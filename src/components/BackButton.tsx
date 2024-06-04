@@ -1,23 +1,31 @@
-import { Feather } from '@expo/vector-icons';
-import { Text, View, StyleSheet } from 'react-native';
+import React, { memo } from 'react';
+import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export const BackButton = ({ onPress }: { onPress: () => void }) => {
+type Props = {
+  goBack: () => void;
+};
+
+const BackButton = ({ goBack }: Props) => {
+  const insets = useSafeAreaInsets();
+
+  const styles = StyleSheet.create({
+    container: {
+      position: 'absolute',
+      top: insets.top,
+      left: 10,
+    },
+    image: {
+      width: 24,
+      height: 24,
+    },
+  });
+
   return (
-    <View style={styles.backButton}>
-      <Feather name="chevron-left" size={16} color="#007AFF" />
-      <Text style={styles.backButtonText} onPress={onPress}>
-        Back
-      </Text>
-    </View>
+    <TouchableOpacity onPress={goBack} style={styles.container}>
+      <Image style={styles.image} source={require('../assets/arrow_back.png')} />
+    </TouchableOpacity>
   );
 };
-const styles = StyleSheet.create({
-  backButton: {
-    flexDirection: 'row',
-    paddingLeft: 20,
-  },
-  backButtonText: {
-    color: '#007AFF',
-    marginLeft: 4,
-  },
-});
+
+export default memo(BackButton);

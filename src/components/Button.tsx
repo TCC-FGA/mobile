@@ -1,40 +1,30 @@
-import { forwardRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import React, { memo } from 'react';
+import { StyleSheet } from 'react-native';
+import { Button as PaperButton } from 'react-native-paper';
+import { theme } from '../core/theme';
 
-type ButtonProps = {
-  onPress?: TouchableOpacityProps['onPress'];
-  title?: string;
-} & TouchableOpacityProps;
+type Props = React.ComponentProps<typeof PaperButton>;
 
-export const Button = forwardRef<TouchableOpacity, ButtonProps>(({ onPress, title }, ref) => {
-  return (
-    <TouchableOpacity ref={ref} style={styles.button} onPress={onPress}>
-      <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-  );
-});
+const Button = ({ mode, style, children, ...props }: Props) => (
+  <PaperButton
+    style={[styles.button, mode === 'outlined' && { backgroundColor: theme.colors.surface }, style]}
+    labelStyle={styles.text}
+    mode={mode}
+    {...props}>
+    {children}
+  </PaperButton>
+);
 
 const styles = StyleSheet.create({
   button: {
-    alignItems: 'center',
-    backgroundColor: '#6366F1',
-    borderRadius: 24,
-    elevation: 5,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      height: 2,
-      width: 0,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    width: '100%',
+    marginVertical: 10,
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+  text: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    lineHeight: 26,
   },
 });
+
+export default memo(Button);
