@@ -1,7 +1,16 @@
-import 'react-native-gesture-handler';
+import React from 'react';
+import { Provider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import RootStack from './src/navigation';
+import { theme } from './src/core/theme';
+import App from './src/navigation';
 
-export default function App() {
-  return <RootStack />;
-}
+const Main = () => (
+  <Provider theme={theme}>
+    <SafeAreaProvider>
+      <App />
+    </SafeAreaProvider>
+  </Provider>
+);
+
+export default Main;
