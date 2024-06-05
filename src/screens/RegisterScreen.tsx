@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { memo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -9,6 +10,7 @@ import Logo from '../components/Logo';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator, nameValidator } from '../core/utils';
+import { api } from '../services/api';
 import { Navigation } from '../types';
 
 type Props = {
@@ -20,7 +22,7 @@ const RegisterScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
 
-  const _onSignUpPressed = () => {
+  const _onSignUpPressed = async () => {
     const nameError = nameValidator(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
@@ -31,8 +33,31 @@ const RegisterScreen = ({ navigation }: Props) => {
       setPassword({ ...password, error: passwordError });
       return;
     }
+    try {
+      const response = await api.post('auth/register', {
+        name: name.value,
+        email: email.value,
+        password: password.value,
+        telephone: '619247915',
+        monthly_income: 0,
+        cpf: '07484238080',
+        birth_date: '2024-06-05',
+        pix_key: '07484238080',
+      });
+      console.log(response.data);
 
-    navigation.navigate('Dashboard');
+      if (response.status !== 201) {
+        setEmail({ ...email, error: 'Erro ao registrar' });
+        return;
+      }
+
+      navigation.navigate('Dashboard');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data.detail);
+        setEmail({ ...email, error: error.response?.data.detail });
+      }
+    }
   };
 
   return (

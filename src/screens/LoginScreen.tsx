@@ -9,8 +9,8 @@ import Logo from '../components/Logo';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator } from '../core/utils';
+import { api } from '../services/api';
 import { Navigation } from '../types';
-
 
 type Props = {
   navigation: Navigation;
@@ -20,13 +20,23 @@ const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
 
-  const _onLoginPressed = () => {
+  const _onLoginPressed = async () => {
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
 
     if (emailError || passwordError) {
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
+      return;
+    }
+
+    const response = await api.post(
+      '/auth/access-token',
+      `grant_type=&username=${encodeURIComponent(email.value)}&password=${encodeURIComponent(password.value)}&scope=&client_id=&client_secret=`
+    );
+
+    if (response.status !== 200) {
+      setEmail({ ...email, error: 'Erro ao logar' });
       return;
     }
 
