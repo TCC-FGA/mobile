@@ -4,11 +4,17 @@ import React from 'react';
 
 import { HomeScreen, LoginScreen, Dashboard, RegisterScreen } from '../screens';
 
+import { useAuth } from '~/hooks/useAuth';
+
 const Stack = createStackNavigator();
 
 function RootStack() {
+  const { user } = useAuth();
+
   return (
-    <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      initialRouteName={user ? 'Dashboard' : 'HomeScreen'}
+      screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeScreen" component={HomeScreen} />
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="Dashboard" component={Dashboard} />

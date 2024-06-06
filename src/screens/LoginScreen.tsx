@@ -9,8 +9,16 @@ import Logo from '../components/Logo';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator } from '../core/utils';
-import { api } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
+
+import {
+  Button as ButtonNative,
+  Dialog,
+  Portal,
+  PaperProvider,
+  Text as TextNative,
+} from 'react-native-paper';
 
 type Props = {
   navigation: Navigation;
@@ -20,7 +28,14 @@ const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
 
+  const [visible, setVisible] = React.useState(false);
+
+  const showDialog = () => setVisible(true);
+
+  const hideDialog = () => setVisible(false);
+
   const _onLoginPressed = async () => {
+    const { signIn } = useAuth();
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
 
@@ -30,17 +45,12 @@ const LoginScreen = ({ navigation }: Props) => {
       return;
     }
 
-    const response = await api.post(
-      '/auth/access-token',
-      `grant_type=&username=${encodeURIComponent(email.value)}&password=${encodeURIComponent(password.value)}&scope=&client_id=&client_secret=`
-    );
-
-    if (response.status !== 200) {
-      setEmail({ ...email, error: 'Erro ao logar' });
-      return;
+    try {
+      signIn(email.value, password.value);
+    } catch (error) {
+      //showDialog() react native paper;
+      console.log(error);
     }
-
-    navigation.navigate('Dashboard');
   };
 
   return (

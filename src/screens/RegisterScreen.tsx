@@ -10,6 +10,7 @@ import Logo from '../components/Logo';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator, nameValidator } from '../core/utils';
+import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 import { Navigation } from '../types';
 
@@ -21,6 +22,7 @@ const RegisterScreen = ({ navigation }: Props) => {
   const [name, setName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
+  const { signIn } = useAuth();
 
   const _onSignUpPressed = async () => {
     const nameError = nameValidator(name.value);
@@ -45,6 +47,7 @@ const RegisterScreen = ({ navigation }: Props) => {
         pix_key: '07484238080',
       });
       console.log(response.data);
+      await signIn(email.value, password.value);
 
       if (response.status !== 201) {
         setEmail({ ...email, error: 'Erro ao registrar' });
