@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 import BackButton from '../components/BackButton';
 import Background from '../components/Background';
@@ -22,6 +22,12 @@ const RegisterScreen = ({ navigation }: Props) => {
   const [name, setName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
+  const [cpf, setCpf] = useState({ value: '', error: '' });
+  const [telephone, setTelephone] = useState({ value: '', error: '' });
+  const [birth_date, setBirthDate] = useState({ value: '', error: '' });
+  const [pix_key, setPixKey] = useState({ value: '', error: '' });
+  const [monthly_income, setMonthlyIncome] = useState({ value: '', error: '' });
+
   const { signIn } = useAuth();
 
   const _onSignUpPressed = async () => {
@@ -36,7 +42,7 @@ const RegisterScreen = ({ navigation }: Props) => {
       return;
     }
     try {
-      const response = await api.post('auth/register', {
+      const response = await api.post('/auth/register', {
         name: name.value,
         email: email.value,
         password: password.value,
@@ -51,10 +57,7 @@ const RegisterScreen = ({ navigation }: Props) => {
 
       if (response.status !== 201) {
         setEmail({ ...email, error: 'Erro ao registrar' });
-        return;
       }
-
-      navigation.navigate('Dashboard');
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.log(error.response?.data.detail);
@@ -78,6 +81,51 @@ const RegisterScreen = ({ navigation }: Props) => {
         onChangeText={(text) => setName({ value: text, error: '' })}
         error={!!name.error}
         errorText={name.error}
+      />
+
+      <TextInput
+        label="CPF"
+        returnKeyType="next"
+        value={cpf.value}
+        onChangeText={(text) => setCpf({ value: text, error: '' })}
+        error={!!cpf.error}
+        errorText={cpf.error}
+      />
+
+      <TextInput
+        label="Telefone"
+        returnKeyType="next"
+        value={telephone.value}
+        onChangeText={(text) => setTelephone({ value: text, error: '' })}
+        error={!!telephone.error}
+        errorText={telephone.error}
+      />
+
+      <TextInput
+        label="Data de Nascimento"
+        returnKeyType="next"
+        value={birth_date.value}
+        onChangeText={(text) => setBirthDate({ value: text, error: '' })}
+        error={!!birth_date.error}
+        errorText={birth_date.error}
+      />
+
+      <TextInput
+        label="Chave PIX"
+        returnKeyType="next"
+        value={pix_key.value}
+        onChangeText={(text) => setPixKey({ value: text, error: '' })}
+        error={!!pix_key.error}
+        errorText={pix_key.error}
+      />
+
+      <TextInput
+        label="Renda Mensal"
+        returnKeyType="next"
+        value={monthly_income.value}
+        onChangeText={(text) => setMonthlyIncome({ value: text, error: '' })}
+        error={!!monthly_income.error}
+        errorText={monthly_income.error}
       />
 
       <TextInput
@@ -109,7 +157,7 @@ const RegisterScreen = ({ navigation }: Props) => {
       <View style={styles.row}>
         <Text style={styles.label}>Já tem uma conta? </Text>
         <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
-          <Text style={styles.link}>Login</Text>
+          <Text style={styles.link}>Entrar</Text>
         </TouchableOpacity>
       </View>
     </Background>

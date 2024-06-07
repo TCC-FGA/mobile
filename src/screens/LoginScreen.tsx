@@ -12,14 +12,6 @@ import { emailValidator, passwordValidator } from '../core/utils';
 import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
 
-import {
-  Button as ButtonNative,
-  Dialog,
-  Portal,
-  PaperProvider,
-  Text as TextNative,
-} from 'react-native-paper';
-
 type Props = {
   navigation: Navigation;
 };
@@ -27,15 +19,9 @@ type Props = {
 const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
-
-  const [visible, setVisible] = React.useState(false);
-
-  const showDialog = () => setVisible(true);
-
-  const hideDialog = () => setVisible(false);
+  const { signIn } = useAuth();
 
   const _onLoginPressed = async () => {
-    const { signIn } = useAuth();
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
 
@@ -48,7 +34,6 @@ const LoginScreen = ({ navigation }: Props) => {
     try {
       signIn(email.value, password.value);
     } catch (error) {
-      //showDialog() react native paper;
       console.log(error);
     }
   };
@@ -90,7 +75,7 @@ const LoginScreen = ({ navigation }: Props) => {
       </View>
 
       <Button mode="contained" onPress={_onLoginPressed}>
-        Login
+        Entrar
       </Button>
 
       <View style={styles.row}>

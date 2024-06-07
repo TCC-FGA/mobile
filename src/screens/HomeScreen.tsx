@@ -18,7 +18,7 @@ const HomeScreen = ({ navigation }: Props) => (
 
     <Paragraph>O melhor aplicativo para gerenciar aluguéis</Paragraph>
     <Button mode="contained" onPress={() => navigation.navigate('LoginScreen')}>
-      Login
+      Entrar
     </Button>
     <Button mode="outlined" onPress={() => navigation.navigate('RegisterScreen')}>
       Registrar

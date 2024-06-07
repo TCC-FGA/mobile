@@ -3,7 +3,7 @@ import { Provider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { theme } from './src/core/theme';
-import App from './src/navigation';
+import AppNavigator from './src/routes';
 
 import { AuthContextProvider } from '~/contexts/AuthContext';
 
@@ -11,7 +11,7 @@ const Main = () => (
   <Provider theme={theme}>
     <SafeAreaProvider>
       <AuthContextProvider>
-        <App />
+        <AppNavigator />
       </AuthContextProvider>
     </SafeAreaProvider>
   </Provider>

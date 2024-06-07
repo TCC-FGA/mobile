@@ -4,6 +4,12 @@ import { UserDTO } from '../dtos/UserDTO';
 import { api } from '../services/api';
 import { storageUserGet, storageUserRemove, storageUserSave } from '../storage/storageUser';
 
+import {
+  storageAuthTokenGet,
+  storageAuthTokenRemove,
+  storageAuthTokenSave,
+} from '~/storage/storageAuthToken';
+
 export type AuthContextDataProps = {
   user: UserDTO;
   signIn: (email: string, password: string) => void;
@@ -19,11 +25,32 @@ export const AuthContext = createContext<AuthContextDataProps>({} as AuthContext
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<UserDTO>({} as UserDTO);
 
+  async function userAndTokenUpdate(user: UserDTO, token: string) {
+    try {
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      setUser(user);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  async function storageUserAndToken(user: UserDTO, token: string) {
+    try {
+      await storageUserSave(user);
+      await storageAuthTokenSave(token);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async function loadUserData() {
     const user = await storageUserGet();
+    const token = await storageAuthTokenGet();
 
-    if (user) {
-      setUser(user);
+    if (user && token) {
+      userAndTokenUpdate(user, token);
     }
   }
 
@@ -34,20 +61,19 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         `grant_type=&username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&scope=&client_id=&client_secret=`
       );
 
-      if (data.status !== 200) {
-        setUser({
-          email,
-          password,
-          name: 'John Doe',
-          telephone: '11999999999',
-          monthly_income: 5000,
-          cpf: '12345678909',
-          birth_date: '1990-01-01',
-        });
-      }
+      const { access_token } = data;
+
+      const { data: user } = await api.get('/users/me', {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      await storageUserAndToken(user, access_token);
+      userAndTokenUpdate(user, access_token);
     } catch (error) {
       console.log(error);
-      throw new Error('Invalid credentials');
+      throw error;
     }
   }
 
@@ -55,6 +81,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     try {
       setUser({} as UserDTO);
       await storageUserRemove();
+      await storageAuthTokenRemove();
     } catch (error) {
       console.log(error);
       throw error;
