@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 
 import BackButton from '../components/BackButton';
 import Background from '../components/Background';
@@ -25,8 +25,37 @@ const RegisterScreen = ({ navigation }: Props) => {
   const [cpf, setCpf] = useState({ value: '', error: '' });
   const [telephone, setTelephone] = useState({ value: '', error: '' });
   const [birth_date, setBirthDate] = useState({ value: '', error: '' });
-  const [pix_key, setPixKey] = useState({ value: '', error: '' });
   const [monthly_income, setMonthlyIncome] = useState({ value: '', error: '' });
+
+  const [numSections, setNumSections] = useState(0);
+
+  const sections = [
+    [
+      { label: 'Nome', value: name, setValue: setName },
+      { label: 'CPF', value: cpf, setValue: setCpf },
+      { label: 'Telefone', value: telephone, setValue: setTelephone },
+    ],
+    [
+      { label: 'Data de Nascimento', value: birth_date, setValue: setBirthDate },
+      { label: 'Renda Mensal', value: monthly_income, setValue: setMonthlyIncome },
+    ],
+    [
+      { label: 'Email', value: email, setValue: setEmail },
+      { label: 'Senha', value: password, setValue: setPassword, secureTextEntry: true },
+    ],
+  ];
+
+  function handleNextSection() {
+    if (numSections < sections.length - 1) {
+      setNumSections(numSections + 1);
+    }
+  }
+
+  function handleReturnSection() {
+    if (numSections > 0) {
+      setNumSections(numSections - 1);
+    }
+  }
 
   const { signIn } = useAuth();
 
@@ -46,13 +75,13 @@ const RegisterScreen = ({ navigation }: Props) => {
         name: name.value,
         email: email.value,
         password: password.value,
-        telephone: '619247915',
+        telephone: telephone.value,
         monthly_income: 0,
-        cpf: '07484238080',
-        birth_date: '2024-06-05',
-        pix_key: '07484238080',
+        cpf: cpf.value,
+        birth_date: birth_date.value,
       });
       console.log(response.data);
+      Alert.alert('Sucesso', `Usuário registrado com sucesso ->${response.data.user_id}`);
       await signIn(email.value, password.value);
 
       if (response.status !== 201) {
@@ -74,106 +103,76 @@ const RegisterScreen = ({ navigation }: Props) => {
 
       <Header>Criar Conta</Header>
 
-      <TextInput
-        label="Nome"
-        returnKeyType="next"
-        value={name.value}
-        onChangeText={(text) => setName({ value: text, error: '' })}
-        error={!!name.error}
-        errorText={name.error}
-      />
+      <View style={styles.inputContainer}>
+        {sections[numSections].map((input, index) => (
+          <TextInput
+            key={index}
+            label={input.label}
+            returnKeyType="next"
+            value={input.value.value}
+            onChangeText={(text) => input.setValue({ value: text, error: '' })}
+            error={!!input.value.error}
+            errorText={input.value.error}
+            secureTextEntry={input.secureTextEntry}
+            style={styles.input}
+          />
+        ))}
+        <View style={styles.buttonContainer}>
+          {numSections > 0 && (
+            <Button mode="outlined" onPress={handleReturnSection} style={styles.button}>
+              Voltar
+            </Button>
+          )}
+          {numSections < sections.length - 1 ? (
+            <Button mode="contained" onPress={handleNextSection} style={styles.button}>
+              Próximo
+            </Button>
+          ) : (
+            <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
+              Registrar
+            </Button>
+          )}
+        </View>
 
-      <TextInput
-        label="CPF"
-        returnKeyType="next"
-        value={cpf.value}
-        onChangeText={(text) => setCpf({ value: text, error: '' })}
-        error={!!cpf.error}
-        errorText={cpf.error}
-      />
-
-      <TextInput
-        label="Telefone"
-        returnKeyType="next"
-        value={telephone.value}
-        onChangeText={(text) => setTelephone({ value: text, error: '' })}
-        error={!!telephone.error}
-        errorText={telephone.error}
-      />
-
-      <TextInput
-        label="Data de Nascimento"
-        returnKeyType="next"
-        value={birth_date.value}
-        onChangeText={(text) => setBirthDate({ value: text, error: '' })}
-        error={!!birth_date.error}
-        errorText={birth_date.error}
-      />
-
-      <TextInput
-        label="Chave PIX"
-        returnKeyType="next"
-        value={pix_key.value}
-        onChangeText={(text) => setPixKey({ value: text, error: '' })}
-        error={!!pix_key.error}
-        errorText={pix_key.error}
-      />
-
-      <TextInput
-        label="Renda Mensal"
-        returnKeyType="next"
-        value={monthly_income.value}
-        onChangeText={(text) => setMonthlyIncome({ value: text, error: '' })}
-        error={!!monthly_income.error}
-        errorText={monthly_income.error}
-      />
-
-      <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      />
-
-      <TextInput
-        label="Senha"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
-        secureTextEntry
-      />
-
-      <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
-        Registrar
-      </Button>
-
-      <View style={styles.row}>
-        <Text style={styles.label}>Já tem uma conta? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
-          <Text style={styles.link}>Entrar</Text>
-        </TouchableOpacity>
+        {(numSections === sections.length - 1 || numSections === 0) && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Já tem uma conta? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')}>
+              <Text style={styles.link}>Entrar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </Background>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  inputContainer: {
+    width: '100%',
+    maxWidth: 340,
+    alignSelf: 'center',
+  },
+  input: {
+    marginBottom: 2,
+  },
   label: {
     color: theme.colors.secondary,
   },
+  buttonContainer: {
+    marginTop: 20,
+  },
   button: {
-    marginTop: 24,
+    marginTop: 10,
   },
   row: {
     flexDirection: 'row',
     marginTop: 4,
+    justifyContent: 'center',
   },
   link: {
     fontWeight: 'bold',

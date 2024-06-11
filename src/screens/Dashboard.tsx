@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { Text, StyleSheet } from 'react-native';
 
 import Background from '../components/Background';
 import Button from '../components/Button';
@@ -20,15 +21,26 @@ const Dashboard = ({ navigation }: Props) => {
       <Logo />
       <Header>Parabéns você está no E-aluguel</Header>
       <Paragraph>
-        {user
-          ? `Bem-vindo, ${user.cpf}! Seu incrível aplicativo de aluguel de imóveis está aqui.`
-          : 'Seu incrível aplicativo de aluguel de imóveis está aqui.'}
+        {user ? (
+          <Text>
+            Bem-vindo, <Text style={styles.boldText}>{user.user_id}</Text>! Seu incrível aplicativo
+            de aluguel de imóveis está aqui.
+          </Text>
+        ) : (
+          'Seu incrível aplicativo de aluguel de imóveis está aqui.'
+        )}
       </Paragraph>
-      <Button mode="outlined" onPress={signOut}>
+      <Button mode="outlined" onPress={signOut} style={{ marginTop: 70 }}>
         Sair
       </Button>
     </Background>
   );
 };
+
+const styles = StyleSheet.create({
+  boldText: {
+    fontWeight: 'bold',
+  },
+});
 
 export default memo(Dashboard);

@@ -14,9 +14,9 @@ type Props = {
 const HomeScreen = ({ navigation }: Props) => (
   <Background>
     <Logo />
-    <Header>Bem Vindo ao E-aluguel</Header>
+    <Header>Seja Bem Vindo(a) !</Header>
 
-    <Paragraph>O melhor aplicativo para gerenciar aluguéis</Paragraph>
+    <Paragraph>O melhor aplicativo para gerenciar aluguéis está aqui!</Paragraph>
     <Button mode="contained" onPress={() => navigation.navigate('LoginScreen')}>
       Entrar
     </Button>

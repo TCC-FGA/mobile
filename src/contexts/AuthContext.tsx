@@ -12,7 +12,7 @@ import {
 
 export type AuthContextDataProps = {
   user: UserDTO;
-  signIn: (email: string, password: string) => void;
+  signIn: (email: string, password: string) => Promise<boolean>;
   signOut: () => void;
 };
 
@@ -71,9 +71,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
       await storageUserAndToken(user, access_token);
       userAndTokenUpdate(user, access_token);
+      return true;
     } catch (error) {
       console.log(error);
-      throw error;
+      return false;
     }
   }
 

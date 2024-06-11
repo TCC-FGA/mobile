@@ -1,5 +1,5 @@
 import React, { memo, useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native';
 
 import BackButton from '../components/BackButton';
 import Background from '../components/Background';
@@ -32,8 +32,12 @@ const LoginScreen = ({ navigation }: Props) => {
     }
 
     try {
-      signIn(email.value, password.value);
+      const response = await signIn(email.value, password.value);
+      if (!response) {
+        Alert.alert('Erro ao fazer Login', 'Senha ou e-mail incorretos.');
+      }
     } catch (error) {
+      Alert.alert('Erro ao fazer Login', 'Senha ou e-mail incorretos.');
       console.log(error);
     }
   };
@@ -44,7 +48,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
       <Logo />
 
-      <Header>Seja bem vindo!</Header>
+      <Header>Seja bem vindo(a)!</Header>
 
       <TextInput
         label="Email"
