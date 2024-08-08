@@ -76,8 +76,8 @@ const RegisterScreen = ({ navigation }: Props) => {
         email: email.value,
         password: password.value,
         telephone: telephone.value,
-        monthly_income: 0,
         cpf: cpf.value,
+        hashed_signature: null,
         birth_date: birth_date.value,
       });
       console.log(response.data);
