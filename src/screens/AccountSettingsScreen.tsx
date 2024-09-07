@@ -67,7 +67,12 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.logoutContainer}>
-          <IconButton icon="logout" size={24} onPress={signOut} style={styles.logoutButton} />
+          <IconButton
+            icon={require('@assets/logout.svg')}
+            size={24}
+            onPress={signOut}
+            style={styles.logoutButton}
+          />
           <Text style={styles.logoutText}>Sair</Text>
         </View>
         <Avatar.Image

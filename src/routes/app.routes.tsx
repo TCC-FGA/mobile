@@ -1,10 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import React from 'react';
-import { BottomNavigation } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { BottomNavigation, Icon } from 'react-native-paper';
 
 import { Dashboard, AccountSettingsScreen, PropertiesScreen } from '../screens';
+
+import Cog from '@assets/cog.svg';
+import Home from '@assets/home.svg';
+import HomeCity from '@assets/home-city.svg';
 
 const Tab = createBottomTabNavigator();
 
@@ -61,7 +64,7 @@ function AppRoutes() {
         options={{
           tabBarLabel: 'Início',
           tabBarIcon: ({ color, size }) => {
-            return <Icon name="home" size={size} color={color} />;
+            return <Icon source={Home} size={size} color={color} />;
           },
         }}
       />
@@ -71,7 +74,7 @@ function AppRoutes() {
         options={{
           tabBarLabel: 'Propriedades',
           tabBarIcon: ({ color, size }) => {
-            return <Icon name="home-city" size={size} color={color} />;
+            return <Icon source={HomeCity} size={size} color={color} />;
           },
         }}
       />
@@ -81,7 +84,7 @@ function AppRoutes() {
         options={{
           tabBarLabel: 'Conta',
           tabBarIcon: ({ color, size }) => {
-            return <Icon name="cog" size={size} color={color} />;
+            return <Icon source={Cog} size={size} color={color} />;
           },
         }}
       />

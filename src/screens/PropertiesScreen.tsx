@@ -89,13 +89,13 @@ const PropertiesScreen = () => {
           </View>
           <View style={{ flexDirection: 'row' }}>
             <IconButton
-              icon="pencil"
+              icon={require('@assets/edit.svg')}
               iconColor={theme.colors.primary}
               onPress={() => onEditPropertie(item)}
               style={styles.iconButton}
             />
             <IconButton
-              icon="delete"
+              icon={require('@assets/delete.svg')}
               iconColor={theme.colors.error}
               onPress={() => onDeletePropertie(item.id)}
               style={styles.iconButton}
@@ -217,7 +217,7 @@ const PropertiesScreen = () => {
       <Appbar.Header>
         <Appbar.Content title="Propriedades" color={theme.colors.primary} />
         <IconButton
-          icon="plus"
+          icon={require('@assets/plus.svg')}
           size={24}
           onPress={onAddPropertie}
           iconColor={theme.colors.primary}
@@ -243,7 +243,7 @@ const PropertiesScreen = () => {
             value={newPropertie.nickname || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, nickname: text })}
             style={styles.input}
-            left={<TextInput.Icon icon="home" />}
+            left={<TextInput.Icon icon={require('@assets/home.svg')} />}
           />
           <TextInput
             label="Valor IPTU"
@@ -253,28 +253,28 @@ const PropertiesScreen = () => {
             }
             style={styles.input}
             keyboardType="numeric"
-            left={<TextInput.Icon icon="file-document" />}
+            left={<TextInput.Icon icon={require('@assets/numeric.svg')} />}
           />
           <TextInput
             label="Rua"
             value={newPropertie.street || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, street: text })}
             style={styles.input}
-            left={<TextInput.Icon icon="road" />}
+            left={<TextInput.Icon icon={require('@assets/road.svg')} />}
           />
           <TextInput
             label="Bairro"
             value={newPropertie.neighborhood || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, neighborhood: text })}
             style={styles.input}
-            left={<TextInput.Icon icon="map-marker" />}
+            left={<TextInput.Icon icon={require('@assets/map-marker.svg')} />}
           />
           <TextInput
             label="Número"
             value={newPropertie.number || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, number: text })}
             style={styles.input}
-            left={<TextInput.Icon icon="numeric" />}
+            left={<TextInput.Icon icon={require('@assets/numeric.svg')} />}
             keyboardType="numeric"
           />
           <TextInput
@@ -282,7 +282,7 @@ const PropertiesScreen = () => {
             value={newPropertie.zip_code || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, zip_code: text })}
             style={styles.input}
-            left={<TextInput.Icon icon="mailbox" />}
+            left={<TextInput.Icon icon={require('@assets/mailbox.svg')} />}
             keyboardType="numeric"
           />
           <TextInput
@@ -290,14 +290,14 @@ const PropertiesScreen = () => {
             value={newPropertie.city || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, city: text })}
             style={styles.input}
-            left={<TextInput.Icon icon="city" />}
+            left={<TextInput.Icon icon={require('@assets/city.svg')} />}
           />
           <TextInput
             label="Estado"
             value={newPropertie.state || ''}
             style={styles.input}
-            left={<TextInput.Icon icon="map-marker" />}
-            right={<TextInput.Icon icon="chevron-down" />}
+            left={<TextInput.Icon icon={require('@assets/map-marker.svg')} />}
+            right={<TextInput.Icon icon={require('@assets/chevron-down.svg')} />}
             // onPress={handlePress}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, state: text })}
           />
