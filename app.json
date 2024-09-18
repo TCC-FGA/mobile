@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "e-aluguel",
+    "slug": "e-aluguel",
     "version": "1.0.0",
     "web": {},
     "experiments": {
@@ -14,6 +14,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "icon": "./src/assets/logo.png",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -22,13 +23,14 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.victor.rayan.myexpoapp"
+      "package": "com.victor.rayan.ealuguel"
     },
     "extra": {
       "eas": {
-        "projectId": "ecc16373-aa47-46d3-b04a-6eb0238a45f7"
+        "projectId": "4fdc05bb-6e18-45bf-9b01-38d56b59f893"
       }
     }
   }
