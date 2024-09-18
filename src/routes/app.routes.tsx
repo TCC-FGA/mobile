@@ -1,13 +1,11 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import React from 'react';
-import { BottomNavigation, Icon } from 'react-native-paper';
+import { BottomNavigation } from 'react-native-paper';
 
 import { Dashboard, AccountSettingsScreen, PropertiesScreen } from '../screens';
 
-import Cog from '@assets/cog.svg';
-import Home from '@assets/home.svg';
-import HomeCity from '@assets/home-city.svg';
 
 const Tab = createBottomTabNavigator();
 
@@ -63,9 +61,9 @@ function AppRoutes() {
         component={Dashboard}
         options={{
           tabBarLabel: 'Início',
-          tabBarIcon: ({ color, size }) => {
-            return <Icon source={Home} size={size} color={color} />;
-          },
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -73,9 +71,9 @@ function AppRoutes() {
         component={PropertiesScreen}
         options={{
           tabBarLabel: 'Propriedades',
-          tabBarIcon: ({ color, size }) => {
-            return <Icon source={HomeCity} size={size} color={color} />;
-          },
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="home-city" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
@@ -83,9 +81,9 @@ function AppRoutes() {
         component={AccountSettingsScreen}
         options={{
           tabBarLabel: 'Conta',
-          tabBarIcon: ({ color, size }) => {
-            return <Icon source={Cog} size={size} color={color} />;
-          },
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cog" size={size} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>

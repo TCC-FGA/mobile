@@ -1,4 +1,5 @@
 import { PropertiesDTO } from '@dtos/PropertiesDTO';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, FlatList, View, StyleSheet, Alert, ScrollView } from 'react-native';
 import {
@@ -89,13 +90,17 @@ const PropertiesScreen = () => {
           </View>
           <View style={{ flexDirection: 'row' }}>
             <IconButton
-              icon={require('@assets/edit.svg')}
+              icon={({ size, color }) => (
+                <MaterialCommunityIcons name="pencil" size={size} color={color} />
+              )}
               iconColor={theme.colors.primary}
               onPress={() => onEditPropertie(item)}
               style={styles.iconButton}
             />
             <IconButton
-              icon={require('@assets/delete.svg')}
+              icon={({ size, color }) => (
+                <MaterialCommunityIcons name="delete" size={size} color={color} />
+              )}
               iconColor={theme.colors.error}
               onPress={() => onDeletePropertie(item.id)}
               style={styles.iconButton}
@@ -217,7 +222,9 @@ const PropertiesScreen = () => {
       <Appbar.Header>
         <Appbar.Content title="Propriedades" color={theme.colors.primary} />
         <IconButton
-          icon={require('@assets/plus.svg')}
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="plus" size={size} color={color} />
+          )}
           size={24}
           onPress={onAddPropertie}
           iconColor={theme.colors.primary}
@@ -243,7 +250,13 @@ const PropertiesScreen = () => {
             value={newPropertie.nickname || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, nickname: text })}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/home.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="home" size={size} color={color} />
+                )}
+              />
+            }
           />
           <TextInput
             label="Valor IPTU"
@@ -253,28 +266,52 @@ const PropertiesScreen = () => {
             }
             style={styles.input}
             keyboardType="numeric"
-            left={<TextInput.Icon icon={require('@assets/numeric.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="numeric" size={size} color={color} />
+                )}
+              />
+            }
           />
           <TextInput
             label="Rua"
             value={newPropertie.street || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, street: text })}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/road.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="road" size={size} color={color} />
+                )}
+              />
+            }
           />
           <TextInput
             label="Bairro"
             value={newPropertie.neighborhood || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, neighborhood: text })}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/map-marker.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="map-marker" size={size} color={color} />
+                )}
+              />
+            }
           />
           <TextInput
             label="Número"
             value={newPropertie.number || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, number: text })}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/numeric.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="numeric" size={size} color={color} />
+                )}
+              />
+            }
             keyboardType="numeric"
           />
           <TextInput
@@ -282,7 +319,13 @@ const PropertiesScreen = () => {
             value={newPropertie.zip_code || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, zip_code: text })}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/mailbox.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="mailbox" size={size} color={color} />
+                )}
+              />
+            }
             keyboardType="numeric"
           />
           <TextInput
@@ -290,15 +333,32 @@ const PropertiesScreen = () => {
             value={newPropertie.city || ''}
             onChangeText={(text) => setNewPropertie({ ...newPropertie, city: text })}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/city.svg')} />}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="city" size={size} color={color} />
+                )}
+              />
+            }
           />
           <TextInput
             label="Estado"
             value={newPropertie.state || ''}
             style={styles.input}
-            left={<TextInput.Icon icon={require('@assets/map-marker.svg')} />}
-            right={<TextInput.Icon icon={require('@assets/chevron-down.svg')} />}
-            // onPress={handlePress}
+            left={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="map-marker" size={size} color={color} />
+                )}
+              />
+            }
+            right={
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="chevron-down" size={size} color={color} />
+                )}
+              />
+            }
             onChangeText={(text) => setNewPropertie({ ...newPropertie, state: text })}
           />
         </ScrollView>

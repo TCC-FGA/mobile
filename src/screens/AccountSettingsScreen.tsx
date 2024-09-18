@@ -1,9 +1,11 @@
 import React, { memo, useState } from 'react';
 import { StyleSheet, Alert, View, SafeAreaView } from 'react-native';
 import { Avatar, Button, TextInput, Text, IconButton, Title } from 'react-native-paper';
+
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 import { Navigation } from '../types';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Props = {
   navigation: Navigation;
@@ -68,7 +70,9 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
       <View style={styles.header}>
         <View style={styles.logoutContainer}>
           <IconButton
-            icon={require('@assets/logout.svg')}
+            icon={({ size, color }) => (
+              <MaterialCommunityIcons name="logout" size={size} color={color} />
+            )}
             size={24}
             onPress={signOut}
             style={styles.logoutButton}

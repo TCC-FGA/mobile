@@ -3,31 +3,32 @@
     "name": "my-expo-app",
     "slug": "my-expo-app",
     "version": "1.0.0",
-
-    "web": {
-    },
-
+    "web": {},
     "experiments": {
       "tsconfigPaths": true
     },
-
     "plugins": [],
-
     "orientation": "portrait",
-
     "userInterfaceStyle": "light",
-
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.victor.rayan.myexpoapp"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ecc16373-aa47-46d3-b04a-6eb0238a45f7"
       }
     }
   }
