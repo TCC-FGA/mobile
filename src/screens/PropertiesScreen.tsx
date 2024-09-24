@@ -1,7 +1,8 @@
 import { PropertiesDTO } from '@dtos/PropertiesDTO';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, FlatList, View, StyleSheet, Alert, ScrollView } from 'react-native';
+import { SafeAreaView, FlatList, View, StyleSheet, Alert, ScrollView, Image } from 'react-native';
 import {
   Appbar,
   Card,
@@ -11,6 +12,7 @@ import {
   IconButton,
   Modal,
   TextInput,
+  Avatar,
   // List,
 } from 'react-native-paper';
 
@@ -23,6 +25,7 @@ const PropertiesScreen = () => {
   const [properties, setProperties] = useState<PropertiesDTO[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<null | { uri: string; base64: string }>(null);
   // const [expanded, setExpanded] = useState(false);
   // const [selectedState, setSelectedState] = useState('');
   const [editingPropertie, setEditingPropertie] = useState({} as PropertiesDTO);
@@ -52,18 +55,42 @@ const PropertiesScreen = () => {
     }
   };
 
+  const pickImage = async () => {
+    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (result.granted === false) {
+      Alert.alert('Permissão necessária', 'É necessário permitir o acesso à galeria de fotos.');
+      return;
+    }
+
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!pickerResult.canceled) {
+      if (pickerResult.assets && pickerResult.assets.length > 0) {
+        setSelectedImage({
+          uri: pickerResult.assets[0].uri,
+          base64: pickerResult.assets[0].base64!,
+        });
+        setNewPropertie({ ...newPropertie, photo: pickerResult.assets[0].uri });
+      }
+      if (pickerResult.assets && pickerResult.assets.length > 0) {
+        setNewPropertie({ ...newPropertie, photo: pickerResult.assets[0].uri });
+      }
+    }
+  };
+
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
     filterProperties(query);
   };
 
-  // Função para filtrar as propriedades com base na busca
   const filterProperties = (query: string) => {
     if (query.trim() === '') {
-      // Se a busca estiver vazia, restaura todas as propriedades originais
       setFilteredProperties(properties);
     } else {
-      // Filtra as propriedades com base na consulta de busca
       const filtered = properties.filter(
         (house) => house.nickname && house.nickname.toLowerCase().includes(query.toLowerCase())
       );
@@ -76,7 +103,18 @@ const PropertiesScreen = () => {
       <Card.Content style={styles.cardContent}>
         <View
           style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <View>
+          {/* Imagem à esquerda */}
+          <Avatar.Image
+            size={64}
+            source={{
+              uri:
+                item.photo || 'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
+            }}
+            style={styles.avatar}
+          />
+
+          {/* Informações da propriedade à direita da imagem */}
+          <View style={{ flex: 1, marginLeft: 16 }}>
             <Text style={styles.cardTitle}>{item.nickname}</Text>
             <Text>
               {item.street}, {item.number}
@@ -88,6 +126,8 @@ const PropertiesScreen = () => {
             <Text>IPTU: {item.iptu}</Text>
             <Text>CEP: {item.zip_code}</Text>
           </View>
+
+          {/* Botões de editar e excluir */}
           <View style={{ flexDirection: 'row' }}>
             <IconButton
               icon={({ size, color }) => (
@@ -147,7 +187,30 @@ const PropertiesScreen = () => {
           setFilteredProperties(updatedProperties);
           Alert.alert('Propriedade atualizada', 'A propriedade foi atualizada com sucesso.');
         } else {
-          const response = await api.post('/properties', newPropertie);
+          const formData = new FormData();
+
+          formData.append('nickname', newPropertie.nickname);
+          formData.append('iptu', newPropertie.iptu.toString());
+          formData.append('street', newPropertie.street || '');
+          formData.append('neighborhood', newPropertie.neighborhood || '');
+          formData.append('number', newPropertie.number || '');
+          formData.append('zip_code', newPropertie.zip_code);
+          formData.append('city', newPropertie.city || '');
+          formData.append('state', newPropertie.state || '');
+
+          if (selectedImage) {
+            formData.append('photo', {
+              uri: selectedImage.uri,
+              name: 'photo.jpg',
+              type: 'image/jpg',
+            } as any);
+          }
+
+          const response = await api.post('/properties', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
           setProperties([...properties, response.data]);
           setFilteredProperties([...filteredProperties, response.data]);
           Alert.alert('Propriedade salva', 'A propriedade foi salva com sucesso.');
@@ -361,6 +424,23 @@ const PropertiesScreen = () => {
             }
             onChangeText={(text) => setNewPropertie({ ...newPropertie, state: text })}
           />
+          <Button
+            mode="outlined"
+            onPress={pickImage}
+            icon={() => (
+              <MaterialCommunityIcons name="camera" size={20} color={theme.colors.primary} />
+            )}>
+            {selectedImage ? 'Alterar imagem' : 'Selecionar imagem'}
+          </Button>
+          {selectedImage && (
+            <>
+              <Text style={{ marginTop: 10 }}>Imagem selecionada:</Text>
+              <Image
+                source={{ uri: selectedImage.uri }}
+                style={{ width: 100, height: 100, marginTop: 10 }}
+              />
+            </>
+          )}
         </ScrollView>
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={onSavePropertie} style={styles.button}>
@@ -379,6 +459,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  avatar: {
+    borderRadius: 28,
+  },
   searchbar: {
     margin: 10,
   },
@@ -388,13 +471,15 @@ const styles = StyleSheet.create({
   },
   card: {
     marginVertical: 8,
+    borderRadius: 8,
   },
   cardContent: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   cardTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    fontSize: 16,
   },
   iconButton: {
     marginLeft: 0,

@@ -79,6 +79,7 @@ const RegisterScreen = ({ navigation }: Props) => {
         cpf: cpf.value,
         hashed_signature: null,
         birth_date: birth_date.value,
+        photo: '',
       });
       console.log(response.data);
       Alert.alert('Sucesso', `Usuário registrado com sucesso ->${response.data.user_id}`);
