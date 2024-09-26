@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "e-aluguel",
+    "slug": "e-aluguel",
+    "version": "1.0.0",
+    "web": {},
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "plugins": [],
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "icon": "./src/assets/logo.png",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.victor.rayan.ealuguel"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4fdc05bb-6e18-45bf-9b01-38d56b59f893"
+      }
+    }
+  }
+}
