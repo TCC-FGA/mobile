@@ -9,7 +9,6 @@ import { theme } from '../core/theme';
 import { emailValidator, passwordValidator } from '../core/utils';
 import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
-import IconLogo from '~/components/IconLogo';
 
 type Props = {
   navigation: Navigation;
@@ -44,8 +43,6 @@ const LoginScreen = ({ navigation }: Props) => {
   return (
     <Background>
       <BackButton goBack={() => navigation.navigate('WelcomeScreen')} />
-        
-      <IconLogo size="xl" />
 
       <TextInput
         label="Email"

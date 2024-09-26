@@ -52,7 +52,16 @@
     "typescript": "~5.3.3"
   },
   "eslintConfig": {
-    "extends": "universe/native"
+    "extends": "universe/native",
+    "rules": {
+      "import/order": "off",
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto"
+        }
+      ]
+    }
   },
   "main": "node_modules/expo/AppEntry.js",
   "expo": {

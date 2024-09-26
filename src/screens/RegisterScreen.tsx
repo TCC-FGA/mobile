@@ -98,7 +98,7 @@ const RegisterScreen = ({ navigation }: Props) => {
 
   return (
     <Background>
-      <BackButton goBack={() => navigation.navigate('WelcomScreen')} />
+      <BackButton goBack={() => navigation.navigate('WelcomeScreen')} />
 
       <Logo />
 
