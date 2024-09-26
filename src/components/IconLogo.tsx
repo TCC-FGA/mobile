@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { SvgUri } from 'react-native-svg';
 
-const Logo = ({
+const IconLogo = ({
   isWhite,
   size = 'md',
 }: {
@@ -9,13 +9,13 @@ const Logo = ({
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }) => (
   <SvgUri
-    width="100%"
+    width={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
     height={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
     uri={
       isWhite
-        ? 'https://storage.googleapis.com/e-aluguel/aluguelapp/Logo-white.svg'
-        : 'https://storage.googleapis.com/e-aluguel/aluguelapp/Logo1.svg'
+        ? require('@assets/images/IconLogo-white.svg')
+        : require('@assets/images/IconLogo.svg')
     }
   />
 );
-export default memo(Logo);
+export default memo(IconLogo);

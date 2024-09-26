@@ -4,8 +4,6 @@ import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native';
 import BackButton from '../components/BackButton';
 import Background from '../components/Background';
 import Button from '../components/Button';
-import Header from '../components/Header';
-import Logo from '../components/Logo';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
 import { emailValidator, passwordValidator } from '../core/utils';
@@ -44,11 +42,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
   return (
     <Background>
-      <BackButton goBack={() => navigation.navigate('HomeScreen')} />
-
-      <Logo />
-
-      <Header>Seja bem vindo(a)!</Header>
+      <BackButton goBack={() => navigation.navigate('WelcomeScreen')} />
 
       <TextInput
         label="Email"
