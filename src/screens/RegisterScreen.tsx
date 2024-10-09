@@ -1,6 +1,15 @@
 import axios from 'axios';
 import React, { memo, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Platform,
+  KeyboardTypeOptions,
+} from 'react-native';
+import RNDateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
 import BackButton from '../components/BackButton';
 import Background from '../components/Background';
@@ -9,43 +18,106 @@ import Header from '../components/Header';
 import Logo from '../components/Logo';
 import TextInput from '../components/TextInput';
 import { theme } from '../core/theme';
-import { emailValidator, passwordValidator, nameValidator } from '../core/utils';
+import {
+  emailValidator,
+  passwordValidator,
+  nameValidator,
+  confirmPasswordValidator,
+  cpfValidator,
+  phoneValidator,
+} from '../core/utils';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
-import { Navigation } from '../types';
+import { formatDate } from '~/helpers/convert_data';
+import { ActivityIndicator, Button as BtnPaper } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { AuthRouterProps } from '~/routes/auth.routes';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-type Props = {
-  navigation: Navigation;
-};
+const RegisterScreen = () => {
+  const navigation = useNavigation<AuthRouterProps>();
 
-const RegisterScreen = ({ navigation }: Props) => {
   const [name, setName] = useState({ value: '', error: '' });
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
+  const [confirmPassword, setConfirmPassword] = useState({ value: '', error: '' });
   const [cpf, setCpf] = useState({ value: '', error: '' });
   const [telephone, setTelephone] = useState({ value: '', error: '' });
-  const [birth_date, setBirthDate] = useState({ value: '', error: '' });
   const [monthly_income, setMonthlyIncome] = useState({ value: '', error: '' });
+  const [loading, setLoading] = useState(false);
+  const [birthDatePicker, setBirthDatePicker] = useState<Date>();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [numSections, setNumSections] = useState(0);
 
   const sections = [
     [
-      { label: 'Nome', value: name, setValue: setName },
-      { label: 'CPF', value: cpf, setValue: setCpf },
-      { label: 'Telefone', value: telephone, setValue: setTelephone },
+      {
+        label: 'Nome',
+        value: name,
+        setValue: setName,
+        secureTextEntry: false,
+        textContentType: 'name' as 'name',
+      },
+      {
+        label: 'CPF',
+        value: cpf,
+        setValue: setCpf,
+        keyboardType: 'numeric' as KeyboardTypeOptions,
+        secureTextEntry: false,
+        textContentType: 'none' as 'none',
+      },
+      {
+        label: 'Telefone',
+        value: telephone,
+        setValue: setTelephone,
+        keyboardType: 'phone-pad' as KeyboardTypeOptions,
+        secureTextEntry: false,
+        textContentType: 'telephoneNumber' as 'telephoneNumber',
+      },
     ],
     [
-      { label: 'Data de Nascimento', value: birth_date, setValue: setBirthDate },
-      { label: 'Renda Mensal', value: monthly_income, setValue: setMonthlyIncome },
+      {
+        label: 'Renda Mensal',
+        value: monthly_income,
+        setValue: setMonthlyIncome,
+        keyboardType: 'numeric' as KeyboardTypeOptions,
+        secureTextEntry: false,
+        textContentType: 'none' as 'none',
+      },
     ],
     [
-      { label: 'Email', value: email, setValue: setEmail },
-      { label: 'Senha', value: password, setValue: setPassword, secureTextEntry: true },
+      {
+        label: 'Email',
+        value: email,
+        setValue: setEmail,
+        keyboardType: 'email-address' as KeyboardTypeOptions,
+        secureTextEntry: false,
+        autoCapitalize: 'none',
+        textContentType: 'emailAddress' as 'emailAddress',
+      },
+      {
+        label: 'Senha',
+        value: password,
+        setValue: setPassword,
+        secureTextEntry: true,
+        textContentType: 'password' as 'password',
+      },
+      {
+        label: 'Confirmar Senha',
+        value: confirmPassword,
+        setValue: setConfirmPassword,
+        secureTextEntry: true,
+        textContentType: 'password' as 'password',
+      },
     ],
   ];
 
   function handleNextSection() {
+    if (!runValidators(numSections)) {
+      return;
+    }
+
     if (numSections < sections.length - 1) {
       setNumSections(numSections + 1);
     }
@@ -59,30 +131,76 @@ const RegisterScreen = ({ navigation }: Props) => {
 
   const { signIn } = useAuth();
 
-  const _onSignUpPressed = async () => {
-    const nameError = nameValidator(name.value);
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
+  const runValidators = (sectionIndex: number) => {
+    const currentSection = sections[sectionIndex];
+    let hasError = false;
 
-    if (emailError || passwordError || nameError) {
-      setName({ ...name, error: nameError });
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
+    currentSection.forEach((input) => {
+      let error = '';
+      switch (input.label) {
+        case 'Nome':
+          error = nameValidator(input.value.value);
+          setName({ ...input.value, error });
+          break;
+        case 'Email':
+          error = emailValidator(input.value.value);
+          setEmail({ ...input.value, error });
+          break;
+        case 'Senha':
+          error = passwordValidator(input.value.value);
+          setPassword({ ...input.value, error });
+          break;
+        case 'Confirmar Senha':
+          error = confirmPasswordValidator(password.value, input.value.value);
+          setConfirmPassword({ ...input.value, error });
+          break;
+        case 'CPF':
+          error = cpfValidator(input.value.value);
+          setCpf({ ...input.value, error });
+          break;
+        case 'Telefone':
+          error = phoneValidator(input.value.value);
+          setTelephone({ ...input.value, error });
+          break;
+        case 'Renda Mensal':
+          break;
+        default:
+          break;
+      }
+      if (error) {
+        hasError = true;
+      }
+    });
+
+    if (!birthDatePicker && sectionIndex === 1) {
+      Alert.alert('Erro', 'Por favor, selecione a data de nascimento.');
+      hasError = true;
+    }
+
+    return !hasError;
+  };
+
+  const _onSignUpPressed = async () => {
+    if (!runValidators(numSections) || !birthDatePicker) {
       return;
     }
+
+    setLoading(true);
+
     try {
       const response = await api.post('/auth/register', {
         name: name.value,
-        email: email.value,
+        email: email.value.toLowerCase(),
         password: password.value,
         telephone: telephone.value,
         cpf: cpf.value,
         hashed_signature: null,
-        birth_date: birth_date.value,
+        birth_date: formatDate(birthDatePicker),
         photo: '',
       });
       console.log(response.data);
       Alert.alert('Sucesso', `Usuário registrado com sucesso ->${response.data.user_id}`);
+      navigation.navigate('LoginScreen');
       await signIn(email.value, password.value);
 
       if (response.status !== 201) {
@@ -93,18 +211,67 @@ const RegisterScreen = ({ navigation }: Props) => {
         console.log(error.response?.data.detail);
         setEmail({ ...email, error: error.response?.data.detail });
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showDatePickerHandler = () => {
+    setShowDatePicker(true);
+  };
+
+  const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate && event.type === 'set') {
+      setBirthDatePicker(selectedDate);
+    }
+  };
+
+  const convertDateInDDMMYYYY = (date: Date) => {
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  };
+
+  const handleBackButton = () => {
+    if (numSections > 0) {
+      handleReturnSection();
+    } else {
+      navigation.navigate('LoginScreen');
     }
   };
 
   return (
     <Background>
-      <BackButton goBack={() => navigation.navigate('WelcomeScreen')} />
+      <BackButton goBack={handleBackButton} />
 
       <Logo />
 
       <Header>Criar Conta</Header>
 
       <View style={styles.inputContainer}>
+        {numSections === 1 && (
+          <>
+            <BtnPaper
+              mode="outlined"
+              onPress={showDatePickerHandler}
+              icon={() => (
+                <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+              )}>
+              Data de nascimento{' '}
+              {birthDatePicker ? `: ${convertDateInDDMMYYYY(birthDatePicker)}` : ''}
+            </BtnPaper>
+
+            {showDatePicker && (
+              <RNDateTimePicker
+                value={birthDatePicker ? new Date(birthDatePicker) : new Date()}
+                mode="date"
+                display="default"
+                onChange={onDateChange}
+                accentColor={theme.colors.primary}
+                textColor={theme.colors.primary}
+              />
+            )}
+          </>
+        )}
         {sections[numSections].map((input, index) => (
           <TextInput
             key={index}
@@ -115,7 +282,12 @@ const RegisterScreen = ({ navigation }: Props) => {
             error={!!input.value.error}
             errorText={input.value.error}
             secureTextEntry={input.secureTextEntry}
+            keyboardType={input.keyboardType}
             style={styles.input}
+            autoCapitalize={input.label === 'Email' ? 'none' : undefined}
+            textContentType={input.textContentType}
+            maxLength={input.label === 'CPF' || input.label === 'Telefone' ? 11 : undefined}
+            autoComplete={input.label === 'Email' ? 'email' : 'off'}
           />
         ))}
         <View style={styles.buttonContainer}>
@@ -129,8 +301,16 @@ const RegisterScreen = ({ navigation }: Props) => {
               Próximo
             </Button>
           ) : (
-            <Button mode="contained" onPress={_onSignUpPressed} style={styles.button}>
-              Registrar
+            <Button
+              mode="contained"
+              onPress={_onSignUpPressed}
+              style={styles.button}
+              disabled={loading}>
+              {loading ? (
+                <ActivityIndicator size="small" color={theme.colors.primary} />
+              ) : (
+                'Registrar'
+              )}
             </Button>
           )}
         </View>

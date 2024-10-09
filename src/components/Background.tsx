@@ -1,34 +1,25 @@
 import React, { memo } from 'react';
-import { ImageBackground, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 type Props = {
   children: React.ReactNode;
 };
 
 const Background = ({ children }: Props) => (
-  <ImageBackground
-    source={require('../assets/background_dot.png')}
-    resizeMode="repeat"
-    style={styles.background}>
+  <SafeAreaProvider>
     <KeyboardAvoidingView style={styles.container} behavior="padding">
-      {children}
+      <SafeAreaView>{children}</SafeAreaView>
     </KeyboardAvoidingView>
-  </ImageBackground>
+  </SafeAreaProvider>
 );
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    backgroundColor: 'white',
-  },
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     width: '100%',
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

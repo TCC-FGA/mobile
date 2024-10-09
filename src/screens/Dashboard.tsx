@@ -1,13 +1,13 @@
 import React, { memo } from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 
 import Background from '../components/Background';
-import Button from '../components/Button';
-import Header from '../components/Header';
-import Logo from '../components/Logo';
-import Paragraph from '../components/Paragraph';
 import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
+import AppBar from '~/components/AppBar/AppBar';
+import FinancialControl from '~/components/FinancialControl/FinancialControl';
+import PropertyStatus from '~/components/PropertyStatus/PropertyStatus';
+import YourProperties from '~/components/YourProperties/YourProperties';
 
 type Props = {
   navigation: Navigation;
@@ -17,35 +17,19 @@ const Dashboard = ({ navigation }: Props) => {
   const { user, signOut } = useAuth();
 
   return (
-    <Background>
-      <Logo />
-      <Header>Parabéns você está no E-aluguel</Header>
-      <Paragraph>
-        {user ? (
-          <Text>
-            Bem-vindo, <Text style={styles.boldText}>{user.user_id}</Text>! Seu incrível aplicativo
-            de aluguel de imóveis está aqui.
-          </Text>
-        ) : (
-          'Seu incrível aplicativo de aluguel de imóveis está aqui.'
-        )}
-      </Paragraph>
-      <Button mode="outlined" onPress={signOut} style={{ marginTop: 20 }}>
-        Sair
-      </Button>
-    </Background>
+    <>
+      <AppBar />
+      <ScrollView>
+        <Background>
+          <FinancialControl />
+          <PropertyStatus />
+          <YourProperties />
+        </Background>
+      </ScrollView>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  boldText: {
-    fontWeight: 'bold',
-  },
-  label: {
-    color: '#000',
-    marginBottom: 8,
-    fontSize: 16,
-  },
-});
+const styles = StyleSheet.create({});
 
 export default memo(Dashboard);

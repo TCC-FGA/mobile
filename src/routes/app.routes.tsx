@@ -1,15 +1,44 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BottomTabNavigationProp, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import React from 'react';
 import { BottomNavigation } from 'react-native-paper';
+import { createStackNavigator } from '@react-navigation/stack';
+import {
+  Dashboard,
+  AccountSettingsScreen,
+  PropertiesScreen,
+  PropertyDetails,
+  HouseDetails,
+  HousesScreen,
+  SeeMoreScreen,
+  TenantsScreen,
+  TenantDetails,
+} from '../screens';
+import { PropertiesDTO } from '~/dtos/PropertiesDTO';
+import { HouseDTO } from '~/dtos/HouseDTO';
+import { TenantDTO } from '~/dtos/TenantDTO';
 
-import { Dashboard, AccountSettingsScreen, PropertiesScreen } from '../screens';
+type AppRoutesType = {
+  PropertiesStack: {
+    screen: 'PropertyDetails';
+    params: { propertie: PropertiesDTO | null };
+  };
+  HousesStack: {
+    screen: 'HousesScreen' | 'HouseDetails';
+    params: { propertyId?: number; house?: HouseDTO | null };
+  };
+  TenantsStack: {
+    screen: 'TenantsScreen' | 'TenantDetails';
+    params?: { tenant?: TenantDTO | null };
+  };
+};
 
+export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutesType>;
 
 const Tab = createBottomTabNavigator();
 
-function AppRoutes() {
+function AppRoutesTab() {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -86,7 +115,72 @@ function AppRoutes() {
           ),
         }}
       />
+      <Tab.Screen
+        name="Mais"
+        component={SeeMoreScreen}
+        options={{
+          tabBarLabel: 'Ver mais',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="dots-horizontal" size={size} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
+  );
+}
+
+const Stack = createStackNavigator();
+
+export function PropertiesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="PropertyDetails"
+        component={PropertyDetails}
+        options={{ headerTitle: 'Propriedades' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function HousesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="HousesScreen" component={HousesScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="HouseDetails"
+        component={HouseDetails}
+        options={{ headerTitle: 'Casas' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function TenantsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="TenantsScreen"
+        component={TenantsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TenantDetails"
+        component={TenantDetails}
+        options={{ headerTitle: 'Inquilinos' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Stack.Navigator initialRouteName="AppRoutesTab" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="AppRoutesTab" component={AppRoutesTab} />
+      <Stack.Screen name="PropertiesStack" component={PropertiesStack} />
+      <Stack.Screen name="HousesStack" component={HousesStack} />
+      <Stack.Screen name="TenantsStack" component={TenantsStack} />
+    </Stack.Navigator>
   );
 }
 

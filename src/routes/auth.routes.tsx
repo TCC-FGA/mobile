@@ -1,7 +1,16 @@
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 
 import { WelcomeScreen, LoginScreen, RegisterScreen, ForgotPasswordScreen } from '../screens';
+
+type AuthRoutesType = {
+  WelcomeScreen: undefined;
+  LoginScreen: undefined;
+  RegisterScreen: undefined;
+  ForgotPasswordScreen: undefined;
+};
+
+export type AuthRouterProps = StackNavigationProp<AuthRoutesType>;
 
 const Stack = createStackNavigator();
 

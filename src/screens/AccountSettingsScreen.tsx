@@ -79,11 +79,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
           />
           <Text style={styles.logoutText}>Sair</Text>
         </View>
-        <Avatar.Image
-          size={64}
-          source={{ uri: 'https://via.placeholder.com/150' }}
-          style={styles.avatar}
-        />
+        <Avatar.Image size={64} source={require('@assets/avatar.png')} style={styles.avatar} />
       </View>
 
       <View style={styles.body}>
@@ -172,7 +168,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    backgroundColor: '#6200ee',
   },
   deleteButton: {
     marginTop: 100,
