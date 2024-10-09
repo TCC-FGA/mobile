@@ -1,34 +1,54 @@
 import React, { memo } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { SvgUri } from 'react-native-svg';
+import IconLogoWhite from '@assets/images/IconLogo-white.svg';
+import IconLogo from '@assets/images/IconLogo.svg';
+import { StyleProp, View, ViewStyle } from 'react-native';
 
-const Logo = () => (
-  <View style={styles.container}>
-    <Image
-      source={{
-        uri: 'https://drive.google.com/thumbnail?id=1g4BzYInD4VkH4xMPfJHxk2rT2pxI7wza',
-      }}
-      style={styles.image}
-    />
-  </View>
-);
+type LogoProps = {
+  isWhite?: boolean;
+  isIcon?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  style?: StyleProp<ViewStyle>;
+};
 
-const styles = StyleSheet.create({
-  container: {
-    width: 136,
-    height: 136,
-    borderRadius: 68,
-    borderWidth: 1,
-    borderColor: '#600EE6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 16,
-  },
-  image: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-  },
-});
+const Logo = ({ isWhite, size = 'md', isIcon, style }: LogoProps) => {
+  const renderLogo = () => {
+    if (isWhite && isIcon) {
+      return (
+        <IconLogoWhite
+          width={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
+          height={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
+        />
+      );
+    } else if (!isWhite && isIcon) {
+      return (
+        <IconLogo
+          width={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
+          style={style ?? {}}
+          height={size === 'sm' ? 32 : size === 'md' ? 40 : size === 'lg' ? 52 : 64}
+        />
+      );
+    } else {
+      const logoUrl = isWhite
+        ? 'https://storage.googleapis.com/e-aluguel/aluguelapp/Logo-white.svg'
+        : 'https://storage.googleapis.com/e-aluguel/aluguelapp/Logo1.svg';
 
+      return <SvgUri width="100%" height={getLogoSize(size)} uri={logoUrl} />;
+    }
+  };
+  const getLogoSize = (size: 'sm' | 'md' | 'lg' | 'xl') => {
+    switch (size) {
+      case 'sm':
+        return 32;
+      case 'md':
+        return 40;
+      case 'lg':
+        return 52;
+      default:
+        return 64;
+    }
+  };
+
+  return <View style={style}>{renderLogo()}</View>;
+};
 export default memo(Logo);

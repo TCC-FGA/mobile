@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { memo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -18,18 +18,18 @@ const BackButton = ({ goBack }: Props) => {
       position: 'absolute',
       top: insets.top,
       left: 10,
+      zIndex: 1,
     },
   });
 
   return (
-    <IconButton
-      icon={({ size }) => (
-        <MaterialCommunityIcons name="arrow-left" size={size} color={theme.colors.primary} />
-      )}
-      size={28}
-      onPress={goBack}
-      style={styles.container}
-    />
+    <TouchableOpacity style={styles.container} onPress={goBack}>
+      <IconButton
+        icon={({ size }) => (
+          <MaterialCommunityIcons name="arrow-left" size={28} color={theme.colors.primary} />
+        )}
+      />
+    </TouchableOpacity>
   );
 };
 

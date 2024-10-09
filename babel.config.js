@@ -4,7 +4,7 @@ module.exports = function (api) {
     presets: ['babel-preset-expo'],
     env: {
       production: {
-        plugins: ['react-native-paper/babel'],
+        plugins: ['react-native-paper/babel', 'nativewind/babel'],
       },
     },
     plugins: [
@@ -18,6 +18,7 @@ module.exports = function (api) {
           },
         },
       ],
+      'nativewind/babel',
     ],
   };
 };

@@ -1,7 +1,13 @@
-export { default as HomeScreen } from './HomeScreen';
+export { default as WelcomeScreen } from './WelcomeScreen';
 export { default as LoginScreen } from './LoginScreen';
 export { default as Dashboard } from './Dashboard';
 export { default as RegisterScreen } from './RegisterScreen';
 export { default as ForgotPasswordScreen } from './ForgotPasswordScreen';
 export { default as AccountSettingsScreen } from './AccountSettingsScreen';
-export { default as PropertiesScreen } from './PropertiesScreen';
+export { default as PropertiesScreen } from './Properties/PropertiesScreen';
+export { default as PropertyDetails } from './Properties/PropertyDetails';
+export { default as HousesScreen } from './Houses/HousesScreen';
+export { default as HouseDetails } from './Houses/HouseDetails';
+export { default as SeeMoreScreen } from './SeeMoreScreen';
+export { default as TenantsScreen } from './Tenants/TenantsScreen';
+export { default as TenantDetails } from './Tenants/TenantDetails';

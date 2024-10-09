@@ -9,6 +9,7 @@ export const emailValidator = (email: string) => {
 
 export const passwordValidator = (password: string) => {
   if (!password || password.length <= 0) return 'Senha não pode estar em branco.';
+  if (password.length < 6) return 'Senha precisa ter 6 caracteres.';
 
   return '';
 };
@@ -16,5 +17,24 @@ export const passwordValidator = (password: string) => {
 export const nameValidator = (name: string) => {
   if (!name || name.length <= 0) return 'Nome não pode estar em branco.';
 
+  return '';
+};
+
+export const cpfValidator = (cpf: string) => {
+  if (!cpf || cpf.length <= 0) return 'CPF não pode estar em branco.';
+  if (cpf.length !== 11) return 'CPF precisa ter 11 dígitos.';
+  return '';
+};
+
+export const confirmPasswordValidator = (password: string, confirmPassword: string) => {
+  if (!confirmPassword || confirmPassword.length <= 0)
+    return 'Confirmação de senha não pode estar em branco.';
+  if (password !== confirmPassword) return 'Senhas não conferem.';
+  return '';
+};
+
+export const phoneValidator = (phone: string) => {
+  if (!phone || phone.length <= 0) return 'Telefone não pode estar em branco.';
+  if (phone.length !== 11) return 'Telefone precisa ter 11 dígitos.';
   return '';
 };
