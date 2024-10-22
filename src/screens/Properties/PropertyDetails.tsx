@@ -9,6 +9,8 @@ import { api } from '~/services/api';
 import { theme } from '~/core/theme';
 import { Picker } from '@react-native-picker/picker';
 import { statesOfBrazil } from '~/dtos/PropertiesDTO';
+import axios from 'axios';
+import { getUpdatedFields } from '~/core/utils';
 
 type RouteParamsProps = {
   propertie?: {
@@ -83,7 +85,34 @@ const PropertyDetails = () => {
     if (newPropertie.nickname && newPropertie.iptu && newPropertie.zip_code) {
       try {
         if (propertie) {
-          await api.patch(`/properties/${propertie.id}`, newPropertie);
+          const updatedFields = getUpdatedFields(propertie, newPropertie);
+
+          if (selectedImage && selectedImage.uri !== propertie.photo) {
+            const formData = new FormData();
+            formData.append('photo', {
+              uri: selectedImage.uri,
+              name: 'photo.jpg',
+              type: 'image/jpeg',
+            } as any);
+
+            for (const key in updatedFields) {
+              if (key !== 'photo') {
+                formData.append(key, updatedFields[key]);
+              }
+            }
+            await api.patch(`/properties/${propertie.id}`, formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          } else {
+            await api.patch(`/properties/${propertie.id}`, updatedFields, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+          }
+
           Alert.alert('Propriedade atualizada', 'A propriedade foi atualizada com sucesso.');
         } else {
           const formData = new FormData();
@@ -101,7 +130,7 @@ const PropertyDetails = () => {
             formData.append('photo', {
               uri: selectedImage.uri,
               name: 'photo.jpg',
-              type: 'image/jpg',
+              type: 'image/jpeg',
             } as any);
           }
 
@@ -112,8 +141,12 @@ const PropertyDetails = () => {
           });
           Alert.alert('Propriedade salva', 'A propriedade foi salva com sucesso.');
         }
+        navigation.goBack();
       } catch (error) {
-        console.error('Erro ao salvar propriedade:', error);
+        if (axios.isAxiosError(error)) {
+          console.log(error);
+          console.error(`error`, error.response?.data);
+        }
       }
     }
   };
@@ -217,26 +250,6 @@ const PropertyDetails = () => {
             />
           }
         />
-        {/* <TextInput
-          label="Estado"
-          value={newPropertie.state || ''}
-          style={styles.input}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="map-marker" size={size} color={color} />
-              )}
-            />
-          }
-          right={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="chevron-down" size={size} color={color} />
-              )}
-            />
-          }
-          onChangeText={(text) => setNewPropertie({ ...newPropertie, state: text })}
-        /> */}
         <View className="mb-4">
           <Text style={{ color: theme.colors.primary }} className="mb-2 text-sm">
             Estado:
@@ -272,10 +285,10 @@ const PropertyDetails = () => {
         </View>
 
         <Button mode="outlined" onPress={pickImage} icon="camera">
-          {selectedImage ? 'Alterar imagem' : 'Selecionar imagem'}
+          {selectedImage && selectedImage.uri ? 'Alterar imagem' : 'Selecionar imagem'}
         </Button>
 
-        {selectedImage && (
+        {selectedImage && selectedImage.uri && (
           <>
             <Text style={{ marginTop: 10 }}>Imagem selecionada:</Text>
             <Image

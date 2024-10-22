@@ -1,5 +1,5 @@
-import React, { memo, useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native';
+import React, { memo, useState, useEffect } from 'react';
+import { TouchableOpacity, StyleSheet, Text, View, Alert, Keyboard } from 'react-native';
 import Background from '../components/Background';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
@@ -18,6 +18,21 @@ const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const { signIn } = useAuth();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const _onLoginPressed = async () => {
     const emailError = emailValidator(email.value);
@@ -42,15 +57,16 @@ const LoginScreen = ({ navigation }: Props) => {
 
   return (
     <Background>
-      {/* <BackButton goBack={() => navigation.navigate('WelcomeScreen')} /> */}
       <SafeAreaView>
-        <View style={styles.containerHead}>
-          <Logo isIcon size="lg" style={styles.logo} />
-          <Text style={styles.headline}>Simplifique a gestão do seu imóvel.</Text>
-          <Text style={styles.paragraph}>
-            Faça login e descubra como é fácil administrar suas locações.
-          </Text>
-        </View>
+        {!isKeyboardVisible && (
+          <View style={styles.containerHead}>
+            <Logo isIcon size="lg" style={styles.logo} />
+            <Text style={styles.headline}>Simplifique a gestão do seu imóvel.</Text>
+            <Text style={styles.paragraph}>
+              Faça login e descubra como é fácil administrar suas locações.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.inputGroup}>
           <TextInput

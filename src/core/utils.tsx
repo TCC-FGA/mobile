@@ -38,3 +38,13 @@ export const phoneValidator = (phone: string) => {
   if (phone.length !== 11) return 'Telefone precisa ter 11 dígitos.';
   return '';
 };
+
+export const getUpdatedFields = (original: any, updated: any) => {
+  const updatedFields: any = {};
+  for (const key in updated) {
+    if (updated[key] !== original[key]) {
+      updatedFields[key] = updated[key];
+    }
+  }
+  return updatedFields;
+};

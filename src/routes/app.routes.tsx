@@ -17,7 +17,6 @@ import {
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
-import { TenantDTO } from '~/dtos/TenantDTO';
 
 type AppRoutesType = {
   PropertiesStack: {
@@ -30,7 +29,7 @@ type AppRoutesType = {
   };
   TenantsStack: {
     screen: 'TenantsScreen' | 'TenantDetails';
-    params?: { tenant?: TenantDTO | null };
+    params?: { tenantId?: number | null };
   };
 };
 

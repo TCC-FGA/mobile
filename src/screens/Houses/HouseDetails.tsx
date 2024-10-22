@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { ScrollView, View, Image, Text, Alert, StyleSheet } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { TextInput, Button, RadioButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,6 +11,7 @@ import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { getProperties } from '~/api/properties';
 import { Picker } from '@react-native-picker/picker';
 import { theme } from '~/core/theme';
+import { getUpdatedFields } from '~/core/utils';
 
 type RouteParamsProps = {
   house?: {
@@ -109,7 +110,26 @@ const HouseDetails = () => {
     if (newHouse.nickname && newHouse.room_count && newHouse.bathrooms) {
       try {
         if (house?.id) {
-          await updateHouse(house.id, newHouse);
+          const updatedFields = getUpdatedFields(house, newHouse);
+
+          if (selectedImage && selectedImage.uri !== house.photo) {
+            const formData = new FormData();
+            formData.append('photo', {
+              uri: selectedImage.uri,
+              name: 'photo.jpg',
+              type: 'image/jpeg',
+            } as any);
+
+            for (const key in updatedFields) {
+              if (key !== 'photo') {
+                formData.append(key, updatedFields[key]);
+              }
+            }
+            await updateHouse(house.id, formData);
+          } else {
+            await updateHouse(house.id, updatedFields);
+          }
+
           Alert.alert('Casa atualizada', 'A casa foi atualizada com sucesso.');
         } else {
           const formData = new FormData();
@@ -124,13 +144,11 @@ const HouseDetails = () => {
             formData.append('photo', {
               uri: selectedImage.uri,
               name: 'photo.jpg',
-              type: 'image/jpg',
+              type: 'image/jpeg',
             } as any);
           }
-          console.log(formData);
-          console.log(house?.property_id);
 
-          await createHouse(9, formData);
+          await createHouse(selectedProperty, formData);
           Alert.alert('Casa salva', 'A casa foi salva com sucesso.');
         }
         navigation.goBack();
@@ -228,27 +246,44 @@ const HouseDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Status"
-          value={newHouse.status || 'vaga'}
-          onChangeText={(text) => {
-            if (text === 'vaga' || text === 'alugada' || text === 'reforma') {
-              setNewHouse({ ...newHouse, status: text });
-            } else {
-              Alert.alert('Erro', 'Status inválido. Use "vaga", "alugada" ou "reforma".');
+        <View style={styles.radioButtonContainer}>
+          <Text style={styles.radioButtonLabel}>Mobiliada:</Text>
+          <RadioButton.Group
+            onValueChange={(value) => setNewHouse({ ...newHouse, furnished: value === 'true' })}
+            value={newHouse.furnished ? 'true' : 'false'}>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="true" />
+              <Text>Sim</Text>
+            </View>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="false" />
+              <Text>Não</Text>
+            </View>
+          </RadioButton.Group>
+        </View>
+        <View style={styles.radioButtonContainer}>
+          <Text style={styles.radioButtonLabel}>Status casa:</Text>
+          <RadioButton.Group
+            onValueChange={(value) =>
+              setNewHouse({ ...newHouse, status: value as 'alugada' | 'reforma' | 'vaga' })
             }
-          }}
-          style={styles.input}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="information" size={size} color={color} />
-              )}
-            />
-          }
-        />
+            value={newHouse.status}>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="vaga" />
+              <Text>Vaga</Text>
+            </View>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="alugada" />
+              <Text>Alugada</Text>
+            </View>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="reforma" />
+              <Text>Em Reforma</Text>
+            </View>
+          </RadioButton.Group>
+        </View>
         <Button mode="outlined" onPress={pickImage} icon="camera">
-          {selectedImage ? 'Alterar imagem' : 'Selecionar imagem'}
+          {selectedImage && selectedImage.uri ? 'Alterar imagem' : 'Selecionar imagem'}
         </Button>
 
         {selectedImage?.uri && (
@@ -283,6 +318,18 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 10,
+  },
+  radioButtonContainer: {
+    marginBottom: 10,
+  },
+  radioButtonLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  radioButtonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
 });
 

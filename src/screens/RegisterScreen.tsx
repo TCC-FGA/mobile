@@ -28,7 +28,7 @@ import {
 } from '../core/utils';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
-import { formatDate } from '~/helpers/convert_data';
+import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
 import { ActivityIndicator, Button as BtnPaper } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { AuthRouterProps } from '~/routes/auth.routes';
@@ -225,10 +225,6 @@ const RegisterScreen = () => {
     if (selectedDate && event.type === 'set') {
       setBirthDatePicker(selectedDate);
     }
-  };
-
-  const convertDateInDDMMYYYY = (date: Date) => {
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 
   const handleBackButton = () => {

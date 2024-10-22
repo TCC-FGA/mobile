@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { View, FlatList, Alert, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, FlatList, Alert, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {
   Appbar,
   Card,
@@ -12,6 +12,7 @@ import {
   FAB,
   Menu,
   Divider,
+  Chip,
 } from 'react-native-paper';
 import { HouseDTO } from '~/dtos/HouseDTO';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
@@ -29,29 +30,42 @@ const HousesScreen = () => {
   const [filteredHouses, setFilteredHouses] = useState<HouseDTO[]>([]);
   const [menuVisible, setMenuVisible] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const closeMenu = () => setMenuVisible(null);
   const { propertyId } = route.params as HousesScreenProps;
 
-  useEffect(() => {
-    const fetchHouses = async () => {
-      try {
-        let fetchedHouses: HouseDTO[];
-        if (propertyId) {
-          fetchedHouses = await getHousesByPropertyId(propertyId);
-        } else {
-          fetchedHouses = await getHouses();
-        }
-        setHouses(fetchedHouses);
-        setFilteredHouses(fetchedHouses);
-      } catch (error) {
-        Alert.alert('Erro', 'Não foi possível carregar as casas.');
+  const fetchHouses = async () => {
+    try {
+      setRefreshing(true);
+      let fetchedHouses: HouseDTO[];
+      if (propertyId) {
+        fetchedHouses = await getHousesByPropertyId(propertyId);
+      } else {
+        fetchedHouses = await getHouses();
       }
-    };
+      setHouses(fetchedHouses);
+      setFilteredHouses(fetchedHouses);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar as casas.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHouses();
   }, [propertyId]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchHouses();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const onChangeSearch = (query: string) => {
     setSearchQuery(query);
@@ -126,19 +140,36 @@ const HousesScreen = () => {
         <Card.Content style={styles.cardContent}>
           <View style={styles.cardHeader}>
             {/* Imagem à esquerda */}
-            <Avatar.Image
-              size={64}
-              source={{ uri: item.photo || 'https://via.placeholder.com/150' }}
-              style={styles.avatar}
+            <Image
+              source={{
+                uri:
+                  item.photo ||
+                  'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
+              }}
+              style={styles.image}
             />
 
             {/* Informações da casa */}
             <View style={styles.infoContainer}>
-              <Title>{item.nickname}</Title>
-              <Paragraph>Quartos: {item.room_count}</Paragraph>
-              <Paragraph>Banheiros: {item.bathrooms}</Paragraph>
-              <Paragraph>Mobiliada: {item.furnished ? 'Sim' : 'Não'}</Paragraph>
-              <Paragraph>Status: {item.status}</Paragraph>
+              <Title style={styles.cardTitle}>{item.nickname}</Title>
+              <Chip
+                icon={
+                  item.status === 'vaga'
+                    ? 'check-circle'
+                    : item.status === 'alugada'
+                      ? 'home'
+                      : 'tools'
+                }
+                style={[
+                  styles.chip,
+                  item.status === 'vaga'
+                    ? styles.chipVaga
+                    : item.status === 'alugada'
+                      ? styles.chipAlugada
+                      : styles.chipReforma,
+                ]}>
+                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+              </Chip>
             </View>
 
             {/* Botão de Menu (três pontos) */}
@@ -224,12 +255,16 @@ const HousesScreen = () => {
       <FlatList
         data={filteredHouses}
         keyExtractor={(item) => item.id.toString()}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={renderItem}
-        ListEmptyComponent={() => (
-          <View style={{ alignItems: 'center', marginTop: 20 }}>
-            <Text>Nenhuma casa encontrada.</Text>
-          </View>
-        )}
+        ListEmptyComponent={() =>
+          !refreshing && (
+            <View style={{ alignItems: 'center', marginTop: 20 }}>
+              <Text>Nenhuma casa encontrada.</Text>
+            </View>
+          )
+        }
       />
       <FAB
         icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
@@ -243,6 +278,11 @@ const HousesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  image: {
+    width: 74,
+    height: 74,
+    borderRadius: 8,
   },
   avatar: {
     borderRadius: 28,
@@ -278,11 +318,24 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
+    marginLeft: 16,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  chip: {
+    marginTop: 8,
+  },
+  chipVaga: {
+    backgroundColor: '#4caf50',
+  },
+  chipAlugada: {
+    backgroundColor: '#ff9800',
+  },
+  chipReforma: {
+    backgroundColor: '#f44336',
   },
 });
 

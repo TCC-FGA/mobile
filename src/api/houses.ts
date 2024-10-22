@@ -8,7 +8,11 @@ export const getHouses = async (): Promise<HouseDTO[]> => {
     const response = await api.get('/houses');
     return response.data;
   } catch (error) {
-    console.error('Erro ao obter casas:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Erro ao obter casas:', error.response?.data);
+    } else {
+      console.error('Erro ao obter casas:', error);
+    }
     throw error;
   }
 };
@@ -19,7 +23,9 @@ export const getHouseById = async (houseId: number): Promise<HouseDTO> => {
     const response = await api.get(`/houses/${houseId}`);
     return response.data;
   } catch (error) {
-    console.error(`Erro ao obter casa com ID ${houseId}:`, error);
+    if (axios.isAxiosError(error)) {
+      console.error(`Erro ao obter casa com ID ${houseId}:`, error.response?.data);
+    }
     throw error;
   }
 };
@@ -27,8 +33,9 @@ export const getHouseById = async (houseId: number): Promise<HouseDTO> => {
 // atualizar uma casa pelo ID
 export const updateHouse = async (
   houseId: number,
-  houseData: Partial<HouseDTO>
-): Promise<HouseDTO> => {
+  houseData: Partial<FormData>
+): Promise<FormData> => {
+  console.log(houseData);
   try {
     const response = await api.patch(`/houses/${houseId}`, houseData, {
       headers: {
@@ -37,7 +44,9 @@ export const updateHouse = async (
     });
     return response.data;
   } catch (error) {
-    console.error(`Erro ao atualizar casa com ID ${houseId}:`, error);
+    if (axios.isAxiosError(error)) {
+      console.error(`Erro ao atualizar casa com ID ${houseId}:`, error.response?.data);
+    }
     throw error;
   }
 };
@@ -47,7 +56,9 @@ export const deleteHouse = async (houseId: number): Promise<void> => {
   try {
     await api.delete(`/houses/${houseId}`);
   } catch (error) {
-    console.error(`Erro ao deletar casa com ID ${houseId}:`, error);
+    if (axios.isAxiosError(error)) {
+      console.error(`Erro ao deletar casa com ID ${houseId}:`, error.response?.data);
+    }
     throw error;
   }
 };
@@ -62,6 +73,10 @@ export const getHousesByPropertyId = async (propertyId: number): Promise<HouseDT
       if (error.response?.status === 404) {
         return [];
       }
+      console.error(
+        `Erro ao obter casas da propriedade com ID ${propertyId}:`,
+        error.response?.data
+      );
     }
     throw error;
   }
@@ -77,7 +92,12 @@ export const createHouse = async (propertyId: number, houseData: FormData): Prom
     });
     return response.data;
   } catch (error) {
-    console.error(`Erro ao criar casa na propriedade com ID ${propertyId}:`, error);
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Erro ao criar casa na propriedade com ID ${propertyId}:`,
+        error.response?.data
+      );
+    }
     throw error;
   }
 };

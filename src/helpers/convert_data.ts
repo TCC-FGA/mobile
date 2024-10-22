@@ -4,3 +4,7 @@ export const formatDate = (date: Date): string => {
   const day = `${date.getDate()}`.padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
+
+export const convertDateInDDMMYYYY = (date: Date) => {
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+};

@@ -1,7 +1,15 @@
 import { PropertiesDTO } from '@dtos/PropertiesDTO';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { memo, useEffect, useState } from 'react';
-import { SafeAreaView, FlatList, View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import {
+  SafeAreaView,
+  FlatList,
+  View,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import {
   Appbar,
   Card,
@@ -21,11 +29,10 @@ import { api } from '~/services/api';
 
 const PropertiesScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProperties, setFilteredProperties] = useState<PropertiesDTO[]>([]);
   const [properties, setProperties] = useState<PropertiesDTO[]>([]);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState<string | null>(null);
 
   const openMenu = (propertyId: string) => setVisibleMenu(propertyId);
@@ -37,11 +44,25 @@ const PropertiesScreen = () => {
 
   const fetchProperties = async () => {
     try {
+      setRefreshing(true);
       const response = await api.get('/properties');
       setProperties(response.data);
       setFilteredProperties(response.data);
     } catch (error) {
       console.error('Erro ao buscar propriedades:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchProperties();
+    } catch (error) {
+      console.error('Erro ao atualizar propriedades:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -71,13 +92,12 @@ const PropertiesScreen = () => {
   };
 
   const renderItem = ({ item }: { item: (typeof properties)[0] }) => (
-    <TouchableOpacity activeOpacity={3} onPress={() => onViewHouses(item)}>
+    <TouchableOpacity activeOpacity={0.8} onPress={() => onViewHouses(item)}>
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {/* Imagem à esquerda */}
-            <Avatar.Image
+            {/* <Avatar.Image
               size={64}
               source={{
                 uri:
@@ -85,20 +105,20 @@ const PropertiesScreen = () => {
                   'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
               }}
               style={styles.avatar}
+            /> */}
+            <Image
+              source={{
+                uri:
+                  item.photo ||
+                  'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
+              }}
+              style={styles.image}
             />
 
             {/* Informações da propriedade à direita da imagem */}
             <View style={{ flex: 1, marginLeft: 16 }}>
               <Text style={styles.cardTitle}>{item.nickname}</Text>
-              <Text>
-                {item.street}, {item.id}
-              </Text>
-              <Text>{item.neighborhood}</Text>
-              <Text>
-                {item.city} - {item.state}
-              </Text>
-              <Text>IPTU: {item.iptu}</Text>
-              <Text>CEP: {item.zip_code}</Text>
+              <Text style={styles.cardSubtitle}>CEP: {item.zip_code}</Text>
             </View>
 
             {/* Ícone de três pontinhos no topo à direita */}
@@ -213,11 +233,21 @@ const PropertiesScreen = () => {
         value={searchQuery}
         style={styles.searchbar}
       />
+
       <FlatList
         data={filteredProperties}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         style={styles.list}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        ListEmptyComponent={() =>
+          !refreshing && (
+            <View style={styles.loadingIndicator}>
+              <Text>Nenhuma propriedade encontrada.</Text>
+            </View>
+          )
+        }
       />
       <FAB
         icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
@@ -233,7 +263,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatar: {
-    borderRadius: 28,
+    borderRadius: 50,
   },
   searchbar: {
     margin: 10,
@@ -265,6 +295,20 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#666',
+  },
+  image: {
+    width: 64,
+    height: 64,
+    borderRadius: 8,
   },
 });
 

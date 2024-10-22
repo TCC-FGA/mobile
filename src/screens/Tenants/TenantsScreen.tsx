@@ -1,5 +1,5 @@
-import React, { memo, useState } from 'react';
-import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { memo, useState, useEffect } from 'react';
+import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import {
   Card,
   Text,
@@ -14,48 +14,9 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
+import { getTenants } from '~/api/tenants';
+import { TenantDTO } from '~/dtos/TenantDTO';
 
-// Mock dos dados TenantsDTO
-const tenantsMock = [
-  {
-    cpf: '123.456.789-00',
-    contact: '(11) 98765-4321',
-    email: 'vitor.farias@email.com',
-    name: 'Vitor Farias',
-    profession: 'Engenheiro',
-    marital_status: 'Solteiro',
-    birth_date: '1990-05-10',
-    emergency_contact: '(11) 99999-1234',
-    income: 7000,
-    residents: 2,
-    street: 'Rua das Flores',
-    neighborhood: 'Centro',
-    number: 123,
-    zip_code: '12345-678',
-    city: 'São Paulo',
-    state: 'SP',
-  },
-  {
-    cpf: '987.654.321-00',
-    contact: '(21) 91234-5678',
-    email: 'ana.silva@email.com',
-    name: 'Ana Silva',
-    profession: 'Médica',
-    marital_status: 'Casada',
-    birth_date: '1985-02-20',
-    emergency_contact: '(21) 98888-8765',
-    income: 10000,
-    residents: 3,
-    street: 'Rua das Laranjeiras',
-    neighborhood: 'Jardim América',
-    number: 456,
-    zip_code: '87654-321',
-    city: 'Rio de Janeiro',
-    state: 'RJ',
-  },
-];
-
-// Função para extrair as iniciais do nome
 const getInitials = (name: string) => {
   const names = name.split(' ');
   const initials = names[0][0] + names[names.length - 1][0];
@@ -63,10 +24,37 @@ const getInitials = (name: string) => {
 };
 
 const TenantScreen = () => {
+  const [tenants, setTenants] = useState<TenantDTO[]>([]);
   const [visibleMenu, setVisibleMenu] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+
+  const fetchTenants = async () => {
+    setRefreshing(true);
+    try {
+      const fetchedTenants = await getTenants();
+      setTenants(fetchedTenants);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os inquilinos.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTenants();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchTenants();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const onChangeSearch = (query: string) => setSearchQuery(query);
 
@@ -82,12 +70,12 @@ const TenantScreen = () => {
     navigation.navigate('TenantsStack', {
       screen: 'TenantDetails',
       params: {
-        tenant: null,
+        tenantId: null,
       },
     });
   };
 
-  const renderItem = ({ item }: { item: (typeof tenantsMock)[0] }) => (
+  const renderItem = ({ item }: { item: TenantDTO }) => (
     <TouchableOpacity activeOpacity={0.8}>
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
@@ -123,7 +111,12 @@ const TenantScreen = () => {
               <Menu.Item
                 onPress={() => {
                   closeMenu();
-                  console.log('Editar', item.name);
+                  navigation.navigate('TenantsStack', {
+                    screen: 'TenantDetails',
+                    params: {
+                      tenantId: item.id,
+                    },
+                  });
                 }}
                 title="Editar"
                 leadingIcon="pencil"
@@ -163,7 +156,6 @@ const TenantScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
         {isSearchVisible ? (
           <Searchbar
             placeholder="Pesquisar"
@@ -173,15 +165,27 @@ const TenantScreen = () => {
             onBlur={toggleSearchBar}
           />
         ) : (
-          <Appbar.Content title="Inquilinos" />
+          <>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Inquilinos" />
+          </>
         )}
         <Appbar.Action icon="magnify" onPress={toggleSearchBar} />
       </Appbar.Header>
       <FlatList
-        data={tenantsMock}
+        data={tenants}
         renderItem={renderItem}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         keyExtractor={(item) => item.cpf}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={() =>
+          !refreshing && (
+            <View style={{ alignItems: 'center', marginTop: 20 }}>
+              <Text>Nenhum inquilino encontrado.</Text>
+            </View>
+          )
+        }
       />
       <FAB
         icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}

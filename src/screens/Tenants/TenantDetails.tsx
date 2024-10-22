@@ -1,65 +1,89 @@
 import React, { useState, useEffect, memo } from 'react';
-import { ScrollView, View, Alert, StyleSheet } from 'react-native';
+import { ScrollView, View, Alert, StyleSheet, Platform } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
-
-const mockTenant = {
-  cpf: '',
-  contact: '',
-  email: '',
-  name: '',
-  profession: '',
-  marital_status: '',
-  birth_date: '',
-  emergency_contact: '',
-  income: null,
-  residents: null,
-  street: '',
-  neighborhood: '',
-  number: null,
-  zip_code: '',
-  city: '',
-  state: '',
-};
+import { getTenantById, createTenant, updateTenant } from '~/api/tenants';
+import { TenantDTO } from '~/dtos/TenantDTO';
+import { convertDateInDDMMYYYY } from '~/helpers/convert_data';
+import { theme } from '~/core/theme';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 type RouteParamsProps = {
-  tenant?: typeof mockTenant;
+  tenantId?: number;
 };
 
 const TenantDetails = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const { tenant } = route.params as RouteParamsProps;
-  const [newTenant, setNewTenant] = useState(tenant || mockTenant);
+  const { tenantId } = route.params as RouteParamsProps;
+  const [newTenant, setNewTenant] = useState<TenantDTO>({
+    id: 0,
+    cpf: '',
+    contact: '',
+    email: null,
+    name: '',
+    profession: null,
+    marital_status: null,
+    birth_date: null,
+    emergency_contact: '',
+    income: null,
+    residents: null,
+    street: '',
+    neighborhood: '',
+    number: null,
+    zip_code: '',
+    city: '',
+    state: '',
+  });
 
   useEffect(() => {
-    if (tenant) {
-      navigation.setOptions({ title: 'Editar Inquilino' });
+    if (tenantId) {
+      const fetchTenant = async () => {
+        try {
+          const tenant = await getTenantById(tenantId);
+          setNewTenant(tenant);
+          navigation.setOptions({ title: 'Editar Inquilino' });
+        } catch (error) {
+          Alert.alert('Erro', 'Não foi possível carregar os detalhes do inquilino.');
+        }
+      };
+
+      fetchTenant();
     } else {
       navigation.setOptions({ title: 'Adicionar Inquilino' });
     }
-  }, [tenant, navigation]);
+  }, [tenantId, navigation]);
 
   const handleInputChange = (field: string, value: any) => {
     setNewTenant({ ...newTenant, [field]: value });
   };
 
-  const handleSave = () => {
+  const showDatePickerHandler = () => {
+    setShowDatePicker(true);
+  };
+
+  const handleSave = async () => {
     if (!newTenant.name || !newTenant.cpf || !newTenant.contact || !newTenant.email) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
 
-    if (tenant) {
-      Alert.alert('Sucesso', 'Inquilino atualizado com sucesso!');
-    } else {
-      Alert.alert('Sucesso', 'Inquilino criado com sucesso!');
+    try {
+      if (tenantId) {
+        await updateTenant(tenantId, newTenant);
+        Alert.alert('Sucesso', 'Inquilino atualizado com sucesso!');
+      } else {
+        await createTenant(newTenant);
+        Alert.alert('Sucesso', 'Inquilino criado com sucesso!');
+      }
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível salvar o inquilino.');
     }
-
-    navigation.goBack();
   };
 
   return (
@@ -108,7 +132,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Email"
-          value={newTenant.email}
+          value={newTenant.email || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('email', text)}
           keyboardType="email-address"
@@ -122,7 +146,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Profissão"
-          value={newTenant.profession}
+          value={newTenant.profession || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('profession', text)}
           left={
@@ -135,7 +159,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Estado Civil"
-          value={newTenant.marital_status}
+          value={newTenant.marital_status || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('marital_status', text)}
           left={
@@ -146,23 +170,38 @@ const TenantDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Data de Nascimento"
-          value={newTenant.birth_date}
-          style={styles.input}
-          onChangeText={(text) => handleInputChange('birth_date', text)}
-          placeholder="DD/MM/AAAA"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="calendar" size={size} color={color} />
-              )}
+        <>
+          <Button
+            className="mb-2"
+            mode="outlined"
+            onPress={showDatePickerHandler}
+            icon={() => (
+              <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+            )}>
+            Data de nascimento{' '}
+            {newTenant.birth_date
+              ? `: ${convertDateInDDMMYYYY(new Date(newTenant.birth_date))}`
+              : ''}
+          </Button>
+
+          {showDatePicker && (
+            <RNDateTimePicker
+              value={newTenant.birth_date ? new Date(newTenant.birth_date) : new Date()}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                const currentDate = selectedDate || new Date();
+                setShowDatePicker(Platform.OS === 'ios');
+                handleInputChange('birth_date', currentDate.toISOString());
+              }}
+              accentColor={theme.colors.primary}
+              textColor={theme.colors.primary}
             />
-          }
-        />
+          )}
+        </>
         <TextInput
           label="Contato de Emergência"
-          value={newTenant.emergency_contact}
+          value={newTenant.emergency_contact || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('emergency_contact', text)}
           keyboardType="phone-pad"
@@ -176,7 +215,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Renda"
-          value={newTenant.income ? newTenant.income : ''}
+          value={newTenant.income ? newTenant.income.toString() : ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('income', Number(text))}
           keyboardType="numeric"
@@ -190,7 +229,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Residentes"
-          value={newTenant.residents ? newTenant.residents : ''}
+          value={newTenant.residents ? newTenant.residents.toString() : ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('residents', Number(text))}
           keyboardType="numeric"
@@ -204,7 +243,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Rua"
-          value={newTenant.street}
+          value={newTenant.street || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('street', text)}
           left={
@@ -217,7 +256,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Bairro"
-          value={newTenant.neighborhood}
+          value={newTenant.neighborhood || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('neighborhood', text)}
           left={
@@ -230,7 +269,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Número"
-          value={newTenant.number ? newTenant.number : ''}
+          value={newTenant.number ? newTenant.number.toString() : ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('number', Number(text))}
           keyboardType="numeric"
@@ -244,7 +283,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="CEP"
-          value={newTenant.zip_code}
+          value={newTenant.zip_code || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('zip_code', text)}
           keyboardType="numeric"
@@ -258,7 +297,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Cidade"
-          value={newTenant.city}
+          value={newTenant.city || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('city', text)}
           left={
@@ -271,7 +310,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Estado"
-          value={newTenant.state}
+          value={newTenant.state || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('state', text)}
           left={
@@ -289,7 +328,7 @@ const TenantDetails = () => {
           padding: 10,
         }}>
         <Button mode="contained" onPress={handleSave} contentStyle={{ paddingHorizontal: 16 }}>
-          {tenant ? 'Atualizar Inquilino' : 'Criar Inquilino'}
+          {tenantId ? 'Atualizar Inquilino' : 'Criar Inquilino'}
         </Button>
         <Button mode="text" onPress={() => navigation.goBack()}>
           Cancelar
