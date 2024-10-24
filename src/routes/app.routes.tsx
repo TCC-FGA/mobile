@@ -14,6 +14,12 @@ import {
   SeeMoreScreen,
   TenantsScreen,
   TenantDetails,
+  ContractsScreen,
+  RentsScreen,
+  RentsDetails,
+  PaymentsScreen,
+  PaymentsDetails,
+  ReceiptScreen,
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
@@ -30,6 +36,17 @@ type AppRoutesType = {
   TenantsStack: {
     screen: 'TenantsScreen' | 'TenantDetails';
     params?: { tenantId?: number | null };
+  };
+  ContractsStack: {
+    screen: 'ContractsScreen';
+  };
+  RentsStack: {
+    screen: 'RentsScreen' | 'RentsDetails';
+    params?: { rentId?: number | null };
+  };
+  PaymentsStack: {
+    screen: 'PaymentsScreen' | 'PaymentsDetails' | 'ReceiptScreen';
+    params?: { contractId?: number | null; paymentId?: number | null; rentId?: number | null };
   };
 };
 
@@ -172,6 +189,53 @@ export function TenantsStack() {
   );
 }
 
+export function ContractsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ContractsScreen"
+        component={ContractsScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function RentsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="RentsScreen" component={RentsScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="RentsDetails"
+        component={RentsDetails}
+        options={{ headerTitle: 'Aluguéis' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function PaymentsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="PaymentsScreen"
+        component={PaymentsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PaymentsDetails"
+        component={PaymentsDetails}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ReceiptScreen"
+        component={ReceiptScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AppRoutes() {
   return (
     <Stack.Navigator initialRouteName="AppRoutesTab" screenOptions={{ headerShown: false }}>
@@ -179,6 +243,9 @@ function AppRoutes() {
       <Stack.Screen name="PropertiesStack" component={PropertiesStack} />
       <Stack.Screen name="HousesStack" component={HousesStack} />
       <Stack.Screen name="TenantsStack" component={TenantsStack} />
+      <Stack.Screen name="ContractsStack" component={ContractsStack} />
+      <Stack.Screen name="RentsStack" component={RentsStack} />
+      <Stack.Screen name="PaymentsStack" component={PaymentsStack} />
     </Stack.Navigator>
   );
 }
