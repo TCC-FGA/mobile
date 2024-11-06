@@ -23,6 +23,8 @@ import { deleteHouse, getHouses, getHousesByPropertyId } from '~/api/houses';
 
 type HousesScreenProps = {
   propertyId?: number;
+  propertyPhoto?: string;
+  propertyNickname?: string;
 };
 
 const HousesScreen = () => {
@@ -34,7 +36,7 @@ const HousesScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const closeMenu = () => setMenuVisible(null);
-  const { propertyId } = route.params as HousesScreenProps;
+  const { propertyId, propertyPhoto, propertyNickname } = route.params as HousesScreenProps;
 
   const fetchHouses = async () => {
     try {
@@ -240,9 +242,19 @@ const HousesScreen = () => {
             navigation.goBack();
           }}
         />
-        <Appbar.Content
-          title={propertyId ? `Casas da Propriedade ${propertyId}` : 'Todas as Casas'}
-        />
+        {propertyId ? (
+          <View style={styles.appbarContent}>
+            <Avatar.Image
+              size={40}
+              source={{
+                uri: propertyPhoto,
+              }}
+            />
+            <Appbar.Content className="ml-2" title={propertyNickname} />
+          </View>
+        ) : (
+          <Appbar.Content title="Todas as Casas" />
+        )}
       </Appbar.Header>
 
       <Searchbar
@@ -267,7 +279,9 @@ const HousesScreen = () => {
         }
       />
       <FAB
-        icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
+        icon={({ size, color }) => (
+          <MaterialCommunityIcons name="home-plus-outline" size={size} color={color} />
+        )}
         style={styles.fab}
         onPress={onAddHouse}
       />
@@ -336,6 +350,16 @@ const styles = StyleSheet.create({
   },
   chipReforma: {
     backgroundColor: '#f44336',
+  },
+  appbarContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 16,
+  },
+  appbarTitle: {
+    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

@@ -4,57 +4,35 @@ import { Text, Chip, Appbar } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
-import { format } from 'date-fns';
+import { getPaymentInstallments } from '~/api/payments';
+import { format, set } from 'date-fns';
+import { parseFloatBR } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   contractId: number;
 };
 
-const mockPayments: PaymentDTO[] = [
-  {
-    id: 1,
-    installmentValue: 1000.0,
-    isPaid: true,
-    paymentMethod: 'transferência',
-    dueDate: new Date('2023-01-01'),
-    paymentDate: new Date('2023-01-01'),
-    contractId: 1,
-  },
-  {
-    id: 2,
-    installmentValue: 1000.0,
-    isPaid: false,
-    paymentMethod: 'dinheiro',
-    dueDate: new Date('2023-02-01'),
-    contractId: 1,
-  },
-  {
-    id: 3,
-    installmentValue: 1000.0,
-    isPaid: false,
-    paymentMethod: 'cartão',
-    dueDate: new Date('2023-03-01'),
-    contractId: 1,
-  },
-];
-
 const PaymentsScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const { contractId } = route.params as RouteParamsProps;
-  const [payments, setPayments] = useState<PaymentDTO[]>(mockPayments);
+  const [payments, setPayments] = useState<PaymentDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchPayments = async () => {
+    try {
+      setIsLoading(true);
+      const paymentsData = await getPaymentInstallments(contractId);
+      const sortedPayments = paymentsData.sort((a, b) => a.id - b.id);
+      setPayments(sortedPayments);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os pagamentos.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        // Simulate fetching data
-        // const paymentsData = await getPaymentsByContractId(contractId);
-        // setPayments(paymentsData);
-      } catch (error) {
-        Alert.alert('Erro', 'Não foi possível carregar os pagamentos.');
-      }
-    };
-
     fetchPayments();
   }, [contractId]);
 
@@ -70,18 +48,18 @@ const PaymentsScreen = () => {
       <View style={styles.paymentContainer}>
         <View style={styles.paymentInfo}>
           <Text style={styles.paymentTitle}>
-            Parcela {index + 1} de {payments.length}
+            Parcela {item.id} de {payments.length}
           </Text>
           <Text style={styles.dueDate}>
-            Vence em {format(new Date(item.dueDate), 'dd/MM/yyyy')}
+            Vence em {format(new Date(item.due_date), 'dd/MM/yyyy')}
           </Text>
         </View>
         <View style={styles.paymentDetails}>
-          <Text style={styles.installmentValue}>R${item.installmentValue.toFixed(2)}</Text>
+          <Text style={styles.installmentValue}>R${parseFloatBR(item.installment_value)}</Text>
           <Chip
-            icon={item.isPaid ? 'check-circle' : 'alert-circle'}
-            style={[styles.chip, item.isPaid ? styles.chipPaid : styles.chipUnpaid]}>
-            {item.isPaid ? 'Pago' : 'Em Aberto'}
+            icon={item.fg_paid ? 'check-circle' : 'alert-circle'}
+            style={[styles.chip, item.fg_paid ? styles.chipPaid : styles.chipUnpaid]}>
+            {item.fg_paid ? 'Pago' : 'Em Aberto'}
           </Chip>
         </View>
       </View>
@@ -99,6 +77,15 @@ const PaymentsScreen = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
+        refreshing={isLoading}
+        onRefresh={fetchPayments}
+        ListEmptyComponent={() =>
+          !isLoading && (
+            <Text style={{ textAlign: 'center', padding: 16 }}>
+              Nenhuma parcela encontrada para este contrato.
+            </Text>
+          )
+        }
       />
     </SafeAreaView>
   );

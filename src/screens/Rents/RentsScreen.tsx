@@ -1,9 +1,12 @@
 import React, { useState, useEffect, memo } from 'react';
 import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Card, Text, Avatar, Chip, IconButton, Appbar, Divider } from 'react-native-paper';
+import { Card, Text, Avatar, Chip, Appbar, Divider, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
+import { getRents } from '~/api/rents';
+import { RentDTO } from '~/dtos/RentDTO';
+import { parseFloatBR } from '~/helpers/convert_data';
 
 const getInitials = (name: string) => {
   const names = name.split(' ');
@@ -11,48 +14,20 @@ const getInitials = (name: string) => {
   return initials.toUpperCase();
 };
 
-const mockRents = [
-  {
-    id: 1,
-    deposit_value: 1000.0,
-    active: true,
-    start_date: '2023-01-01',
-    end_date: '2023-12-31',
-    base_value: 1500.0,
-    due_date: 5,
-    reajustment_rate: '5%',
-    houseDto: { nickname: 'Casa 1', zip_code: '12345-678' },
-    template_id: 1,
-    tenantsDTO: { name: 'John Doe' },
-    user_id: 'user1',
-  },
-  {
-    id: 2,
-    deposit_value: 2000.0,
-    active: false,
-    start_date: '2022-01-01',
-    end_date: '2022-12-31',
-    base_value: 2500.0,
-    due_date: 10,
-    reajustment_rate: '3%',
-    houseDto: { nickname: 'Casa 2', zip_code: '23456-789' },
-    template_id: 2,
-    tenantsDTO: { name: 'Jane Smith' },
-    user_id: 'user2',
-  },
-];
-
 const RentsScreen = () => {
-  const [rents, setRents] = useState(mockRents);
+  const [rents, setRents] = useState<RentDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
 
   const fetchRents = async () => {
-    // Simulate fetching data
     try {
-      // const fetchedRents = await getRents();
-      // setRents(fetchedRents);
+      setIsLoading(true);
+      const fetchedRents = await getRents();
+      setRents(fetchedRents);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar os alugueis.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,39 +35,35 @@ const RentsScreen = () => {
     fetchRents();
   }, []);
 
-  const onViewRent = (rent: (typeof mockRents)[0]) => {
+  const onViewRent = (rent: RentDTO) => {
     navigation.navigate('RentsStack', {
       screen: 'RentsDetails',
       params: { rentId: rent.id },
     });
   };
 
-  const renderItem = ({ item }: { item: (typeof mockRents)[0] }) => (
+  const renderItem = ({ item }: { item: RentDTO }) => (
     <TouchableOpacity activeOpacity={0.8} onPress={() => onViewRent(item)}>
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
           <View style={styles.rentInfo}>
             {/* Avatar com as iniciais do inquilino */}
-            <Avatar.Text
-              size={48}
-              label={getInitials(item.tenantsDTO.name)}
-              style={styles.avatar}
-            />
+            <Avatar.Text size={48} label={getInitials(item.tenant.name)} style={styles.avatar} />
 
             {/* Informações do aluguel */}
             <View style={styles.info}>
-              <Text style={styles.cardTitle}>{item.houseDto.nickname}</Text>
-              <View style={styles.infoRow}>
+              <Text style={styles.cardTitle}>{item.house.nickname}</Text>
+              {/* <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="map-marker" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.houseDto.zip_code}</Text>
-              </View>
+                <Text style={styles.infoText}>{item.houseDto.}</Text>
+              </View> */}
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="currency-usd" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.base_value}</Text>
+                <Text style={styles.infoText}>{parseFloatBR(item.base_value)}</Text>
               </View>
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="account" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.tenantsDTO.name}</Text>
+                <Text style={styles.infoText}>{item.tenant.name}</Text>
               </View>
             </View>
 
@@ -120,6 +91,20 @@ const RentsScreen = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
+        refreshing={isLoading}
+        onRefresh={fetchRents}
+        ListEmptyComponent={() =>
+          !isLoading && (
+            <View style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ fontSize: 16, color: '#666' }}>Nenhum aluguel encontrado.</Text>
+            </View>
+          )
+        }
+      />
+      <FAB
+        icon="briefcase-plus"
+        style={{ position: 'absolute', margin: 16, right: 0, bottom: 0 }}
+        onPress={() => navigation.navigate('RentsStack', { screen: 'RentsMainCreation' })}
       />
     </SafeAreaView>
   );

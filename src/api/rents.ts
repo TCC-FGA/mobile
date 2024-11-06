@@ -1,5 +1,5 @@
 import { api } from '~/services/api';
-import { RentDTO } from '~/dtos/RentDTO';
+import { RentCreateDTO, RentDTO } from '~/dtos/RentDTO';
 import axios from 'axios';
 
 // Função para obter todos os contratos (rents)
@@ -16,7 +16,7 @@ export const getRents = async (): Promise<RentDTO[]> => {
 };
 
 // Função para criar um novo contrato (rent)
-export const createRent = async (contractData: RentDTO): Promise<RentDTO> => {
+export const createRent = async (contractData: RentCreateDTO): Promise<RentDTO> => {
   try {
     const response = await api.post('/contracts', contractData);
     return response.data;
@@ -64,6 +64,26 @@ export const deleteRent = async (contractId: number): Promise<void> => {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(`Erro ao deletar contrato com ID ${contractId}:`, error.response?.data);
+    }
+    throw error;
+  }
+};
+
+// Função para fazer upload de um PDF assinado
+export const updatePdfRent = async (contractId: number, signedPdf: FormData): Promise<RentDTO> => {
+  try {
+    const response = await api.patch(`/contracts/${contractId}`, signedPdf, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Erro ao fazer upload do PDF assinado para o contrato com ID ${contractId}:`,
+        error.response?.data
+      );
     }
     throw error;
   }

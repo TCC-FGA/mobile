@@ -29,7 +29,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
-import { ActivityIndicator, Button as BtnPaper } from 'react-native-paper';
+import { ActivityIndicator, Button as BtnPaper, TextInput as Input } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { AuthRouterProps } from '~/routes/auth.routes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -58,6 +58,7 @@ const RegisterScreen = () => {
         setValue: setName,
         secureTextEntry: false,
         textContentType: 'name' as 'name',
+        left: <Input.Icon icon={() => <MaterialCommunityIcons name="account" size={20} />} />,
       },
       {
         label: 'CPF',
@@ -66,6 +67,11 @@ const RegisterScreen = () => {
         keyboardType: 'numeric' as KeyboardTypeOptions,
         secureTextEntry: false,
         textContentType: 'none' as 'none',
+        left: (
+          <Input.Icon
+            icon={() => <MaterialCommunityIcons name="card-account-details" size={20} />}
+          />
+        ),
       },
       {
         label: 'Telefone',
@@ -74,6 +80,7 @@ const RegisterScreen = () => {
         keyboardType: 'phone-pad' as KeyboardTypeOptions,
         secureTextEntry: false,
         textContentType: 'telephoneNumber' as 'telephoneNumber',
+        left: <Input.Icon icon={() => <MaterialCommunityIcons name="phone" size={20} />} />,
       },
     ],
     [
@@ -84,6 +91,7 @@ const RegisterScreen = () => {
         keyboardType: 'numeric' as KeyboardTypeOptions,
         secureTextEntry: false,
         textContentType: 'none' as 'none',
+        left: <Input.Icon icon={() => <MaterialCommunityIcons name="cash" size={20} />} />,
       },
     ],
     [
@@ -95,6 +103,7 @@ const RegisterScreen = () => {
         secureTextEntry: false,
         autoCapitalize: 'none',
         textContentType: 'emailAddress' as 'emailAddress',
+        left: <Input.Icon icon={() => <MaterialCommunityIcons name="email" size={20} />} />,
       },
       {
         label: 'Senha',
@@ -102,6 +111,7 @@ const RegisterScreen = () => {
         setValue: setPassword,
         secureTextEntry: true,
         textContentType: 'password' as 'password',
+        left: <Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={20} />} />,
       },
       {
         label: 'Confirmar Senha',
@@ -109,6 +119,7 @@ const RegisterScreen = () => {
         setValue: setConfirmPassword,
         secureTextEntry: true,
         textContentType: 'password' as 'password',
+        left: <Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={20} />} />,
       },
     ],
   ];
@@ -284,6 +295,7 @@ const RegisterScreen = () => {
             textContentType={input.textContentType}
             maxLength={input.label === 'CPF' || input.label === 'Telefone' ? 11 : undefined}
             autoComplete={input.label === 'Email' ? 'email' : 'off'}
+            left={input.left}
           />
         ))}
         <View style={styles.buttonContainer}>

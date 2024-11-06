@@ -9,7 +9,9 @@ export const getTemplates = async (): Promise<TemplateDTO[]> => {
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      console.error('Erro ao obter templates:', error.response?.data);
+      if (error.response?.status === 404) {
+        return [];
+      }
     }
     throw error;
   }

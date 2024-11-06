@@ -10,8 +10,21 @@ export type RentDTO = {
   base_value: number;
   due_date: number;
   reajustment_rate?: string;
-  houseDto: HouseDTO;
+  house: HouseDTO;
   template_id: number;
-  tenantsDTO: TenantDTO;
+  tenant: TenantDTO;
   user_id: string;
+  signed_pdfExpand?: string | null;
+};
+
+export type RentCreateDTO = {
+  deposit_value?: number | null;
+  start_date: Date | string;
+  end_date: Date | string;
+  base_value: number;
+  due_date: number;
+  reajustment_rate?: string | null;
+  house_id: number;
+  template_id: number;
+  tenant_id: number;
 };

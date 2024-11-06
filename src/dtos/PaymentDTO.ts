@@ -1,9 +1,9 @@
 export type PaymentDTO = {
   id: number;
-  installmentValue: number;
-  isPaid: boolean;
-  paymentMethod: 'dinheiro' | 'cartão' | 'transferência' | 'outro';
-  dueDate: Date;
-  paymentDate?: Date;
-  contractId: number;
+  installment_value: number;
+  fg_paid: boolean;
+  payment_type: 'dinheiro' | 'cartão' | 'transferência' | 'outro' | 'None';
+  due_date: Date;
+  payment_date?: Date;
+  contract_id: number;
 };

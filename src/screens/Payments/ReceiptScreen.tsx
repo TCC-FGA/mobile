@@ -1,68 +1,17 @@
 import React, { memo, useEffect, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Appbar, Text } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { RentDTO } from '~/dtos/RentDTO';
+import { getPaymentInstallments } from '~/api/payments';
+import { getRentById } from '~/api/rents';
 import { format } from 'date-fns';
 
 type RouteParamsProps = {
   paymentId: number;
   rentId: number;
-};
-
-const mockPayment: PaymentDTO = {
-  id: 1,
-  installmentValue: 1000.0,
-  isPaid: true,
-  paymentMethod: 'transferência',
-  dueDate: new Date('2023-01-01'),
-  paymentDate: new Date('2023-01-01'),
-  contractId: 1,
-};
-
-const mockRent: RentDTO = {
-  id: 1,
-  deposit_value: 1000.0,
-  active: true,
-  start_date: '2023-01-01',
-  end_date: '2023-12-31',
-  base_value: 1500.0,
-  due_date: 5,
-  reajustment_rate: '5%',
-  houseDto: {
-    nickname: 'Casa 1',
-    id: 0,
-    property_id: 0,
-    photo: null,
-    room_count: 0,
-    bathrooms: 0,
-    furnished: null,
-    status: 'alugada',
-  },
-  template_id: 1,
-  tenantsDTO: {
-    name: 'John Doe',
-    id: 0,
-    cpf: '',
-    contact: '',
-    email: null,
-    profession: null,
-    marital_status: null,
-    birth_date: null,
-    emergency_contact: null,
-    income: null,
-    residents: null,
-    street: '',
-    neighborhood: null,
-    number: null,
-    zip_code: '',
-    city: null,
-    state: null,
-  },
-  user_id: 'user1',
 };
 
 const ReceiptScreen = () => {
@@ -75,13 +24,11 @@ const ReceiptScreen = () => {
   useEffect(() => {
     const fetchPaymentAndRent = async () => {
       try {
-        // Simulate fetching data
-        // const paymentData = await getPaymentById(paymentId);
-        // const rentData = await getRentById(rentId);
-        // setPayment(paymentData);
-        // setRent(rentData);
-        setPayment(mockPayment); // Use mock data for now
-        setRent(mockRent); // Use mock data for now
+        const paymentsData = await getPaymentInstallments(rentId);
+        const paymentData = paymentsData.find((p) => p.id === paymentId);
+        const rentData = await getRentById(rentId);
+        setPayment(paymentData || null);
+        setRent(rentData || null);
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar os detalhes do recibo.');
       }
@@ -111,19 +58,19 @@ const ReceiptScreen = () => {
           <>
             <Text style={styles.title}>RECIBO DE ALUGUEL</Text>
             <Text style={styles.reference}>
-              MÊS REFERÊNCIA: {format(new Date(payment.dueDate), 'MMMM yyyy').toUpperCase()} -
+              MÊS REFERÊNCIA: {format(new Date(payment.due_date), 'MMMM yyyy').toUpperCase()} -
               VALOR: R$
-              {payment.installmentValue.toFixed(2)}
+              {payment.installment_value.toFixed(2)}
             </Text>
-            <Text style={styles.detail}>Locatário(a): {rent.tenantsDTO.name}</Text>
+            <Text style={styles.detail}>Locatário(a): {rent.tenant.name}</Text>
             <Text style={styles.message}>
-              Recebi de {rent.tenantsDTO.name} a importância de R$
-              {payment.installmentValue.toFixed(2)} referente ao mês de{' '}
-              {format(new Date(payment.dueDate), 'MMMM yyyy')}.
+              Recebi de {rent.tenant.name} a importância de R$
+              {payment.installment_value.toFixed(2)} referente ao mês de{' '}
+              {format(new Date(payment.due_date), 'MMMM yyyy')}.
             </Text>
             <Text style={styles.paymentDate}>
               Pagamento realizado em:{' '}
-              {payment.paymentDate ? format(new Date(payment.paymentDate), 'dd/MM/yyyy') : 'N/A'}
+              {payment.payment_date ? format(new Date(payment.payment_date), 'dd/MM/yyyy') : 'N/A'}
             </Text>
           </>
         )}

@@ -8,7 +8,7 @@ type Props = {
 
 const Background = ({ children }: Props) => (
   <SafeAreaProvider>
-    <KeyboardAvoidingView style={styles.container} behavior="padding">
+    <KeyboardAvoidingView style={styles.container} behavior="position">
       <SafeAreaView>{children}</SafeAreaView>
     </KeyboardAvoidingView>
   </SafeAreaProvider>
@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     width: '100%',
+    backgroundColor: '#fff',
   },
 });
 

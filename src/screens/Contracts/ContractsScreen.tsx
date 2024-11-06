@@ -1,53 +1,68 @@
-import React, { memo, useState } from 'react';
-import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, IconButton, Divider, Appbar, SegmentedButtons, Surface } from 'react-native-paper';
+import React, { memo, useState, useEffect } from 'react';
+import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import {
+  Text,
+  IconButton,
+  Divider,
+  Appbar,
+  SegmentedButtons,
+  Surface,
+  FAB,
+} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '~/core/theme';
-
-const mockTemplates = [
-  {
-    id: '1',
-    title: 'Contrato de Aluguel Residencial',
-    details: 'Detalhes do contrato de aluguel residencial...',
-  },
-  {
-    id: '2',
-    title: 'Contrato de Aluguel Comercial',
-    details: 'Detalhes do contrato de aluguel comercial...',
-  },
-  { id: '3', title: 'Contrato de Sublocação', details: 'Detalhes do contrato de sublocação...' },
-];
-
-const mockSignedContracts = [
-  {
-    id: '1',
-    name: 'Contrato_Residencial_Assinado.pdf',
-    link: 'https://example.com/Contrato_Residencial_Assinado.pdf',
-  },
-  {
-    id: '2',
-    name: 'Contrato_Comercial_Assinado.pdf',
-    link: 'https://example.com/Contrato_Comercial_Assinado.pdf',
-  },
-  {
-    id: '3',
-    name: 'Contrato_Sublocacao_Assinado.pdf',
-    link: 'https://example.com/Contrato_Sublocacao_Assinado.pdf',
-  },
-];
+import { AppNavigatorRoutesProps } from '~/routes/app.routes';
+import { getRents } from '~/api/rents';
+import { getTemplates } from '~/api/templates';
+import { RentDTO } from '~/dtos/RentDTO';
+import { TemplateDTO } from '~/dtos/TemplateDTO';
+import { set } from 'date-fns';
 
 const ContractsScreen = () => {
   const [expandedContract, setExpandedContract] = useState<string | null>(null);
-  const navigation = useNavigation();
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
   const [value, setValue] = useState('templates');
+  const [templates, setTemplates] = useState<TemplateDTO[]>([]);
+  const [signedContracts, setSignedContracts] = useState<RentDTO[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [isLoadingSignedContracts, setIsLoadingSignedContracts] = useState(false);
+
+  const fetchTemplates = async () => {
+    setIsLoadingTemplates(true);
+    try {
+      const templatesData = await getTemplates();
+      setTemplates(templatesData);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os templates.');
+    } finally {
+      setIsLoadingTemplates(false);
+    }
+  };
+
+  const fetchSignedContracts = async () => {
+    setIsLoadingSignedContracts(true);
+    try {
+      const signedContractsData = await getRents();
+      setSignedContracts(signedContractsData);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os contratos assinados.');
+    } finally {
+      setIsLoadingSignedContracts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTemplates();
+    fetchSignedContracts();
+  }, []);
 
   const toggleExpand = (id: string) => {
     setExpandedContract(expandedContract === id ? null : id);
   };
 
-  const renderTemplateItem = ({ item }: { item: (typeof mockTemplates)[0] }) => (
-    <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(item.id)}>
+  const renderTemplateItem = ({ item }: { item: TemplateDTO }) => (
+    <TouchableOpacity activeOpacity={0.8} onPress={() => toggleExpand(item.id.toString())}>
       <View style={styles.contractContainer}>
         <View style={styles.contractInfo}>
           <MaterialCommunityIcons
@@ -56,18 +71,20 @@ const ContractsScreen = () => {
             color={theme.colors.primary}
           />
           <View style={styles.info}>
-            <Text style={styles.title}>{item.title}</Text>
-            {expandedContract === item.id && <Text style={styles.details}>{item.details}</Text>}
+            <Text style={styles.title}>{item.template_name}</Text>
+            {expandedContract === item.id.toString() && (
+              <Text style={styles.details}>{item.description}</Text>
+            )}
           </View>
           <IconButton
             icon={({ size, color }) => (
               <MaterialCommunityIcons
-                name={expandedContract === item.id ? 'chevron-up' : 'chevron-down'}
+                name={expandedContract === item.id.toString() ? 'chevron-up' : 'chevron-down'}
                 size={size}
                 color={color}
               />
             )}
-            onPress={() => toggleExpand(item.id)}
+            onPress={() => toggleExpand(item.id.toString())}
           />
         </View>
         <Divider className="mt-0 mb-0 p-0" />
@@ -75,18 +92,19 @@ const ContractsScreen = () => {
     </TouchableOpacity>
   );
 
-  const renderSignedContractItem = ({ item }: { item: (typeof mockSignedContracts)[0] }) => (
+  const renderSignedContractItem = ({ item }: { item: RentDTO }) => (
     <Surface style={styles.surface}>
       <View style={styles.signedContractInfo}>
         <MaterialCommunityIcons name="file-pdf-box" size={48} color={theme.colors.primary} />
         <View style={styles.info}>
-          <Text style={styles.title}>{item.name}</Text>
+          <Text style={styles.title}>{item.house.nickname}</Text>
+          <Text style={styles.details}>{item.signed_pdfExpand}</Text>
         </View>
         <IconButton
           icon={({ size, color }) => (
             <MaterialCommunityIcons name="download" size={size} color={color} />
           )}
-          onPress={() => console.log('Download link:', item.link)}
+          onPress={() => console.log('Download link:', item.signed_pdfExpand)}
         />
       </View>
     </Surface>
@@ -116,19 +134,51 @@ const ContractsScreen = () => {
           ]}
         />
         {value === 'templates' ? (
-          <FlatList
-            data={mockTemplates}
-            renderItem={renderTemplateItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
-          />
+          <>
+            <FlatList
+              data={templates}
+              renderItem={renderTemplateItem}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.list}
+              onRefresh={fetchTemplates}
+              refreshing={isLoadingTemplates}
+              ListEmptyComponent={() => (
+                <View style={{ alignItems: 'center', marginTop: 16 }}>
+                  <Text style={{ fontSize: 16, color: '#666' }}>Nenhum template encontrado.</Text>
+                </View>
+              )}
+            />
+            <FAB
+              icon="file-plus"
+              style={{ position: 'absolute', margin: 16, right: 0, bottom: 50 }}
+              onPress={() =>
+                navigation.navigate('ContractsStack', {
+                  screen: 'ContractsDetails',
+                  params: { templateId: null },
+                })
+              }
+            />
+          </>
         ) : (
-          <FlatList
-            data={mockSignedContracts}
-            renderItem={renderSignedContractItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
-          />
+          <>
+            <FlatList
+              data={signedContracts}
+              renderItem={renderSignedContractItem}
+              keyExtractor={(item) => item.id.toString()}
+              contentContainerStyle={styles.list}
+              onRefresh={fetchSignedContracts}
+              refreshing={isLoadingSignedContracts}
+              ListEmptyComponent={() =>
+                !isLoadingSignedContracts && (
+                  <View style={{ alignItems: 'center', marginTop: 16 }}>
+                    <Text style={{ fontSize: 16, color: '#666' }}>
+                      Nenhum contrato assinado encontrado.
+                    </Text>
+                  </View>
+                )
+              }
+            />
+          </>
         )}
       </SafeAreaView>
     </>

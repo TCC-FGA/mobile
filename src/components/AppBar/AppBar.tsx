@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Appbar, Avatar } from 'react-native-paper';
+import { Appbar, Avatar, MD3LightTheme } from 'react-native-paper';
 import { Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '~/core/theme';
@@ -11,7 +11,7 @@ const modeAppBar = Platform.OS === 'ios' ? 'center-aligned' : 'small';
 const AppBar = () => {
   const { user, signOut } = useAuth();
   return (
-    <Appbar.Header mode={modeAppBar}>
+    <Appbar.Header mode={modeAppBar} theme={theme}>
       <Appbar.Action
         icon={() => (
           <MaterialCommunityIcons size={24} name="bell" color={theme.colors.onSurfaceVariant} />

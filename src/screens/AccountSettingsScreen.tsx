@@ -1,21 +1,18 @@
 import React, { memo, useState } from 'react';
 import { StyleSheet, Alert, View, SafeAreaView } from 'react-native';
-import { Avatar, Button, TextInput, Text, IconButton, Title } from 'react-native-paper';
+import { Avatar, Button, TextInput, Text, IconButton, Title, Appbar } from 'react-native-paper';
 
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
-import { Navigation } from '../types';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-type Props = {
-  navigation: Navigation;
-};
-
-const AccountSettingsScreen = ({ navigation }: Props) => {
+const AccountSettingsScreen = () => {
   const { user, signOut } = useAuth();
   const [newPassword, setNewPassword] = useState({ value: '', error: '' });
   const [confirmPassword, setConfirmPassword] = useState({ value: '', error: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
 
   const deleteAccount = async () => {
     setIsLoading(true);
@@ -66,61 +63,77 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.logoutContainer}>
-          <IconButton
-            icon={({ size, color }) => (
-              <MaterialCommunityIcons name="logout" size={size} color={color} />
-            )}
-            size={24}
-            onPress={signOut}
-            style={styles.logoutButton}
+    <>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.Content title="Minha Conta" />
+        <Appbar.Action
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="logout" size={size} color={color} />
+          )}
+          onPress={signOut}
+        />
+      </Appbar.Header>
+      <SafeAreaView style={styles.container}>
+        {/* <View style={styles.header}>
+          <View style={styles.logoutContainer}>
+            <IconButton
+              icon={({ size, color }) => (
+                <MaterialCommunityIcons name="logout" size={size} color={color} />
+              )}
+              size={24}
+              onPress={signOut}
+              style={styles.logoutButton}
+            />
+            <Text style={styles.logoutText}>Sair</Text>
+          </View>
+          <Avatar.Image size={64} source={require('@assets/avatar.png')} style={styles.avatar} />
+        </View> */}
+
+        <View style={styles.body}>
+          <Title style={styles.title}>Olá, {user?.name || 'Usuário'}!</Title>
+          <Text style={styles.infoText}>Deseja alterar sua senha?</Text>
+
+          <TextInput
+            label="Nova Senha"
+            value={newPassword.value}
+            onChangeText={(text) => setNewPassword({ value: text, error: '' })}
+            secureTextEntry
+            error={!!newPassword.error}
+            style={styles.input}
           />
-          <Text style={styles.logoutText}>Sair</Text>
+          {newPassword.error ? <Text style={styles.errorText}>{newPassword.error}</Text> : null}
+
+          <TextInput
+            label="Confirme a Nova Senha"
+            value={confirmPassword.value}
+            onChangeText={(text) => setConfirmPassword({ value: text, error: '' })}
+            secureTextEntry
+            error={!!confirmPassword.error}
+            style={styles.input}
+          />
+          {confirmPassword.error ? (
+            <Text style={styles.errorText}>{confirmPassword.error}</Text>
+          ) : null}
+
+          <Button
+            mode="contained"
+            onPress={changePassword}
+            style={styles.button}
+            loading={isLoading}>
+            Alterar Senha
+          </Button>
+
+          <Button
+            mode="outlined"
+            onPress={deleteAccount}
+            style={styles.deleteButton}
+            loading={isLoading}>
+            Excluir Conta
+          </Button>
         </View>
-        <Avatar.Image size={64} source={require('@assets/avatar.png')} style={styles.avatar} />
-      </View>
-
-      <View style={styles.body}>
-        <Title style={styles.title}>Olá, {user?.name || 'Usuário'}!</Title>
-        <Text style={styles.infoText}>Deseja alterar sua senha?</Text>
-
-        <TextInput
-          label="Nova Senha"
-          value={newPassword.value}
-          onChangeText={(text) => setNewPassword({ value: text, error: '' })}
-          secureTextEntry
-          error={!!newPassword.error}
-          style={styles.input}
-        />
-        {newPassword.error ? <Text style={styles.errorText}>{newPassword.error}</Text> : null}
-
-        <TextInput
-          label="Confirme a Nova Senha"
-          value={confirmPassword.value}
-          onChangeText={(text) => setConfirmPassword({ value: text, error: '' })}
-          secureTextEntry
-          error={!!confirmPassword.error}
-          style={styles.input}
-        />
-        {confirmPassword.error ? (
-          <Text style={styles.errorText}>{confirmPassword.error}</Text>
-        ) : null}
-
-        <Button mode="contained" onPress={changePassword} style={styles.button} loading={isLoading}>
-          Alterar Senha
-        </Button>
-
-        <Button
-          mode="outlined"
-          onPress={deleteAccount}
-          style={styles.deleteButton}
-          loading={isLoading}>
-          Excluir Conta
-        </Button>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 };
 

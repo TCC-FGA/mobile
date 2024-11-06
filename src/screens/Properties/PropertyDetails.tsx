@@ -11,6 +11,9 @@ import { Picker } from '@react-native-picker/picker';
 import { statesOfBrazil } from '~/dtos/PropertiesDTO';
 import axios from 'axios';
 import { getUpdatedFields } from '~/core/utils';
+import { TextInputMask } from 'react-native-masked-text';
+import CustomPicker from '~/components/CustomPicker';
+import { parseFloatBR } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   propertie?: {
@@ -155,7 +158,11 @@ const PropertyDetails = () => {
     <>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <TextInput
-          label="Apelido da propriedade"
+          label={
+            <Text>
+              Apelido da propriedade <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={newPropertie.nickname}
           style={styles.input}
           onChangeText={(text) => setNewPropertie({ ...newPropertie, nickname: text })}
@@ -167,22 +174,54 @@ const PropertyDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Valor IPTU"
-          value={newPropertie.iptu?.toString() || ''}
-          onChangeText={(text) =>
-            setNewPropertie({ ...newPropertie, iptu: Number(text.replace(/[^0-9]/g, '')) })
-          }
+        <TextInputMask
+          type="money"
+          value={parseFloatBR(Number(newPropertie.iptu) || 0)}
+          onChangeText={(text) => {
+            const numericValue = text.replace(/[^0-9.,]/g, '').replace(',', '.');
+            setNewPropertie({ ...newPropertie, iptu: parseFloat(numericValue) });
+          }}
           style={styles.input}
           keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="numeric" size={size} color={color} />
-              )}
-            />
-          }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="numeric" size={size} color={color} />
+                )}
+              />
+            ),
+            label: (
+              <Text>
+                Valor IPTU <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+          }}
         />
+        <TextInputMask
+          type="zip-code"
+          value={newPropertie.zip_code || ''}
+          onChangeText={(text) => setNewPropertie({ ...newPropertie, zip_code: text })}
+          style={styles.input}
+          keyboardType="numeric"
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="mailbox" size={size} color={color} />
+                )}
+              />
+            ),
+            label: (
+              <Text>
+                CEP <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+          }}
+        />
+
         <TextInput
           label="Rua"
           value={newPropertie.street || ''}
@@ -209,21 +248,25 @@ const PropertyDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Número"
+        <TextInputMask
+          type="only-numbers"
           value={newPropertie.number || ''}
           onChangeText={(text) => setNewPropertie({ ...newPropertie, number: text })}
           style={styles.input}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="numeric" size={size} color={color} />
-              )}
-            />
-          }
           keyboardType="numeric"
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="numeric" size={size} color={color} />
+                )}
+              />
+            ),
+            label: 'Número',
+          }}
         />
-        <TextInput
+        {/* <TextInput
           label="CEP"
           value={newPropertie.zip_code || ''}
           onChangeText={(text) => setNewPropertie({ ...newPropertie, zip_code: text })}
@@ -236,7 +279,7 @@ const PropertyDetails = () => {
             />
           }
           keyboardType="numeric"
-        />
+        /> */}
         <TextInput
           label="Cidade"
           value={newPropertie.city || ''}
@@ -251,10 +294,10 @@ const PropertyDetails = () => {
           }
         />
         <View className="mb-4">
-          <Text style={{ color: theme.colors.primary }} className="mb-2 text-sm">
+          {/* <Text style={{ color: theme.colors.primary }} className="mb-2 text-sm">
             Estado:
-          </Text>
-          <View
+          </Text> */}
+          {/* <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -262,14 +305,14 @@ const PropertyDetails = () => {
               borderRadius: 8,
               paddingHorizontal: 12,
               marginBottom: 4,
-            }}>
-            <MaterialCommunityIcons
+            }}> */}
+          {/* <MaterialCommunityIcons
               name="map-marker"
               size={24}
               color={theme.colors.primary}
               style={{ marginRight: 8 }}
-            />
-            <Picker
+            /> */}
+          {/* <Picker
               selectedValue={newPropertie.state}
               onValueChange={(itemValue) => setNewPropertie({ ...newPropertie, state: itemValue })}
               style={{
@@ -280,8 +323,16 @@ const PropertyDetails = () => {
               {statesOfBrazil.map((state) => (
                 <Picker.Item key={state.value} label={state.label} value={state.value} />
               ))}
-            </Picker>
-          </View>
+            </Picker> */}
+          {/* </View> */}
+          <CustomPicker
+            data={statesOfBrazil}
+            selectedValue={newPropertie.state}
+            onValueChange={(value) => setNewPropertie({ ...newPropertie, state: value.value })}
+            placeholder="Selecione um estado"
+            leftIcon="map-marker"
+            title="Estado"
+          />
         </View>
 
         <Button mode="outlined" onPress={pickImage} icon="camera">

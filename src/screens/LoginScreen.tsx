@@ -9,6 +9,8 @@ import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '~/components/Logo';
+import { TextInput as Input } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Props = {
   navigation: Navigation;
@@ -79,6 +81,7 @@ const LoginScreen = ({ navigation }: Props) => {
             autoCapitalize="none"
             textContentType="emailAddress"
             keyboardType="email-address"
+            left={<Input.Icon icon={() => <MaterialCommunityIcons name="email" size={21} />} />}
           />
           <View style={styles.forgotPassword}>
             <TextInput
@@ -89,6 +92,7 @@ const LoginScreen = ({ navigation }: Props) => {
               error={!!password.error}
               errorText={password.error}
               secureTextEntry
+              left={<Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={21} />} />}
             />
             <TouchableOpacity onPress={() => navigation.navigate('ForgotPasswordScreen')}>
               <Text style={styles.label}>Esqueceu sua senha?</Text>

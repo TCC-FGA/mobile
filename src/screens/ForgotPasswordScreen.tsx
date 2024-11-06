@@ -11,6 +11,8 @@ import { theme } from '../core/theme';
 import { emailValidator } from '../core/utils';
 import { api } from '../services/api';
 import { Navigation } from '../types';
+import { TextInput as Input } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type Props = {
   navigation: Navigation;
@@ -55,6 +57,7 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
         autoCapitalize="none"
         textContentType="emailAddress"
         keyboardType="email-address"
+        left={<Input.Icon icon={() => <MaterialCommunityIcons name="email" size={21} />} />}
       />
 
       <Button mode="contained" onPress={_onSendPressed}>

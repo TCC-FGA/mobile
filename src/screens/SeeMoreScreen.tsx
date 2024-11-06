@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { Button, Appbar, Divider, Avatar, IconButton, List, Surface } from 'react-native-paper';
+import { Appbar, Divider, Avatar, IconButton, List, Surface } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { useNavigation } from '@react-navigation/native';
@@ -134,7 +134,7 @@ const SeeMoreScreen = () => {
                   color={theme.colors.primary}
                 />
               )}
-              onPress={() => onNavigate('ProfileScreen')}
+              onPress={() => navigation.navigate('AccountSettingsScreen')}
               style={styles.listItem}
             />
           </List.Section>

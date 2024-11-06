@@ -188,7 +188,9 @@ const TenantScreen = () => {
         }
       />
       <FAB
-        icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
+        icon={({ size, color }) => (
+          <MaterialCommunityIcons name="account-plus" size={size} color={color} />
+        )}
         style={styles.fab}
         onPress={onAddTenants}
       />

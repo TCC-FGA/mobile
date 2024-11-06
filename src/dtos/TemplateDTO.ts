@@ -3,7 +3,7 @@ export type TemplateDTO = {
   template_name: string;
   description?: string | null;
   garage: boolean;
-  warranty: string;
+  warranty: 'fiador' | 'caução' | 'nenhum';
   animals: boolean;
   sublease: boolean;
   contract_type: 'residencial' | 'comercial';

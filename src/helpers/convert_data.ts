@@ -8,3 +8,7 @@ export const formatDate = (date: Date): string => {
 export const convertDateInDDMMYYYY = (date: Date) => {
   return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 };
+
+export const parseFloatBR = (value: number): string => {
+  return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};

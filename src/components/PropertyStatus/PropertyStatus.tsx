@@ -32,23 +32,17 @@ function PropertyStatus() {
         <CardStatus
           statusValue={10}
           label="Disponíveis"
-          icon={() => (
-            <MaterialCommunityIcons name="home" size={28} color={theme.colors.onSurface} />
-          )}
+          icon={() => <MaterialCommunityIcons name="home" size={28} color="#65A30D" />}
         />
         <CardStatus
           statusValue={20}
           label="Alugados"
-          icon={() => (
-            <MaterialCommunityIcons name="home-account" size={28} color={theme.colors.onSurface} />
-          )}
+          icon={() => <MaterialCommunityIcons name="home-account" size={28} color="#FBBF24" />}
         />
         <CardStatus
           statusValue={5}
           label="Manutenção"
-          icon={() => (
-            <MaterialCommunityIcons name="home-alert" size={28} color={theme.colors.onSurface} />
-          )}
+          icon={() => <MaterialCommunityIcons name="home-alert" size={28} color="#DC2626" />}
         />
       </View>
     </View>

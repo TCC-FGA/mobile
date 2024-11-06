@@ -197,6 +197,9 @@ const PropertiesScreen = () => {
       screen: 'HousesScreen',
       params: {
         propertyId: parseInt(propertie.id, 10),
+        propertyPhoto:
+          propertie.photo || 'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
+        propertyNickname: propertie.nickname || 'Propriedade',
       },
     });
   };
@@ -250,7 +253,9 @@ const PropertiesScreen = () => {
         }
       />
       <FAB
-        icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
+        icon={({ size, color }) => (
+          <MaterialCommunityIcons name="home-group-plus" size={size} color={color} />
+        )}
         style={styles.fab}
         onPress={onAddPropertie}
       />

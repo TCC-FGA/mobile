@@ -12,6 +12,8 @@ export { default as SeeMoreScreen } from './SeeMoreScreen';
 export { default as TenantsScreen } from './Tenants/TenantsScreen';
 export { default as TenantDetails } from './Tenants/TenantDetails';
 export { default as ContractsScreen } from './Contracts/ContractsScreen';
+export { default as ContractsDetails } from './Contracts/ContractsDetails';
+export { default as RentsMainCreation } from './Rents/RentsMainCreation';
 export { default as RentsScreen } from './Rents/RentsScreen';
 export { default as RentsDetails } from './Rents/RentsDetails';
 export { default as PaymentsScreen } from './Payments/PaymentsScreen';

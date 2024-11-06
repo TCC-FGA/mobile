@@ -2,9 +2,8 @@ import React from 'react';
 import { StatusBar, LogBox } from 'react-native';
 import { Provider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-import { theme } from './src/core/theme';
 import AppNavigator from './src/routes';
+import { theme } from '~/core/theme';
 
 import { AuthContextProvider } from '~/contexts/AuthContext';
 

@@ -12,6 +12,7 @@ import { getProperties } from '~/api/properties';
 import { Picker } from '@react-native-picker/picker';
 import { theme } from '~/core/theme';
 import { getUpdatedFields } from '~/core/utils';
+import { TextInputMask } from 'react-native-masked-text';
 
 type RouteParamsProps = {
   house?: {
@@ -202,7 +203,15 @@ const HouseDetails = () => {
           </View>
         </View>
         <TextInput
-          label="Apelido da casa"
+          label={
+            selectedProperty ? (
+              'Apelido da casa'
+            ) : (
+              <Text>
+                Apelido da casa <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            )
+          }
           value={newHouse.nickname}
           style={styles.input}
           onChangeText={(text) => setNewHouse({ ...newHouse, nickname: text })}
@@ -214,37 +223,53 @@ const HouseDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Quantidade de quartos"
+        <TextInputMask
+          type="only-numbers"
           value={newHouse.room_count?.toString() || ''}
           onChangeText={(text) =>
             setNewHouse({ ...newHouse, room_count: Number(text.replace(/[^0-9]/g, '')) })
           }
           style={styles.input}
           keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="bed" size={size} color={color} />
-              )}
-            />
-          }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="bed" size={size} color={color} />
+                )}
+              />
+            ),
+            label: (
+              <Text>
+                Quantidade de quartos <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+          }}
         />
-        <TextInput
-          label="Quantidade de banheiros"
+        <TextInputMask
+          type="only-numbers"
           value={newHouse.bathrooms?.toString() || ''}
           onChangeText={(text) =>
             setNewHouse({ ...newHouse, bathrooms: Number(text.replace(/[^0-9]/g, '')) })
           }
           style={styles.input}
           keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="shower" size={size} color={color} />
-              )}
-            />
-          }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="shower" size={size} color={color} />
+                )}
+              />
+            ),
+            label: (
+              <Text>
+                Quantidade de banheiros <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+          }}
         />
         <View style={styles.radioButtonContainer}>
           <Text style={styles.radioButtonLabel}>Mobiliada:</Text>

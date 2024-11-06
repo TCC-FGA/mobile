@@ -1,39 +1,41 @@
 import React, { useState, useEffect, memo } from 'react';
 import { ScrollView, View, Alert, StyleSheet } from 'react-native';
-import { Text, Button, Surface, Chip, Appbar } from 'react-native-paper';
+import {
+  Text,
+  Button,
+  Surface,
+  Chip,
+  Appbar,
+  Dialog,
+  Portal,
+  RadioButton,
+} from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
+import { getPaymentInstallments, updatePaymentInstallment } from '~/api/payments';
 import { format } from 'date-fns';
+import { formatDate, parseFloatBR } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   paymentId: number;
-};
-
-const mockPayment: PaymentDTO = {
-  id: 1,
-  installmentValue: 1000.0,
-  isPaid: false,
-  paymentMethod: 'transferência',
-  dueDate: new Date('2023-01-01'),
-  paymentDate: undefined,
-  contractId: 1,
 };
 
 const PaymentDetails = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const { paymentId } = route.params as RouteParamsProps;
-  const [payment, setPayment] = useState<PaymentDTO | null>(mockPayment);
+  const [payment, setPayment] = useState<PaymentDTO | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [paymentType, setPaymentType] = useState<PaymentDTO['payment_type']>('dinheiro');
 
   useEffect(() => {
     const fetchPayment = async () => {
       try {
-        // Simulate fetching data
-        // const paymentData = await getPaymentById(paymentId);
-        // setPayment(paymentData);
-        setPayment(mockPayment); // Use mock data for now
+        const paymentsData = await getPaymentInstallments(paymentId);
+        const paymentData = paymentsData.find((p) => p.id === paymentId);
+        setPayment(paymentData || null);
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar os detalhes do pagamento.');
       }
@@ -44,21 +46,26 @@ const PaymentDetails = () => {
 
   const handleMarkAsPaid = async () => {
     try {
-      // Simulate updating payment status
-      // await updatePaymentStatus(paymentId, { isPaid: true });
-      setPayment((prev) => prev && { ...prev, isPaid: true, paymentDate: new Date() });
-      Alert.alert('Sucesso', 'Pagamento marcado como pago!');
+      if (payment) {
+        const updatedPayment = await updatePaymentInstallment(payment.id, {
+          fg_paid: true,
+          payment_date: formatDate(new Date()),
+          payment_type: paymentType,
+        });
+        setPayment(updatedPayment);
+        Alert.alert('Sucesso', 'Pagamento marcado como pago!');
+        setVisible(false);
+      }
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível marcar o pagamento como pago.');
     }
   };
 
   const handleGenerateReceipt = () => {
-    navigation.navigate('PaymentsStack', {
-      screen: 'ReceiptScreen',
-      params: { paymentId: payment?.id, rentId: payment?.id },
-    });
+    setVisible(true);
   };
+
+  const hideDialog = () => setVisible(false);
 
   return (
     <>
@@ -71,20 +78,23 @@ const PaymentDetails = () => {
           <Surface style={styles.surface}>
             <Text style={styles.title}>Detalhes da Parcela</Text>
             <Text style={styles.detail}>
-              Valor da Parcela: R${payment.installmentValue.toFixed(2)}
+              Valor da Parcela: R${parseFloatBR(payment.installment_value)}
             </Text>
-            <Text style={styles.detail}>Método de Pagamento: {payment.paymentMethod}</Text>
+            {payment.payment_type !== 'None' && (
+              <Text style={styles.detail}>Método de Pagamento: {payment.payment_type}</Text>
+            )}
             <Text style={styles.detail}>
-              Data de Vencimento: {format(new Date(payment.dueDate), 'dd/MM/yyyy')}
+              Data de Vencimento: {format(new Date(payment.due_date), 'dd/MM/yyyy')}
             </Text>
-            <Text style={styles.detail}>
-              Data de Pagamento:{' '}
-              {payment.paymentDate ? format(new Date(payment.paymentDate), 'dd/MM/yyyy') : 'N/A'}
-            </Text>
+            {payment.payment_date && (
+              <Text style={styles.detail}>
+                Data de Pagamento: {format(new Date(payment.payment_date), 'dd/MM/yyyy')}
+              </Text>
+            )}
             <Chip
-              icon={payment.isPaid ? 'check-circle' : 'alert-circle'}
-              style={[styles.chip, payment.isPaid ? styles.chipPaid : styles.chipUnpaid]}>
-              {payment.isPaid ? 'Pago' : 'Em Aberto'}
+              icon={payment.fg_paid ? 'check-circle' : 'alert-circle'}
+              style={[styles.chip, payment.fg_paid ? styles.chipPaid : styles.chipUnpaid]}>
+              {payment.fg_paid ? 'Pago' : 'Em Aberto'}
             </Chip>
           </Surface>
         )}
@@ -92,10 +102,10 @@ const PaymentDetails = () => {
       <View style={styles.buttonContainer}>
         <Button
           mode="contained"
-          onPress={handleMarkAsPaid}
+          onPress={() => setVisible(true)}
           icon={() => <MaterialCommunityIcons name="check-circle" size={20} color="#fff" />}
           style={styles.button}
-          disabled={payment?.isPaid}>
+          disabled={payment?.fg_paid}>
           Marcar como Pago
         </Button>
         <Button
@@ -108,6 +118,37 @@ const PaymentDetails = () => {
           Gerar Recibo
         </Button>
       </View>
+      <Portal>
+        <Dialog visible={visible} onDismiss={hideDialog}>
+          <Dialog.Title>Escolha o Método de Pagamento</Dialog.Title>
+          <Dialog.Content>
+            <RadioButton.Group
+              onValueChange={(value) => setPaymentType(value as typeof paymentType)}
+              value={paymentType}>
+              <View style={styles.radioItem}>
+                <RadioButton value="dinheiro" />
+                <Text>Dinheiro</Text>
+              </View>
+              <View style={styles.radioItem}>
+                <RadioButton value="cartao" />
+                <Text>Cartão</Text>
+              </View>
+              <View style={styles.radioItem}>
+                <RadioButton value="transferencia" />
+                <Text>Transferência</Text>
+              </View>
+              <View style={styles.radioItem}>
+                <RadioButton value="outro" />
+                <Text>Outro</Text>
+              </View>
+            </RadioButton.Group>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={hideDialog}>Cancelar</Button>
+            <Button onPress={handleMarkAsPaid}>Marcar como Pago</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 };
@@ -142,6 +183,11 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 8,
+  },
+  radioItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
 });
 
