@@ -15,8 +15,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { getPaymentInstallments, updatePaymentInstallment } from '~/api/payments';
-import { format } from 'date-fns';
-import { formatDate, parseFloatBR } from '~/helpers/convert_data';
+import { format, parse } from 'date-fns';
+import { convertDateInDDMMYYYY, formatDate, parseFloatBR } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   paymentId: number;
@@ -62,7 +62,10 @@ const PaymentDetails = () => {
   };
 
   const handleGenerateReceipt = () => {
-    setVisible(true);
+    navigation.navigate('PaymentsStack', {
+      screen: 'ReceiptScreen',
+      params: { paymentId: payment?.id, rentId: payment?.id },
+    });
   };
 
   const hideDialog = () => setVisible(false);
@@ -84,11 +87,13 @@ const PaymentDetails = () => {
               <Text style={styles.detail}>Método de Pagamento: {payment.payment_type}</Text>
             )}
             <Text style={styles.detail}>
-              Data de Vencimento: {format(new Date(payment.due_date), 'dd/MM/yyyy')}
+              Data de Vencimento:{' '}
+              {convertDateInDDMMYYYY(parse(payment.due_date, 'yyyy-MM-dd', new Date()))}
             </Text>
             {payment.payment_date && (
               <Text style={styles.detail}>
-                Data de Pagamento: {format(new Date(payment.payment_date), 'dd/MM/yyyy')}
+                Data de Pagamento:{' '}
+                {convertDateInDDMMYYYY(parse(payment.payment_date, 'yyyy-MM-dd', new Date()))}
               </Text>
             )}
             <Chip

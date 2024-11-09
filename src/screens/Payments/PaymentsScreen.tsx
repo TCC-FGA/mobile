@@ -5,8 +5,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { getPaymentInstallments } from '~/api/payments';
-import { format, set } from 'date-fns';
-import { parseFloatBR } from '~/helpers/convert_data';
+import { format, parse, set } from 'date-fns';
+import { convertDateInDDMMYYYY, parseFloatBR } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   contractId: number;
@@ -51,7 +51,7 @@ const PaymentsScreen = () => {
             Parcela {item.id} de {payments.length}
           </Text>
           <Text style={styles.dueDate}>
-            Vence em {format(new Date(item.due_date), 'dd/MM/yyyy')}
+            Vence em {convertDateInDDMMYYYY(parse(item.due_date, 'yyyy-MM-dd', new Date()))}
           </Text>
         </View>
         <View style={styles.paymentDetails}>

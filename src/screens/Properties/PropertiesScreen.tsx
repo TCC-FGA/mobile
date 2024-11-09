@@ -26,6 +26,7 @@ import { useNavigation } from '@react-navigation/native';
 import { theme } from '~/core/theme';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { api } from '~/services/api';
+import CustomAppBar from '~/components/AppBar/AppBar';
 
 const PropertiesScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -131,6 +132,7 @@ const PropertiesScreen = () => {
                     <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
                   )}
                   onPress={() => openMenu(item.id)}
+                  style={{ marginRight: -10, marginTop: -45 }}
                 />
               }>
               {/* Itens do Menu */}
@@ -227,9 +229,7 @@ const PropertiesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header>
-        <Appbar.Content title="Propriedades" color={theme.colors.primary} />
-      </Appbar.Header>
+      <CustomAppBar title="Propriedades" />
       <Searchbar
         placeholder="Buscar propriedades"
         onChangeText={onChangeSearch}
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: 14,
     right: 0,
     bottom: 0,
   },

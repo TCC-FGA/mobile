@@ -18,6 +18,7 @@ import { getTemplates } from '~/api/templates';
 import { RentDTO } from '~/dtos/RentDTO';
 import { TemplateDTO } from '~/dtos/TemplateDTO';
 import { set } from 'date-fns';
+import { capitalizeWords } from '~/helpers/utils';
 
 const ContractsScreen = () => {
   const [expandedContract, setExpandedContract] = useState<string | null>(null);
@@ -73,7 +74,29 @@ const ContractsScreen = () => {
           <View style={styles.info}>
             <Text style={styles.title}>{item.template_name}</Text>
             {expandedContract === item.id.toString() && (
-              <Text style={styles.details}>{item.description}</Text>
+              <>
+                <Text style={styles.details}>{item.description || 'N/A'}</Text>
+                <Text style={styles.details}>
+                  <Text style={styles.bold}>Tipo: </Text>
+                  {capitalizeWords(item.contract_type)}
+                </Text>
+                <Text style={styles.details}>
+                  <Text style={styles.bold}>Garagem: </Text>
+                  {item.garage ? 'Sim' : 'Não'}
+                </Text>
+                <Text style={styles.details}>
+                  <Text style={styles.bold}>Garantia: </Text>
+                  {capitalizeWords(item.warranty)}
+                </Text>
+                <Text style={styles.details}>
+                  <Text style={styles.bold}>Animais: </Text>
+                  {item.animals ? 'Sim' : 'Não'}
+                </Text>
+                <Text style={styles.details}>
+                  <Text style={styles.bold}>Subarrendamento: </Text>
+                  {item.sublease ? 'Sim' : 'Não'}
+                </Text>
+              </>
             )}
           </View>
           <IconButton
@@ -85,6 +108,7 @@ const ContractsScreen = () => {
               />
             )}
             onPress={() => toggleExpand(item.id.toString())}
+            style={styles.iconButton}
           />
         </View>
         <Divider className="mt-0 mb-0 p-0" />
@@ -142,11 +166,13 @@ const ContractsScreen = () => {
               contentContainerStyle={styles.list}
               onRefresh={fetchTemplates}
               refreshing={isLoadingTemplates}
-              ListEmptyComponent={() => (
-                <View style={{ alignItems: 'center', marginTop: 16 }}>
-                  <Text style={{ fontSize: 16, color: '#666' }}>Nenhum template encontrado.</Text>
-                </View>
-              )}
+              ListEmptyComponent={() =>
+                !isLoadingTemplates && (
+                  <View style={{ alignItems: 'center', marginTop: 16 }}>
+                    <Text style={{ fontSize: 16, color: '#666' }}>Nenhum template encontrado.</Text>
+                  </View>
+                )
+              }
             />
             <FAB
               icon="file-plus"
@@ -227,6 +253,14 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
     elevation: 2,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  iconButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
 });
 

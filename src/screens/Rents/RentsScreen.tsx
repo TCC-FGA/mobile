@@ -7,6 +7,7 @@ import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getRents } from '~/api/rents';
 import { RentDTO } from '~/dtos/RentDTO';
 import { parseFloatBR } from '~/helpers/convert_data';
+import CustomAppBar from '~/components/AppBar/AppBar';
 
 const getInitials = (name: string) => {
   const names = name.split(' ');
@@ -82,10 +83,7 @@ const RentsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Aluguéis" />
-      </Appbar.Header>
+      <CustomAppBar title="Aluguéis" />
       <FlatList
         data={rents}
         renderItem={renderItem}

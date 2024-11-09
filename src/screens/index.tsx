@@ -19,3 +19,5 @@ export { default as RentsDetails } from './Rents/RentsDetails';
 export { default as PaymentsScreen } from './Payments/PaymentsScreen';
 export { default as PaymentsDetails } from './Payments/PaymentsDetails';
 export { default as ReceiptScreen } from './Payments/ReceiptScreen';
+export { default as SignatureScreen } from './Payments/SignatureScreen';
+export { default as InspectionsScreen } from './Inspection/InspectionsScreen';

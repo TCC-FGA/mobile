@@ -38,6 +38,7 @@ const RentsMainCreation = () => {
   const [currentSection, setCurrentSection] = useState<number>(1);
   const [loadingHouses, setLoadingHouses] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [depositValue, setDepositValue] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,6 +111,7 @@ const RentsMainCreation = () => {
       due_date: Number(dueDay),
       start_date: formatDate(startDate),
       end_date: formatDate(endDate),
+      deposit_value: depositValue ? Number(depositValue) : null,
     };
 
     try {
@@ -302,13 +304,35 @@ const RentsMainCreation = () => {
               ))}
             </Picker>
           </View>
-          {/* <TextInput
-            label="Valor do Aluguel"
-            value={rentValue}
-            onChangeText={setRentValue}
-            keyboardType="numeric"
-            style={styles.input}
-          /> */}
+          {selectedTemplate &&
+            templates.find((template) => template.id.toString() === selectedTemplate)?.warranty ===
+              'caução' && (
+              <TextInputMask
+                type="money"
+                value={depositValue}
+                onChangeText={(text) => {
+                  const numericValue = text.replace(/[^0-9.,]/g, '').replace(',', '.');
+                  setDepositValue(numericValue);
+                }}
+                style={styles.input}
+                keyboardType="numeric"
+                customTextInput={TextInput}
+                customTextInputProps={{
+                  left: (
+                    <TextInput.Icon
+                      icon={({ size, color }) => (
+                        <MaterialCommunityIcons name="currency-usd" size={size} color={color} />
+                      )}
+                    />
+                  ),
+                  label: (
+                    <Text>
+                      Valor da Caução <Text style={{ color: 'red' }}>*</Text>
+                    </Text>
+                  ),
+                }}
+              />
+            )}
           <TextInputMask
             type="money"
             value={rentValue}
@@ -371,13 +395,6 @@ const RentsMainCreation = () => {
             }}
           />
           {error && <Text style={styles.errorText}>{error}</Text>}
-          {/* <TextInput
-            label="Dia de Vencimento"
-            value={dueDay}
-            onChangeText={setDueDay}
-            keyboardType="numeric"
-            style={styles.input}
-          /> */}
           <Button
             onPress={() => setShowStartDatePicker(true)}
             mode="outlined"

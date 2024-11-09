@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet } from 'react-native';
 import Background from '../components/Background';
 import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
-import AppBar from '~/components/AppBar/AppBar';
+import CustomAppBar from '~/components/AppBar/AppBar';
 import FinancialControl from '~/components/FinancialControl/FinancialControl';
 import PropertyStatus from '~/components/PropertyStatus/PropertyStatus';
 import YourProperties from '~/components/YourProperties/YourProperties';
@@ -18,7 +18,7 @@ const Dashboard = ({ navigation }: Props) => {
 
   return (
     <>
-      <AppBar />
+      <CustomAppBar title="Dashboard" />
       <ScrollView>
         <Background>
           <FinancialControl />

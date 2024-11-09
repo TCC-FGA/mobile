@@ -22,6 +22,8 @@ import {
   PaymentsDetails,
   ReceiptScreen,
   RentsMainCreation,
+  SignatureScreen,
+  InspectionsScreen,
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
@@ -55,7 +57,12 @@ type AppRoutesType = {
     params?: { rentId?: number | null };
   };
   PaymentsStack: {
-    screen: 'PaymentsScreen' | 'PaymentsDetails' | 'ReceiptScreen';
+    screen:
+      | 'PaymentsScreen'
+      | 'PaymentsDetails'
+      | 'ReceiptScreen'
+      | 'SignatureScreen'
+      | 'InspectionsScreen';
     params?: { contractId?: number | null; paymentId?: number | null; rentId?: number | null };
   };
   AccountSettingsScreen: undefined;
@@ -264,6 +271,16 @@ export function PaymentsStack() {
         name="ReceiptScreen"
         component={ReceiptScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignatureScreen"
+        component={SignatureScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="InspectionsScreen"
+        component={InspectionsScreen}
+        options={{ headerTitle: 'Vistorias' }}
       />
     </Stack.Navigator>
   );
