@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { set } from 'date-fns';
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Image } from 'react-native';
 import { ActivityIndicator, Appbar, Button, Modal, Portal, Text } from 'react-native-paper';
 import Signature, { SignatureViewRef } from 'react-native-signature-canvas';
 import { theme } from '~/core/theme';
@@ -24,13 +24,15 @@ const SignatureScreen = () => {
   const getUserSignature = async () => {
     setLoading(true);
     try {
-      const user: UserDTO = await api.get('/users/me');
+      const response = await api.get('/users/me');
+      const user: UserDTO = response.data;
       if (user.hashed_signature) {
         setSignature(user.hashed_signature);
         setVisible(false);
       }
     } catch (error) {
-      console.error('Erro ao buscar a assinatura do usuário:', error);
+      Alert.alert('Erro', 'Não foi possível carregar a assinatura do usuário.');
+      console.log('Erro ao buscar a assinatura do usuário:', error);
     } finally {
       setLoading(false);
     }
@@ -40,7 +42,6 @@ const SignatureScreen = () => {
     console.log('Assinatura capturada:', signature);
     setSignature(signature);
     try {
-      console.log('aqui');
       const response = await api.patch('/users/me', { hashed_signature: signature });
       Alert.alert('Sucesso', 'Assinatura salva com sucesso!');
       console.log('Assinatura salva com sucesso:', response.data);
@@ -88,6 +89,17 @@ const SignatureScreen = () => {
               </Button>
             </Modal>
           </Portal>
+          {/* {signature ? (
+            <>
+              <Text style={{ marginBottom: 16 }}>Assinatura salva:</Text>
+              <Image
+                resizeMode={'contain'}
+                style={{ width: 335, height: 50 }}
+                source={{ uri: signature }}
+              />
+            </>
+          ) : null} */}
+          <Text variant="titleLarge">Sua assinatura:</Text>
           <Signature
             ref={signatureRef}
             onOK={handleSignature}
@@ -95,11 +107,12 @@ const SignatureScreen = () => {
             descriptionText="Assine aqui"
             clearText="Limpar"
             confirmText="Salvar"
-            webStyle=".m-signature-pad--footer { display: none; }" // Oculta botões internos
+            webStyle=".m-signature-pad--footer { display: none; }"
             autoClear
             imageType="image/png"
             dataURL={signature || ''}
             trimWhitespace
+            key={signature}
           />
           <Button
             mode="contained"
