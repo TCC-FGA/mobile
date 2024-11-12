@@ -24,6 +24,8 @@ import {
   RentsMainCreation,
   SignatureScreen,
   InspectionsScreen,
+  ExpensesScreen,
+  ExpensesDetails,
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
@@ -63,6 +65,10 @@ type AppRoutesType = {
   InspectionsStack: {
     screen: 'InspectionsScreen';
     params?: { rentId: number };
+  };
+  ExpensesStack: {
+    screen: 'ExpensesScreen' | 'ExpensesDetails';
+    params?: { houseId?: number | null; expenseId?: number | null };
   };
   AccountSettingsScreen: undefined;
 };
@@ -292,6 +298,23 @@ export function InspectionsStack() {
   );
 }
 
+export function ExpensesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ExpensesScreen"
+        component={ExpensesScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ExpensesDetails"
+        component={ExpensesDetails}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function AppRoutes() {
   return (
     <Stack.Navigator initialRouteName="AppRoutesTab" screenOptions={{ headerShown: false }}>
@@ -303,6 +326,7 @@ function AppRoutes() {
       <Stack.Screen name="RentsStack" component={RentsStack} />
       <Stack.Screen name="PaymentsStack" component={PaymentsStack} />
       <Stack.Screen name="InspectionsStack" component={InspectionsStack} />
+      <Stack.Screen name="ExpensesStack" component={ExpensesStack} />
       <Stack.Screen name="AccountSettingsScreen" component={AccountSettingsScreen} />
     </Stack.Navigator>
   );

@@ -227,6 +227,19 @@ const HousesScreen = () => {
                   <MaterialCommunityIcons name="file-document" size={size} color={color} />
                 )}
               />
+              <Menu.Item
+                onPress={() => {
+                  closeMenu();
+                  navigation.navigate('ExpensesStack', {
+                    screen: 'ExpensesScreen',
+                    params: { houseId: item.id },
+                  });
+                }}
+                title="Gerir Despesas"
+                leadingIcon={({ size, color }) => (
+                  <MaterialCommunityIcons name="cash" size={size} color={color} />
+                )}
+              />
             </Menu>
           </View>
         </Card.Content>

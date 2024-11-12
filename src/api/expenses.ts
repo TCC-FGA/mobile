@@ -9,6 +9,9 @@ export const getExpensesByHouseId = async (houseId: number): Promise<ExpenseDTO[
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        return [];
+      }
       console.error(`Erro ao obter despesas da casa com ID ${houseId}:`, error.response?.data);
     }
     throw error;
@@ -54,6 +57,19 @@ export const deleteExpense = async (expenseId: number): Promise<void> => {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(`Erro ao deletar despesa com ID ${expenseId}:`, error.response?.data);
+    }
+    throw error;
+  }
+};
+
+export const getExpenseById = async (expenseId: number, houseId: number): Promise<ExpenseDTO> => {
+  try {
+    const all_expen = await getExpensesByHouseId(houseId);
+    const expense = all_expen.find((exp) => exp.id === expenseId);
+    return expense!;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(`Erro ao obter despesa com ID ${expenseId}:`, error.response?.data);
     }
     throw error;
   }

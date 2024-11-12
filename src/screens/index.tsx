@@ -21,3 +21,5 @@ export { default as PaymentsDetails } from './Payments/PaymentsDetails';
 export { default as ReceiptScreen } from './Payments/ReceiptScreen';
 export { default as SignatureScreen } from './Payments/SignatureScreen';
 export { default as InspectionsScreen } from './Inspection/InspectionsScreen';
+export { default as ExpensesScreen } from './Expenses/ExpensesScreen';
+export { default as ExpensesDetails } from './Expenses/ExpensesDetails';
