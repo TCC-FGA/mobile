@@ -57,13 +57,12 @@ type AppRoutesType = {
     params?: { rentId?: number | null };
   };
   PaymentsStack: {
-    screen:
-      | 'PaymentsScreen'
-      | 'PaymentsDetails'
-      | 'ReceiptScreen'
-      | 'SignatureScreen'
-      | 'InspectionsScreen';
+    screen: 'PaymentsScreen' | 'PaymentsDetails' | 'ReceiptScreen' | 'SignatureScreen';
     params?: { contractId?: number | null; paymentId?: number | null; rentId?: number | null };
+  };
+  InspectionsStack: {
+    screen: 'InspectionsScreen';
+    params?: { rentId: number };
   };
   AccountSettingsScreen: undefined;
 };
@@ -277,6 +276,13 @@ export function PaymentsStack() {
         component={SignatureScreen}
         options={{ headerShown: false }}
       />
+    </Stack.Navigator>
+  );
+}
+
+export function InspectionsStack() {
+  return (
+    <Stack.Navigator>
       <Stack.Screen
         name="InspectionsScreen"
         component={InspectionsScreen}
@@ -296,6 +302,7 @@ function AppRoutes() {
       <Stack.Screen name="ContractsStack" component={ContractsStack} />
       <Stack.Screen name="RentsStack" component={RentsStack} />
       <Stack.Screen name="PaymentsStack" component={PaymentsStack} />
+      <Stack.Screen name="InspectionsStack" component={InspectionsStack} />
       <Stack.Screen name="AccountSettingsScreen" component={AccountSettingsScreen} />
     </Stack.Navigator>
   );

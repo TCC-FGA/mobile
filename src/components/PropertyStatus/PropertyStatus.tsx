@@ -1,12 +1,18 @@
+import React from 'react';
 import { theme } from '~/core/theme';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CardStatus from '../CardStatus';
+import { DashboardHousesAvailabilityDTO, DashboardTotalsDTO } from '~/api/dashboard';
 
 const widthScreen = Dimensions.get('screen').width;
 
-function PropertyStatus() {
+type PropertyStatusProps = {
+  housesAvailability: DashboardHousesAvailabilityDTO | null;
+};
+
+const PropertyStatus: React.FC<PropertyStatusProps> = ({ housesAvailability }) => {
   return (
     <View style={styles.containerStatus}>
       <View style={styles.headerWrapper}>
@@ -30,24 +36,25 @@ function PropertyStatus() {
       </View>
       <View style={styles.cardList}>
         <CardStatus
-          statusValue={10}
+          statusValue={housesAvailability?.total_available || 0}
           label="Disponíveis"
           icon={() => <MaterialCommunityIcons name="home" size={28} color="#65A30D" />}
         />
         <CardStatus
-          statusValue={20}
+          statusValue={housesAvailability?.total_rented || 0}
           label="Alugados"
           icon={() => <MaterialCommunityIcons name="home-account" size={28} color="#FBBF24" />}
         />
         <CardStatus
-          statusValue={5}
+          statusValue={housesAvailability?.total_maintenance || 0}
           label="Manutenção"
           icon={() => <MaterialCommunityIcons name="home-alert" size={28} color="#DC2626" />}
         />
       </View>
     </View>
   );
-}
+};
+
 const styles = StyleSheet.create({
   containerStatus: {
     marginVertical: 8,

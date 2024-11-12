@@ -1,0 +1,189 @@
+import React from 'react';
+import { View, StyleSheet, Dimensions, ScrollView, Text } from 'react-native';
+import { IconButton } from 'react-native-paper';
+import { BarChart } from 'react-native-chart-kit';
+import { DashboardCashFlowDTO, DashboardTotalsDTO } from '~/api/dashboard';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { theme } from '~/core/theme';
+
+const screenWidth = Dimensions.get('window').width;
+
+type DashboardTotalsProps = {
+  cashFlow: DashboardCashFlowDTO | null;
+  housesAvailability: DashboardTotalsDTO | null;
+};
+
+const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvailability }) => {
+  if (!cashFlow || !housesAvailability) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
+
+  const barChartData = {
+    labels: ['Receitas', 'Despesas', 'Lucro'],
+    datasets: [
+      {
+        data: [
+          cashFlow.total_monthly_income,
+          cashFlow.total_monthly_expenses,
+          cashFlow.total_profit_monthly,
+        ],
+        colors: [
+          (opacity = 1) => `rgba(255, 99, 132, ${opacity})`,
+          (opacity = 1) => `rgba(54, 162, 235, ${opacity})`,
+          (opacity = 1) => `rgba(75, 192, 192, ${opacity})`,
+        ],
+      },
+    ],
+  };
+
+  const horizontalBarChartData = {
+    labels: ['Casas', 'Propriedades', 'Inquilinos'],
+    datasets: [
+      {
+        data: [
+          housesAvailability.total_houses,
+          housesAvailability.total_properties,
+          housesAvailability.total_tenants,
+        ],
+        colors: [
+          (opacity = 1) => `rgba(255, 99, 132, ${opacity})`,
+          (opacity = 1) => `rgba(54, 162, 235, ${opacity})`,
+          (opacity = 1) => `rgba(75, 192, 192, ${opacity})`,
+        ],
+      },
+    ],
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.headerWrapper}>
+        <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
+          Fluxo de Caixa
+        </Text>
+        <IconButton
+          onPress={() => {
+            alert('Visão geral do controle financeiro');
+          }}
+          icon={() => {
+            return (
+              <MaterialCommunityIcons
+                size={24}
+                name="chevron-right"
+                color={theme.colors.onSurfaceVariant}
+              />
+            );
+          }}
+        />
+      </View>
+      <BarChart
+        data={barChartData}
+        withCustomBarColorFromData
+        width={screenWidth - 32}
+        height={220}
+        yAxisLabel="R$"
+        yAxisSuffix=""
+        chartConfig={{
+          backgroundGradientFrom: theme.colors.primary,
+          backgroundGradientFromOpacity: 0.1,
+          backgroundGradientToOpacity: 0,
+          decimalPlaces: 2,
+          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          style: {
+            borderRadius: 16,
+          },
+          propsForDots: {
+            r: '6',
+            strokeWidth: '2',
+            stroke: '#ffa726',
+          },
+          propsForLabels: {
+            fontWeight: 'bold',
+          },
+        }}
+        style={{
+          marginVertical: 8,
+          borderRadius: 16,
+        }}
+      />
+
+      <View style={styles.headerWrapper}>
+        <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
+          Resumo Geral
+        </Text>
+        <IconButton
+          onPress={() => {
+            alert('Visão geral do controle financeiro');
+          }}
+          icon={() => {
+            return (
+              <MaterialCommunityIcons
+                size={24}
+                name="chevron-right"
+                color={theme.colors.onSurfaceVariant}
+              />
+            );
+          }}
+        />
+      </View>
+      <BarChart
+        data={horizontalBarChartData}
+        width={screenWidth - 32}
+        height={220}
+        yAxisLabel=""
+        yAxisSuffix=""
+        chartConfig={{
+          backgroundGradientFrom: theme.colors.primary,
+          backgroundGradientFromOpacity: 0.1,
+          backgroundGradientToOpacity: 0,
+          decimalPlaces: 0,
+          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          style: {
+            borderRadius: 16,
+          },
+          propsForLabels: {
+            fontWeight: 'bold',
+          },
+        }}
+        style={{
+          marginVertical: 8,
+          borderRadius: 16,
+        }}
+        fromZero
+        showValuesOnTopOfBars
+        withCustomBarColorFromData
+        withInnerLines={false}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+});
+
+export default DashboardTotals;

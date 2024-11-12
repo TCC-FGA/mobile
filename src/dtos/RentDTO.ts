@@ -14,7 +14,7 @@ export type RentDTO = {
   template_id: number;
   tenant: TenantDTO;
   user_id: string;
-  signed_pdfExpand?: string | null;
+  signed_pdf?: string | null;
 };
 
 export type RentCreateDTO = {

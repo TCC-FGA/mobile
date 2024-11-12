@@ -88,3 +88,21 @@ export const updatePdfRent = async (contractId: number, signedPdf: FormData): Pr
     throw error;
   }
 };
+
+// Função para obter um PDF pelo ID do contrato
+export const getPdfByContractId = async (contractId: number): Promise<Blob> => {
+  try {
+    const response = await api.post(`/contracts/${contractId}/pdf`, null, {
+      responseType: 'blob',
+    });
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error(
+        `Erro ao obter PDF para o contrato com ID ${contractId}:`,
+        error.response?.data
+      );
+    }
+    throw error;
+  }
+};

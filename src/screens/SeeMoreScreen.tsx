@@ -99,7 +99,7 @@ const SeeMoreScreen = () => {
               />
 
               {/* Item Laudo de Vistorias */}
-              <List.Item
+              {/* <List.Item
                 title="Laudo de Vistorias"
                 left={() => (
                   <MaterialCommunityIcons
@@ -112,7 +112,7 @@ const SeeMoreScreen = () => {
                   navigation.navigate('PaymentsStack', { screen: 'InspectionsScreen' })
                 }
                 style={styles.listItem}
-              />
+              /> */}
 
               {/* Divider */}
               <Divider style={styles.divider} />

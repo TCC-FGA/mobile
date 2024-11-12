@@ -122,13 +122,13 @@ const ContractsScreen = () => {
         <MaterialCommunityIcons name="file-pdf-box" size={48} color={theme.colors.primary} />
         <View style={styles.info}>
           <Text style={styles.title}>{item.house.nickname}</Text>
-          <Text style={styles.details}>{item.signed_pdfExpand}</Text>
+          <Text style={styles.details}>{item.signed_pdf}</Text>
         </View>
         <IconButton
           icon={({ size, color }) => (
             <MaterialCommunityIcons name="download" size={size} color={color} />
           )}
-          onPress={() => console.log('Download link:', item.signed_pdfExpand)}
+          onPress={() => console.log('Download link:', item.signed_pdf)}
         />
       </View>
     </Surface>

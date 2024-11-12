@@ -16,6 +16,8 @@ import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getTenants } from '~/api/tenants';
 import { TenantDTO } from '~/dtos/TenantDTO';
+import GuarantorComponent from '~/components/guarantor/GuarantorComponent';
+import { set } from 'date-fns';
 
 const getInitials = (name: string) => {
   const names = name.split(' ');
@@ -30,6 +32,8 @@ const TenantScreen = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [itemTenant, setTenantItem] = useState<TenantDTO>();
 
   const fetchTenants = async () => {
     setRefreshing(true);
@@ -75,82 +79,93 @@ const TenantScreen = () => {
     });
   };
 
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
   const renderItem = ({ item }: { item: TenantDTO }) => (
-    <TouchableOpacity activeOpacity={0.8}>
-      <Card style={styles.card}>
-        <Card.Content style={styles.cardContent}>
-          <View style={styles.tenantInfo}>
-            {/* Avatar com as iniciais */}
-            <Avatar.Text size={48} label={getInitials(item.name)} style={styles.avatar} />
+    <>
+      <TouchableOpacity activeOpacity={0.8}>
+        <Card style={styles.card}>
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.tenantInfo}>
+              {/* Avatar com as iniciais */}
+              <Avatar.Text size={48} label={getInitials(item.name)} style={styles.avatar} />
 
-            {/* Informações do inquilino */}
-            <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="phone" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.contact}</Text>
+              {/* Informações do inquilino */}
+              <View style={styles.info}>
+                <Text style={styles.name}>{item.name}</Text>
+                <View style={styles.infoRow}>
+                  <MaterialCommunityIcons name="phone" size={16} color="#666" />
+                  <Text style={styles.infoText}>{item.contact}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <MaterialCommunityIcons name="email" size={16} color="#666" />
+                  <Text style={styles.infoText}>{item.email}</Text>
+                </View>
               </View>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="email" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.email}</Text>
-              </View>
-            </View>
 
-            {/* Menu de opções (ícone de três pontinhos) */}
-            <Menu
-              visible={visibleMenu === item.cpf}
-              onDismiss={closeMenu}
-              anchor={
-                <IconButton
-                  icon={({ size, color }) => (
-                    <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
-                  )}
-                  onPress={() => openMenu(item.cpf)}
+              {/* Menu de opções (ícone de três pontinhos) */}
+              <Menu
+                visible={visibleMenu === item.cpf}
+                onDismiss={closeMenu}
+                anchor={
+                  <IconButton
+                    icon={({ size, color }) => (
+                      <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
+                    )}
+                    onPress={() => openMenu(item.cpf)}
+                  />
+                }>
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    navigation.navigate('TenantsStack', {
+                      screen: 'TenantDetails',
+                      params: {
+                        tenantId: item.id,
+                      },
+                    });
+                  }}
+                  title="Editar"
+                  leadingIcon="pencil"
                 />
-              }>
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  navigation.navigate('TenantsStack', {
-                    screen: 'TenantDetails',
-                    params: {
-                      tenantId: item.id,
-                    },
-                  });
-                }}
-                title="Editar"
-                leadingIcon="pencil"
-              />
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Excluir', item.name);
-                }}
-                title="Excluir"
-                leadingIcon="delete"
-              />
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Ver contratos', item.name);
-                }}
-                title="Ver Contratos"
-                leadingIcon="file-document-outline"
-              />
-              <Divider />
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Ver Detalhes', item.name);
-                }}
-                title="Ver Detalhes"
-                leadingIcon="account-details"
-              />
-            </Menu>
-          </View>
-        </Card.Content>
-      </Card>
-    </TouchableOpacity>
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    console.log('Excluir', item.name);
+                  }}
+                  title="Excluir"
+                  leadingIcon="delete"
+                />
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    console.log('Ver contratos', item.name);
+                  }}
+                  title="Ver Contratos"
+                  leadingIcon="file-document-outline"
+                />
+                <Divider />
+                <Menu.Item
+                  onPress={() => {
+                    setTenantItem(item);
+                    closeMenu();
+                    handleOpenModal();
+                  }}
+                  title="Adicionar Fiador"
+                  leadingIcon="account-details"
+                />
+              </Menu>
+            </View>
+          </Card.Content>
+        </Card>
+      </TouchableOpacity>
+    </>
   );
 
   return (
@@ -187,13 +202,22 @@ const TenantScreen = () => {
           )
         }
       />
-      <FAB
-        icon={({ size, color }) => (
-          <MaterialCommunityIcons name="account-plus" size={size} color={color} />
-        )}
-        style={styles.fab}
-        onPress={onAddTenants}
-      />
+      {itemTenant && (
+        <GuarantorComponent
+          tenantId={itemTenant?.id}
+          visible={modalVisible}
+          onClose={handleCloseModal}
+        />
+      )}
+      {!modalVisible && (
+        <FAB
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="account-plus" size={size} color={color} />
+          )}
+          style={styles.fab}
+          onPress={onAddTenants}
+        />
+      )}
     </SafeAreaView>
   );
 };

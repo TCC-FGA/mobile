@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { ScrollView, View, Alert, StyleSheet } from 'react-native';
+import { ScrollView, View, Alert, StyleSheet, Linking } from 'react-native';
 import {
   TextInput,
   Button,
@@ -13,12 +13,16 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { theme } from '~/core/theme';
 import { RentDTO } from '~/dtos/RentDTO';
-import { getRentById, updateRent, updatePdfRent } from '~/api/rents';
+import { getRentById, updateRent, updatePdfRent, getPdfByContractId } from '~/api/rents';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { createPaymentInstallment, getPaymentInstallments } from '~/api/payments';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { convertDateInDDMMYYYY, parseFloatBR } from '~/helpers/convert_data';
-import { parse } from 'date-fns';
+import { parse, set } from 'date-fns';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { getInspectionByContractId, submitSignedInspection } from '~/api/inspections';
+import { ResponseInspectionDTO } from '~/dtos/InspectionDTO';
 
 type RouteParamsProps = {
   rentId?: number;
@@ -32,6 +36,7 @@ const RentsDetails = () => {
   const [hasPayments, setPayments] = useState<PaymentDTO[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPage, setIsLoadingPage] = useState(false);
+  const [inspection, setInspection] = useState<ResponseInspectionDTO | null>(null);
 
   useEffect(() => {
     if (rentId) {
@@ -40,8 +45,10 @@ const RentsDetails = () => {
         try {
           const rentData = await getRentById(rentId);
           const hasPayments = await getPaymentInstallments(rentId);
+          const inspectionData = await getInspectionByContractId(rentId);
           setPayments(hasPayments);
           setRent(rentData);
+          setInspection(inspectionData);
           navigation.setOptions({ title: 'Detalhes do Aluguel' });
         } catch (error) {
           Alert.alert('Erro', 'Não foi possível carregar os detalhes do aluguel.');
@@ -78,20 +85,49 @@ const RentsDetails = () => {
     }
   };
 
-  const handleSave = async () => {
-    if (!rent) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
-      return;
-    }
+  const openPdfNotSigned = async () => {
+    if (!rent) return;
 
     try {
-      if (rentId) {
-        await updateRent(rentId, rent);
-        Alert.alert('Sucesso', 'Aluguel atualizado com sucesso!');
+      const pdfBlob = await getPdfByContractId(rent.id);
+      const pdfBase64 = await pdfBlob.text();
+      const pdfUri = `${FileSystem.documentDirectory}contract_${rent.id}.pdf`;
+
+      await FileSystem.writeAsStringAsync(pdfUri, pdfBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(pdfUri);
+      } else {
+        Alert.alert('Erro', 'Não foi possível abrir o PDF.');
       }
-      navigation.goBack();
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível salvar o aluguel.');
+      Alert.alert('Erro', 'Não foi possível obter o PDF.');
+      console.error('Erro ao obter o PDF:', error);
+    }
+  };
+
+  const handleUploadInspection = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+      });
+
+      if (result.assets && rent && inspection) {
+        const formData = new FormData();
+        formData.append('inspection_pdf', {
+          uri: result.assets[0].uri,
+          name: 'signed_inspection.pdf',
+          type: 'application/pdf',
+        } as any);
+
+        await submitSignedInspection(inspection.id, formData);
+        Alert.alert('Sucesso', 'Laudo de vistoria assinado enviado com sucesso!');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível anexar o laudo de vistoria.');
+      console.error('Erro ao anexar o laudo de vistoria:', error);
     }
   };
 
@@ -168,6 +204,37 @@ const RentsDetails = () => {
                       Nome do Inquilino: {rent.tenant.name}
                     </Text>
                   </View>
+                  {rent.signed_pdf && (
+                    <View style={styles.detailContainer}>
+                      <MaterialCommunityIcons
+                        name="file-pdf-box"
+                        size={24}
+                        color={theme.colors.primary}
+                      />
+                      <Text
+                        variant="titleSmall"
+                        style={[styles.detail, { color: theme.colors.primary }]}
+                        onPress={() => Linking.openURL(rent.signed_pdf || '')}>
+                        Contrato Assinado: Clique aqui para abrir
+                      </Text>
+                    </View>
+                  )}
+                  {inspection?.pdf_inspection && !inspection.signed_pdf && (
+                    <View style={styles.detailContainer}>
+                      <MaterialCommunityIcons
+                        name="file-pdf-box"
+                        size={24}
+                        color={theme.colors.primary}
+                      />
+                      <Text
+                        variant="titleSmall"
+                        style={[styles.detail, { color: theme.colors.primary }]}
+                        onPress={() => Linking.openURL(inspection.pdf_inspection || '')}>
+                        Laudo de Vistoria: Clique aqui para abrir
+                      </Text>
+                    </View>
+                  )}
+                  <Button onPress={openPdfNotSigned}>Ver contrato</Button>
                 </View>
               </Surface>
             )}
@@ -220,14 +287,47 @@ const RentsDetails = () => {
                 {isLoading ? 'Gerando Parcelas' : 'Gerar Parcelas'}
               </Button>
             )}
-            <Button
-              mode="contained"
-              onPress={handleUploadContract}
-              icon={() => <MaterialCommunityIcons name="upload" size={20} color="#fff" />}
-              contentStyle={{ paddingHorizontal: 16 }}
-              style={styles.button}>
-              Anexar Contrato Assinado
-            </Button>
+            {!rent?.signed_pdf && (
+              <Button
+                mode="contained"
+                onPress={handleUploadContract}
+                icon={() => <MaterialCommunityIcons name="upload" size={20} color="#fff" />}
+                contentStyle={{ paddingHorizontal: 16 }}
+                style={styles.button}>
+                Anexar Contrato Assinado
+              </Button>
+            )}
+            {!inspection?.signed_pdf && inspection?.pdf_inspection && (
+              <Button
+                mode="contained"
+                onPress={handleUploadInspection}
+                icon={() => <MaterialCommunityIcons name="upload" size={20} color="#fff" />}
+                contentStyle={{ paddingHorizontal: 16 }}
+                style={styles.button}>
+                Anexar Laudo de vistoria Assinado
+              </Button>
+            )}
+            {!inspection?.pdf_inspection && rent?.id && (
+              <Button
+                mode="outlined"
+                onPress={() =>
+                  navigation.navigate('InspectionsStack', {
+                    screen: 'InspectionsScreen',
+                    params: { rentId: rent?.id },
+                  })
+                }
+                icon={() => (
+                  <MaterialCommunityIcons
+                    name="file-document-outline"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
+                )}
+                contentStyle={{ paddingHorizontal: 16 }}
+                style={styles.button}>
+                Gerar Laudo de Vistoria
+              </Button>
+            )}
           </View>
         </>
       )}

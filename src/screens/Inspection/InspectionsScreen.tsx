@@ -16,6 +16,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { InspectionDTO } from '~/dtos/InspectionDTO';
 import { createInspection } from '~/api/inspections';
 import { formatDate } from '~/helpers/convert_data';
+import { useRoute } from '@react-navigation/native';
 
 const sections = [
   'Pintura',
@@ -30,11 +31,17 @@ const sections = [
   'Chaves',
 ];
 
+type RouteParamsProps = {
+  rentId: number;
+};
+
 const InspectionScreen: React.FC = () => {
+  const route = useRoute();
+  const { rentId } = route.params as RouteParamsProps;
   const [currentSection, setCurrentSection] = useState(0);
   const [loading, setLoading] = useState(false);
   const [inspectionData, setInspectionData] = useState<InspectionDTO>({
-    contract_id: 0,
+    contract_id: rentId,
     data_vistoria: formatDate(new Date()),
     estado_pintura: 'Nova',
     tipo_tinta: 'acrílica',
