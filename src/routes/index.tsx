@@ -3,6 +3,7 @@ import React from 'react';
 import AppRoutes from './app.routes';
 import AuthRoutes from './auth.routes';
 import { useAuth } from '~/hooks/useAuth';
+import { setUserEmail, tagUserCreate } from '~/services/notifications';
 
 const MyTheme = {
   ...DefaultTheme,
@@ -19,6 +20,10 @@ const MyTheme = {
 
 function AppNavigator() {
   const { user } = useAuth();
+  if (user && user.user_id) {
+    tagUserCreate(user.user_id);
+    setUserEmail(user.email);
+  }
 
   return (
     <NavigationContainer theme={MyTheme}>

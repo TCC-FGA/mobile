@@ -64,9 +64,12 @@ const AccountSettingsScreen = () => {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Minha Conta" />
+        <Appbar.Content
+          title={`Olá, ${user?.name || 'Usuário'}!`}
+          titleStyle={{ fontWeight: 'bold' }}
+        />
         <Appbar.Action
           icon={({ size, color }) => (
             <MaterialCommunityIcons name="logout" size={size} color={color} />
@@ -91,7 +94,6 @@ const AccountSettingsScreen = () => {
         </View> */}
 
         <View style={styles.body}>
-          <Title style={styles.title}>Olá, {user?.name || 'Usuário'}!</Title>
           <Text style={styles.infoText}>Deseja alterar sua senha?</Text>
 
           <TextInput

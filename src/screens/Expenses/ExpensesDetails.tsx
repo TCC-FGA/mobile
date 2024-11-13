@@ -8,6 +8,7 @@ import { HouseDTO } from '~/dtos/HouseDTO';
 import { ExpenseDTO } from '~/dtos/ExpenseDTO';
 import CustomPicker from '~/components/CustomPicker';
 import { TextInputMask } from 'react-native-masked-text';
+import { convertStringDateToYYYYMMDD } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   houseId?: number;
@@ -24,7 +25,7 @@ const ExpenseDetails: React.FC = () => {
   const [expenseData, setExpenseData] = useState<Partial<ExpenseDTO>>({
     expense_type: 'manutenção',
     value: 0,
-    expense_date: new Date().toISOString().split('T')[0],
+    expense_date: '01/12/2024',
     house_id: houseId || 0,
   });
   const [loading, setLoading] = useState(false);
@@ -102,6 +103,7 @@ const ExpenseDetails: React.FC = () => {
         />
         <TextInput
           label="Tipo de Despesa"
+          className="mt-4"
           value={expenseData.expense_type}
           onChangeText={(text) =>
             setExpenseData({ ...expenseData, expense_type: text as ExpenseDTO['expense_type'] })
@@ -123,10 +125,12 @@ const ExpenseDetails: React.FC = () => {
         <TextInputMask
           type="datetime"
           options={{
-            format: 'YYYY-MM-DD',
+            format: 'DD/MM/YYYY',
           }}
           value={expenseData.expense_date as string}
-          onChangeText={(text) => setExpenseData({ ...expenseData, expense_date: text })}
+          onChangeText={(text) =>
+            setExpenseData({ ...expenseData, expense_date: convertStringDateToYYYYMMDD(text) })
+          }
           style={styles.input}
           customTextInput={TextInput}
           customTextInputProps={{

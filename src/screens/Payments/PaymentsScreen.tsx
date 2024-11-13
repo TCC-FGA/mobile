@@ -68,9 +68,9 @@ const PaymentsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Pagamentos" />
+        <Appbar.Content title="Pagamentos" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
       <FlatList
         data={payments}

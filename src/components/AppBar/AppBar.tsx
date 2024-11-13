@@ -1,9 +1,11 @@
 import * as React from 'react';
-import { Appbar, Avatar } from 'react-native-paper';
-import { Platform } from 'react-native';
+import { Appbar, Avatar, Portal, Modal } from 'react-native-paper';
+import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '~/core/theme';
 import { useAuth } from '~/hooks/useAuth';
+import { AppNavigatorRoutesProps } from '~/routes/app.routes';
+import { useNavigation } from '@react-navigation/native';
 
 const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
 const modeAppBar = Platform.OS === 'ios' ? 'center-aligned' : 'small';
@@ -14,24 +16,40 @@ type AppBarProps = {
 
 const CustomAppBar: React.FC<AppBarProps> = ({ title }) => {
   const { user, signOut } = useAuth();
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const handleToggleModal = () => {
+    navigation.navigate('NotificationsScreen');
+  };
+
   return (
-    <Appbar.Header mode="center-aligned" theme={theme}>
-      <Appbar.Action
-        icon={() => (
-          <MaterialCommunityIcons size={24} name="bell" color={theme.colors.onSurfaceVariant} />
-        )}
-        onPress={() => {}}
-      />
-      <Appbar.Content title={title} />
-      <Appbar.Action
-        size={36}
-        icon={() => <Avatar.Image size={36} source={require('@assets/avatar.png')} />}
-        onPress={() => {
-          alert('Clicou no avatar');
-        }}
-      />
-    </Appbar.Header>
+    <>
+      <Appbar.Header mode="center-aligned" theme={theme}>
+        <Appbar.Action
+          icon={() => (
+            <MaterialCommunityIcons size={24} name="bell" color={theme.colors.onSurfaceVariant} />
+          )}
+          onPress={handleToggleModal}
+        />
+        <Appbar.Content title={title} titleStyle={{ fontWeight: 'bold' }} />
+        <Appbar.Action
+          size={36}
+          icon={() => <Avatar.Image size={36} source={require('@assets/avatar.png')} />}
+          onPress={() => {
+            alert('Clicou no avatar');
+          }}
+        />
+      </Appbar.Header>
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  modal: {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
+  },
+});
 
 export default CustomAppBar;

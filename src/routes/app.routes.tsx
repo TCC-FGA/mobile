@@ -26,6 +26,7 @@ import {
   InspectionsScreen,
   ExpensesScreen,
   ExpensesDetails,
+  NotificationsScreen,
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
@@ -71,6 +72,7 @@ type AppRoutesType = {
     params?: { houseId?: number | null; expenseId?: number | null };
   };
   AccountSettingsScreen: undefined;
+  NotificationsScreen: undefined;
 };
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutesType>;
@@ -328,6 +330,7 @@ function AppRoutes() {
       <Stack.Screen name="InspectionsStack" component={InspectionsStack} />
       <Stack.Screen name="ExpensesStack" component={ExpensesStack} />
       <Stack.Screen name="AccountSettingsScreen" component={AccountSettingsScreen} />
+      <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
     </Stack.Navigator>
   );
 }

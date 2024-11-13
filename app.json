@@ -7,9 +7,12 @@
     "experiments": {
       "tsconfigPaths": true
     },
-    "plugins": [],
+    "plugins": [
+      ["onesignal-expo-plugin", {
+        "mode": "development"
+      }]
+    ],
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
@@ -19,7 +22,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.victor.rayan.ealuguel"
     },
     "android": {
       "adaptiveIcon": {

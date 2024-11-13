@@ -99,7 +99,7 @@ const ExpensesScreen: React.FC = () => {
       )}
       <FAB
         style={styles.fab}
-        icon="plus"
+        icon="cash-remove"
         onPress={() =>
           navigation.navigate('ExpensesStack', { screen: 'ExpensesDetails', params: { houseId } })
         }

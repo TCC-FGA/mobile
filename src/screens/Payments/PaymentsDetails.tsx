@@ -17,6 +17,7 @@ import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { getPaymentInstallments, updatePaymentInstallment } from '~/api/payments';
 import { format, parse } from 'date-fns';
 import { convertDateInDDMMYYYY, formatDate, parseFloatBR } from '~/helpers/convert_data';
+import { capitalizeWords } from '~/helpers/utils';
 
 type RouteParamsProps = {
   paymentId: number;
@@ -84,7 +85,9 @@ const PaymentDetails = () => {
               Valor da Parcela: R${parseFloatBR(payment.installment_value)}
             </Text>
             {payment.payment_type !== 'None' && (
-              <Text style={styles.detail}>Método de Pagamento: {payment.payment_type}</Text>
+              <Text style={styles.detail}>
+                Método de Pagamento: {capitalizeWords(payment.payment_type)}
+              </Text>
             )}
             <Text style={styles.detail}>
               Data de Vencimento:{' '}
