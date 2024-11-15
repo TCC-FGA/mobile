@@ -117,7 +117,7 @@ const ReceiptScreen = () => {
               <p id="cidadeEstadoData" style="margin-top: 32px; text-align: center;">${format(new Date(), 'dd')} ${translateMonth(new Date())}.</p>
               <div style="display: flex; flex-direction: column; align-items: center; margin: 32px 0;">
                 <p style="font-size: 0.875rem; font-weight: bold; line-height: 1.25; text-align: center;">
-                  Assinatura do locatário(a)
+                  Assinatura do locador(a)
                 </p>
                 <br>
                 <div style="border-bottom: 1px solid #000; width: 200px; margin: 8px auto;">
@@ -168,9 +168,9 @@ const ReceiptScreen = () => {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Recibo de Aluguel" />
+        <Appbar.Content title="Recibo" titleStyle={{ fontWeight: 'bold' }} />
         <Appbar.Action icon="printer" onPress={handlePrint} />
         <Appbar.Action icon="share-variant" onPress={handleShare} />
         <Appbar.Action icon="file-edit" onPress={handleSignature} />
@@ -247,6 +247,7 @@ const ReceiptScreen = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: '#fff',
   },
   dashedDivider: {
     borderBottomWidth: 2,

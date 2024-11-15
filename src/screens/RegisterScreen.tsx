@@ -47,6 +47,8 @@ const RegisterScreen = () => {
   const [loading, setLoading] = useState(false);
   const [birthDatePicker, setBirthDatePicker] = useState<Date>();
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [numSections, setNumSections] = useState(0);
 
@@ -59,6 +61,7 @@ const RegisterScreen = () => {
         secureTextEntry: false,
         textContentType: 'name' as 'name',
         left: <Input.Icon icon={() => <MaterialCommunityIcons name="account" size={20} />} />,
+        right: null,
       },
       {
         label: 'CPF',
@@ -109,17 +112,33 @@ const RegisterScreen = () => {
         label: 'Senha',
         value: password,
         setValue: setPassword,
-        secureTextEntry: true,
+        secureTextEntry: !showPassword,
         textContentType: 'password' as 'password',
         left: <Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={20} />} />,
+        right: (
+          <Input.Icon
+            onPress={() => setShowPassword(!showPassword)}
+            icon={() => (
+              <MaterialCommunityIcons name={showPassword ? 'eye-off' : 'eye'} size={21} />
+            )}
+          />
+        ),
       },
       {
         label: 'Confirmar Senha',
         value: confirmPassword,
         setValue: setConfirmPassword,
-        secureTextEntry: true,
+        secureTextEntry: !showConfirmPassword,
         textContentType: 'password' as 'password',
         left: <Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={20} />} />,
+        right: (
+          <Input.Icon
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            icon={() => (
+              <MaterialCommunityIcons name={showConfirmPassword ? 'eye-off' : 'eye'} size={21} />
+            )}
+          />
+        ),
       },
     ],
   ];
@@ -208,6 +227,7 @@ const RegisterScreen = () => {
         hashed_signature: null,
         birth_date: formatDate(birthDatePicker),
         photo: '',
+        zip_code: '00000-000',
       });
       console.log(response.data);
       Alert.alert('Sucesso', `Usuário registrado com sucesso ->${response.data.user_id}`);
@@ -296,6 +316,7 @@ const RegisterScreen = () => {
             maxLength={input.label === 'CPF' || input.label === 'Telefone' ? 11 : undefined}
             autoComplete={input.label === 'Email' ? 'email' : 'off'}
             left={input.left}
+            right={input?.right}
           />
         ))}
         <View style={styles.buttonContainer}>

@@ -266,20 +266,6 @@ const PropertyDetails = () => {
             label: 'Número',
           }}
         />
-        {/* <TextInput
-          label="CEP"
-          value={newPropertie.zip_code || ''}
-          onChangeText={(text) => setNewPropertie({ ...newPropertie, zip_code: text })}
-          style={styles.input}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="mailbox" size={size} color={color} />
-              )}
-            />
-          }
-          keyboardType="numeric"
-        /> */}
         <TextInput
           label="Cidade"
           value={newPropertie.city || ''}
@@ -294,37 +280,6 @@ const PropertyDetails = () => {
           }
         />
         <View className="mb-4">
-          {/* <Text style={{ color: theme.colors.primary }} className="mb-2 text-sm">
-            Estado:
-          </Text> */}
-          {/* <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: theme.colors.surfaceVariant,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              marginBottom: 4,
-            }}> */}
-          {/* <MaterialCommunityIcons
-              name="map-marker"
-              size={24}
-              color={theme.colors.primary}
-              style={{ marginRight: 8 }}
-            /> */}
-          {/* <Picker
-              selectedValue={newPropertie.state}
-              onValueChange={(itemValue) => setNewPropertie({ ...newPropertie, state: itemValue })}
-              style={{
-                flex: 1,
-                color: theme.colors.onSurface,
-              }}>
-              <Picker.Item label="Selecione um estado" value="" />
-              {statesOfBrazil.map((state) => (
-                <Picker.Item key={state.value} label={state.label} value={state.value} />
-              ))}
-            </Picker> */}
-          {/* </View> */}
           <CustomPicker
             data={statesOfBrazil}
             selectedValue={newPropertie.state}

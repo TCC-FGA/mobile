@@ -34,7 +34,7 @@ const NotificationsModal = () => {
             kind: 1,
           },
           headers: {
-            Authorization: `Basic ${'token'}`,
+            Authorization: `Basic ${'api_key'}`,
           },
         });
 

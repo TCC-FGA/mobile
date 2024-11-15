@@ -73,11 +73,11 @@ const PaymentDetails = () => {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Detalhes do Pagamento" />
+        <Appbar.Content title="Detalhes do Pagamento" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, backgroundColor: '#fff' }}>
         {payment && (
           <Surface style={styles.surface}>
             <Text style={styles.title}>Detalhes da Parcela</Text>
@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
   detail: {
     fontSize: 14,
     marginBottom: 4,
+    fontWeight: 'bold',
   },
   chip: {
     marginTop: 8,

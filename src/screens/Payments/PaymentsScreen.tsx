@@ -7,6 +7,7 @@ import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { getPaymentInstallments } from '~/api/payments';
 import { format, parse, set } from 'date-fns';
 import { convertDateInDDMMYYYY, parseFloatBR } from '~/helpers/convert_data';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 type RouteParamsProps = {
   contractId: number;
@@ -57,7 +58,13 @@ const PaymentsScreen = () => {
         <View style={styles.paymentDetails}>
           <Text style={styles.installmentValue}>R${parseFloatBR(item.installment_value)}</Text>
           <Chip
-            icon={item.fg_paid ? 'check-circle' : 'alert-circle'}
+            icon={({ size, color }) => (
+              <MaterialCommunityIcons
+                name={item.fg_paid ? 'check-circle' : 'alert-circle'}
+                size={size}
+                color="black"
+              />
+            )}
             style={[styles.chip, item.fg_paid ? styles.chipPaid : styles.chipUnpaid]}>
             {item.fg_paid ? 'Pago' : 'Em Aberto'}
           </Chip>
@@ -94,6 +101,7 @@ const PaymentsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   list: {
     paddingHorizontal: 16,

@@ -13,6 +13,7 @@ import { Picker } from '@react-native-picker/picker';
 import { theme } from '~/core/theme';
 import { getUpdatedFields } from '~/core/utils';
 import { TextInputMask } from 'react-native-masked-text';
+import CustomPicker from '~/components/CustomPicker';
 
 type RouteParamsProps = {
   house?: {
@@ -169,38 +170,19 @@ const HouseDetails = () => {
           <Text style={{ color: theme.colors.primary }} className="mb-2 text-sm">
             {selectedProperty ? 'Propriedade vinculada:' : 'Escolha a propriedade:'}
           </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: theme.colors.surfaceVariant,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              marginBottom: 4,
-            }}>
-            <MaterialCommunityIcons
-              name="home-city"
-              size={24}
-              color={theme.colors.primary}
-              style={{ marginRight: 8 }}
+          {properties && (
+            <CustomPicker
+              data={properties.map((property) => ({
+                label: property.nickname || property.zip_code || 'Propriedade sem nome',
+                value: property.id.toString(),
+              }))}
+              selectedValue={selectedProperty ? selectedProperty.toString() : ''}
+              onValueChange={(item) => setSelectedProperty(Number(item.value))}
+              title={selectedProperty ? 'Propriedade vinculada:' : 'Escolha a propriedade:'}
+              placeholder="Selecione uma propriedade"
+              leftIcon="home-city"
             />
-            <Picker
-              selectedValue={selectedProperty}
-              onValueChange={(itemValue) => setSelectedProperty(itemValue)}
-              style={{
-                flex: 1,
-                color: theme.colors.onSurface,
-              }}>
-              <Picker.Item label="Vincular propriedade" value="" />
-              {properties?.map((property) => (
-                <Picker.Item
-                  key={property.id}
-                  label={property.nickname || property.zip_code || 'Propriedade sem nome'}
-                  value={property.id}
-                />
-              ))}
-            </Picker>
-          </View>
+          )}
         </View>
         <TextInput
           label={

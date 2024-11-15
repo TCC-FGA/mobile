@@ -24,34 +24,37 @@ const SeeMoreScreen = () => {
             <List.Section>
               {/* Item Meus alugueis */}
               <List.Item
-                title="Meus Alugueis"
+                title="Gerenciar Assinatura"
+                titleStyle={{ fontWeight: 'bold' }}
                 left={() => (
                   <MaterialCommunityIcons
-                    name="briefcase-outline"
+                    name="signature-freehand"
                     size={34}
                     color={theme.colors.primary}
                   />
                 )}
-                onPress={() => navigation.navigate('RentsStack', { screen: 'RentsScreen' })}
+                onPress={() => navigation.navigate('PaymentsStack', { screen: 'SignatureScreen' })}
                 style={styles.listItem}
               />
               {/* Item Propriedades */}
               <List.Item
-                title="Propriedades"
+                title="Notificações"
+                titleStyle={{ fontWeight: 'bold' }}
                 left={() => (
                   <MaterialCommunityIcons
-                    name="home-city-outline"
+                    name="bell-outline"
                     size={34}
                     color={theme.colors.primary}
                   />
                 )}
-                onPress={() => onNavigate('PropertiesScreen')}
+                onPress={() => navigation.navigate('AccountSettingsScreen')}
                 style={styles.listItem}
               />
 
               {/* Item Inquilinos */}
               <List.Item
                 title="Inquilinos"
+                titleStyle={{ fontWeight: 'bold' }}
                 left={() => (
                   <MaterialCommunityIcons
                     name="account-outline"
@@ -66,6 +69,7 @@ const SeeMoreScreen = () => {
               {/* Item Casas */}
               <List.Item
                 title="Casas"
+                titleStyle={{ fontWeight: 'bold' }}
                 left={() => (
                   <MaterialCommunityIcons
                     name="home-outline"
@@ -87,6 +91,7 @@ const SeeMoreScreen = () => {
               {/* Item Contratos */}
               <List.Item
                 title="Contratos"
+                titleStyle={{ fontWeight: 'bold' }}
                 left={() => (
                   <MaterialCommunityIcons
                     name="file-document-outline"
@@ -120,6 +125,7 @@ const SeeMoreScreen = () => {
               {/* Item Meu Perfil */}
               <List.Item
                 title="Meu Perfil"
+                titleStyle={{ fontWeight: 'bold' }}
                 left={() => (
                   <MaterialCommunityIcons
                     name="account-circle-outline"

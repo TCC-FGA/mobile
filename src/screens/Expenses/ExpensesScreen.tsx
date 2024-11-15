@@ -6,6 +6,9 @@ import { getExpensesByHouseId, deleteExpense } from '~/api/expenses';
 import { ExpenseDTO } from '~/dtos/ExpenseDTO';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
+import { convertDateInDDMMYYYY } from '~/helpers/convert_data';
+import { parse } from 'date-fns';
+import { capitalizeWords } from '~/helpers/utils';
 
 type RouteParamsProps = {
   houseId: number;
@@ -48,8 +51,8 @@ const ExpensesScreen: React.FC = () => {
 
   const renderExpenseItem = ({ item }: { item: ExpenseDTO }) => (
     <List.Item
-      title={`R$ ${item.value.toFixed(2)}`}
-      description={`${item.expense_type} - ${new Date(item.expense_date).toLocaleDateString()}`}
+      title={`R$ ${typeof item.value === 'number' ? item.value.toFixed(2) : item.value}`}
+      description={`${item.expense_type.toUpperCase()} - ${convertDateInDDMMYYYY(parse(item.expense_date as string, 'yyyy-MM-dd', new Date()))}`}
       left={(props) => <List.Icon {...props} icon="currency-usd" color="red" />}
       right={(props) => (
         <View style={styles.iconContainer}>

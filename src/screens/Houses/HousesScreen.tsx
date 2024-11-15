@@ -154,24 +154,33 @@ const HousesScreen = () => {
             {/* Informações da casa */}
             <View style={styles.infoContainer}>
               <Title style={styles.cardTitle}>{item.nickname}</Title>
-              <Chip
-                icon={
-                  item.status === 'vaga'
-                    ? 'check-circle'
-                    : item.status === 'alugada'
-                      ? 'home'
-                      : 'tools'
-                }
-                style={[
-                  styles.chip,
-                  item.status === 'vaga'
-                    ? styles.chipVaga
-                    : item.status === 'alugada'
-                      ? styles.chipAlugada
-                      : styles.chipReforma,
-                ]}>
-                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-              </Chip>
+              <View style={styles.chipContainer}>
+                <Chip
+                  textStyle={{ fontWeight: 'bold' }}
+                  icon={({ size, color }) => (
+                    <MaterialCommunityIcons
+                      name={
+                        item.status === 'vaga'
+                          ? 'home'
+                          : item.status === 'alugada'
+                            ? 'home'
+                            : 'tools'
+                      }
+                      size={size}
+                      color="black"
+                    />
+                  )}
+                  style={[
+                    styles.chip,
+                    item.status === 'vaga'
+                      ? styles.chipVaga
+                      : item.status === 'alugada'
+                        ? styles.chipAlugada
+                        : styles.chipReforma,
+                  ]}>
+                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                </Chip>
+              </View>
             </View>
 
             {/* Botão de Menu (três pontos) */}
@@ -183,6 +192,7 @@ const HousesScreen = () => {
                   icon={({ size, color }) => (
                     <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
                   )}
+                  style={{ marginRight: -10, marginTop: -45 }}
                   onPress={() => toggleMenu(item.id)}
                 />
               }>
@@ -206,7 +216,7 @@ const HousesScreen = () => {
                   <MaterialCommunityIcons name="delete" size={size} color={color} />
                 )}
               />
-              <Menu.Item
+              {/* <Menu.Item
                 onPress={() => {
                   closeMenu();
                   onViewTenant(item);
@@ -215,9 +225,9 @@ const HousesScreen = () => {
                 leadingIcon={({ size, color }) => (
                   <MaterialCommunityIcons name="account" size={size} color={color} />
                 )}
-              />
+              /> */}
               <Divider />
-              <Menu.Item
+              {/* <Menu.Item
                 onPress={() => {
                   closeMenu();
                   onViewContract(item);
@@ -226,7 +236,7 @@ const HousesScreen = () => {
                 leadingIcon={({ size, color }) => (
                   <MaterialCommunityIcons name="file-document" size={size} color={color} />
                 )}
-              />
+              /> */}
               <Menu.Item
                 onPress={() => {
                   closeMenu();
@@ -352,6 +362,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  chipContainer: {
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
   chip: {
     marginTop: 8,
   },
@@ -373,6 +387,11 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
 });
 

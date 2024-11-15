@@ -69,10 +69,8 @@ const RentsScreen = () => {
             </View>
 
             {/* Chip indicando se está ativo ou inativo */}
-            <Chip
-              icon="check-circle"
-              style={[styles.chip, item.active ? styles.chipActive : styles.chipInactive]}>
-              {item.active ? 'Ativo' : 'Inativo'}
+            <Chip icon="check-circle" style={[styles.chip, styles.chipActive]}>
+              Ativo
             </Chip>
           </View>
         </Card.Content>

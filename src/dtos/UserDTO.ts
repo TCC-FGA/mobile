@@ -9,4 +9,13 @@ export type UserDTO = {
   birth_date: string;
   hashed_signature: string | null;
   photo: string | null;
+  iptu: number | null;
+  street: string | null;
+  neighborhood: string | null;
+  number: string | null;
+  zip_code: string | null;
+  city: string | null;
+  state: string | null;
+  marital_status: string | null;
+  profession: string | null;
 };

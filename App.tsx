@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusBar, LogBox } from 'react-native';
+import { StatusBar, LogBox, Platform } from 'react-native';
 import { Provider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/routes';
@@ -12,8 +12,10 @@ LogBox.ignoreLogs([
   'react-native-snap-carousel: It is recommended to use at least version 0.44 of React Native with the plugin',
 ]);
 
-OneSignal.initialize('1243b543-9212-4940-84d8-70af01639081');
-OneSignal.Notifications.requestPermission(true);
+if (Platform.OS === 'android') {
+  OneSignal.initialize('1243b543-9212-4940-84d8-70af01639081');
+  OneSignal.Notifications.requestPermission(true);
+}
 
 const Main = () => (
   <Provider theme={theme}>

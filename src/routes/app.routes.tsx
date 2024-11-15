@@ -190,7 +190,13 @@ export function PropertiesStack() {
       <Stack.Screen
         name="PropertyDetails"
         component={PropertyDetails}
-        options={{ headerTitle: 'Propriedades' }}
+        options={{
+          headerTitle: 'Propriedades',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -203,7 +209,13 @@ export function HousesStack() {
       <Stack.Screen
         name="HouseDetails"
         component={HouseDetails}
-        options={{ headerTitle: 'Casas' }}
+        options={{
+          headerTitle: 'Casas',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -220,7 +232,13 @@ export function TenantsStack() {
       <Stack.Screen
         name="TenantDetails"
         component={TenantDetails}
-        options={{ headerTitle: 'Inquilinos' }}
+        options={{
+          headerTitle: 'Inquilinos',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -237,7 +255,13 @@ export function ContractsStack() {
       <Stack.Screen
         name="ContractsDetails"
         component={ContractsDetails}
-        options={{ headerTitle: 'Modelos de Contratos' }}
+        options={{
+          headerTitle: 'Modelos de Contratos',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -250,12 +274,24 @@ export function RentsStack() {
       <Stack.Screen
         name="RentsDetails"
         component={RentsDetails}
-        options={{ headerTitle: 'Aluguéis' }}
+        options={{
+          headerTitle: 'Meus Aluguéis',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
       <Stack.Screen
         name="RentsMainCreation"
         component={RentsMainCreation}
-        options={{ headerTitle: 'Novo Aluguel' }}
+        options={{
+          headerTitle: 'Novo Aluguel',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -294,7 +330,13 @@ export function InspectionsStack() {
       <Stack.Screen
         name="InspectionsScreen"
         component={InspectionsScreen}
-        options={{ headerTitle: 'Vistorias' }}
+        options={{
+          headerTitle: 'Vistorias',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );

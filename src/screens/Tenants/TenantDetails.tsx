@@ -6,7 +6,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getTenantById, createTenant, updateTenant } from '~/api/tenants';
 import { TenantDTO } from '~/dtos/TenantDTO';
-import { convertDateInDDMMYYYY } from '~/helpers/convert_data';
+import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
 import { theme } from '~/core/theme';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 
@@ -192,7 +192,7 @@ const TenantDetails = () => {
               onChange={(event, selectedDate) => {
                 const currentDate = selectedDate || new Date();
                 setShowDatePicker(Platform.OS === 'ios');
-                handleInputChange('birth_date', currentDate.toISOString());
+                handleInputChange('birth_date', formatDate(currentDate));
               }}
               accentColor={theme.colors.primary}
               textColor={theme.colors.primary}

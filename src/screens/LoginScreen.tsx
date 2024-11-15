@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '~/components/Logo';
 import { TextInput as Input } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { fi } from 'date-fns/locale';
 
 type Props = {
   navigation: Navigation;
@@ -21,6 +22,8 @@ const LoginScreen = ({ navigation }: Props) => {
   const [password, setPassword] = useState({ value: '', error: '' });
   const { signIn } = useAuth();
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -47,6 +50,7 @@ const LoginScreen = ({ navigation }: Props) => {
     }
 
     try {
+      setIsLoading(true);
       const response = await signIn(email.value, password.value);
       if (!response) {
         Alert.alert('Erro ao fazer Login', 'Senha ou e-mail incorretos.');
@@ -54,6 +58,8 @@ const LoginScreen = ({ navigation }: Props) => {
     } catch (error) {
       Alert.alert('Erro ao fazer Login', 'Senha ou e-mail incorretos.');
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,8 +97,16 @@ const LoginScreen = ({ navigation }: Props) => {
               onChangeText={(text) => setPassword({ value: text, error: '' })}
               error={!!password.error}
               errorText={password.error}
-              secureTextEntry
+              secureTextEntry={!showPassword}
               left={<Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={21} />} />}
+              right={
+                <Input.Icon
+                  onPress={() => setShowPassword(!showPassword)}
+                  icon={() => (
+                    <MaterialCommunityIcons name={showPassword ? 'eye-off' : 'eye'} size={21} />
+                  )}
+                />
+              }
             />
             <TouchableOpacity onPress={() => navigation.navigate('ForgotPasswordScreen')}>
               <Text style={styles.label}>Esqueceu sua senha?</Text>
@@ -100,7 +114,7 @@ const LoginScreen = ({ navigation }: Props) => {
           </View>
         </View>
 
-        <Button mode="contained" onPress={_onLoginPressed}>
+        <Button mode="contained" onPress={_onLoginPressed} loading={isLoading} disabled={isLoading}>
           Fazer Login
         </Button>
 

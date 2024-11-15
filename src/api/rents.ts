@@ -1,7 +1,7 @@
 import { api } from '~/services/api';
 import { RentCreateDTO, RentDTO } from '~/dtos/RentDTO';
 import axios from 'axios';
-
+import { Buffer } from 'buffer';
 // Função para obter todos os contratos (rents)
 export const getRents = async (): Promise<RentDTO[]> => {
   try {
@@ -90,12 +90,18 @@ export const updatePdfRent = async (contractId: number, signedPdf: FormData): Pr
 };
 
 // Função para obter um PDF pelo ID do contrato
-export const getPdfByContractId = async (contractId: number): Promise<Blob> => {
+export const getPdfByContractId = async (contractId: number) => {
   try {
-    const response = await api.post(`/contracts/${contractId}/pdf`, null, {
-      responseType: 'blob',
+    const url = `/contracts/${contractId}/pdf`;
+    const response = await api({
+      url,
+      method: 'POST',
+      responseType: 'arraybuffer',
+      headers: {
+        'Content-Type': 'application/pdf',
+      },
     });
-    return response.data;
+    return Buffer.from(response.data, 'binary').toString('base64');
   } catch (error) {
     if (axios.isAxiosError(error)) {
       console.error(

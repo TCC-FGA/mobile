@@ -170,7 +170,7 @@ const TenantScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         {isSearchVisible ? (
           <Searchbar
             placeholder="Pesquisar"
@@ -182,7 +182,7 @@ const TenantScreen = () => {
         ) : (
           <>
             <Appbar.BackAction onPress={() => navigation.goBack()} />
-            <Appbar.Content title="Inquilinos" />
+            <Appbar.Content title="Inquilinos" titleStyle={{ fontWeight: 'bold' }} />
           </>
         )}
         <Appbar.Action icon="magnify" onPress={toggleSearchBar} />
@@ -225,6 +225,7 @@ const TenantScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   list: {
     paddingHorizontal: 16,

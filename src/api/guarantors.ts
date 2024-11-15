@@ -3,14 +3,14 @@ import { GuarantorDTO } from '~/dtos/GuarantorDTO';
 import axios from 'axios';
 
 // Obter fiador por ID do inquilino
-export const getGuarantorByTenantId = async (tenantId: number): Promise<GuarantorDTO[]> => {
+export const getGuarantorByTenantId = async (tenantId: number): Promise<GuarantorDTO> => {
   try {
-    const response = await api.get(`/guarantor${tenantId}`);
+    const response = await api.get(`/guarantor/${tenantId}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
-        return [];
+        return {} as GuarantorDTO;
       }
     }
     throw error;

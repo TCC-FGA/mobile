@@ -17,7 +17,6 @@ import { getRents } from '~/api/rents';
 import { getTemplates } from '~/api/templates';
 import { RentDTO } from '~/dtos/RentDTO';
 import { TemplateDTO } from '~/dtos/TemplateDTO';
-import { set } from 'date-fns';
 import { capitalizeWords } from '~/helpers/utils';
 
 const ContractsScreen = () => {
@@ -116,29 +115,35 @@ const ContractsScreen = () => {
     </TouchableOpacity>
   );
 
-  const renderSignedContractItem = ({ item }: { item: RentDTO }) => (
-    <Surface style={styles.surface}>
-      <View style={styles.signedContractInfo}>
-        <MaterialCommunityIcons name="file-pdf-box" size={48} color={theme.colors.primary} />
-        <View style={styles.info}>
-          <Text style={styles.title}>{item.house.nickname}</Text>
-          <Text style={styles.details}>{item.signed_pdf}</Text>
+  const renderSignedContractItem = ({ item }: { item: RentDTO }) => {
+    if (!item.signed_pdf) {
+      return null;
+    }
+
+    return (
+      <Surface style={styles.surface}>
+        <View style={styles.signedContractInfo}>
+          <MaterialCommunityIcons name="file-pdf-box" size={48} color={theme.colors.primary} />
+          <View style={styles.info}>
+            <Text style={styles.title}>{item.house.nickname}</Text>
+            <Text style={styles.details}>{item.signed_pdf}</Text>
+          </View>
+          <IconButton
+            icon={({ size, color }) => (
+              <MaterialCommunityIcons name="download" size={size} color={color} />
+            )}
+            onPress={() => console.log('Download link:', item.signed_pdf)}
+          />
         </View>
-        <IconButton
-          icon={({ size, color }) => (
-            <MaterialCommunityIcons name="download" size={size} color={color} />
-          )}
-          onPress={() => console.log('Download link:', item.signed_pdf)}
-        />
-      </View>
-    </Surface>
-  );
+      </Surface>
+    );
+  };
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Contratos" />
+        <Appbar.Content title="Contratos" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
       <SafeAreaView style={styles.container}>
         <SegmentedButtons
@@ -215,6 +220,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: '#fff',
   },
   list: {
     paddingHorizontal: 0,

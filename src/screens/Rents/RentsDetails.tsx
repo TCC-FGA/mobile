@@ -13,7 +13,13 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { theme } from '~/core/theme';
 import { RentDTO } from '~/dtos/RentDTO';
-import { getRentById, updateRent, updatePdfRent, getPdfByContractId } from '~/api/rents';
+import {
+  getRentById,
+  updateRent,
+  updatePdfRent,
+  getPdfByContractId,
+  deleteRent,
+} from '~/api/rents';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { createPaymentInstallment, getPaymentInstallments } from '~/api/payments';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
@@ -90,22 +96,50 @@ const RentsDetails = () => {
 
     try {
       const pdfBlob = await getPdfByContractId(rent.id);
-      const pdfBase64 = await pdfBlob.text();
-      const pdfUri = `${FileSystem.documentDirectory}contract_${rent.id}.pdf`;
-
-      await FileSystem.writeAsStringAsync(pdfUri, pdfBase64, {
+      const pdfUri = `${FileSystem.documentDirectory}Contrato_Aluguel.pdf`;
+      await FileSystem.writeAsStringAsync(pdfUri, pdfBlob, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(pdfUri);
       } else {
-        Alert.alert('Erro', 'Não foi possível abrir o PDF.');
+        Alert.alert('Erro', 'A visualização do PDF não está disponível no dispositivo.');
       }
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível obter o PDF.');
       console.error('Erro ao obter o PDF:', error);
     }
+  };
+
+  const handleDeleteContract = async () => {
+    if (!rent) return;
+
+    Alert.alert(
+      'Excluir Contrato',
+      'Você tem certeza que deseja excluir este contrato?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteRent(rent.id);
+              Alert.alert('Sucesso', 'Contrato excluído com sucesso!');
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível excluir o contrato.');
+              console.error('Erro ao excluir o contrato:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleUploadInspection = async () => {
@@ -141,7 +175,16 @@ const RentsDetails = () => {
             {rent && (
               <Surface style={styles.surface}>
                 <View style={styles.detailContainer} className="mb-4 justify-center">
-                  <Text variant="headlineSmall">Detalhes do Contrato</Text>
+                  <IconButton
+                    icon="delete"
+                    iconColor={theme.colors.error}
+                    size={24}
+                    onPress={handleDeleteContract}
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={{ fontWeight: 'bold' }} variant="headlineSmall">
+                    Detalhes do Contrato
+                  </Text>
                 </View>
                 <View className="p-3 justify-center">
                   <View style={styles.detailContainer}>
@@ -152,7 +195,9 @@ const RentsDetails = () => {
                     />
                     <Text variant="titleSmall" style={styles.detail}>
                       Data de Início:{' '}
-                      {convertDateInDDMMYYYY(parse(rent.start_date, 'yyyy-MM-dd', new Date()))}
+                      <Text style={styles.detailValue}>
+                        {convertDateInDDMMYYYY(parse(rent.start_date, 'yyyy-MM-dd', new Date()))}
+                      </Text>
                     </Text>
                   </View>
                   <View style={styles.detailContainer}>
@@ -163,7 +208,9 @@ const RentsDetails = () => {
                     />
                     <Text variant="titleSmall" style={styles.detail}>
                       Data de Término:{' '}
-                      {convertDateInDDMMYYYY(parse(rent.end_date, 'yyyy-MM-dd', new Date()))}
+                      <Text style={styles.detailValue}>
+                        {convertDateInDDMMYYYY(parse(rent.end_date, 'yyyy-MM-dd', new Date()))}
+                      </Text>
                     </Text>
                   </View>
                   <View style={styles.detailContainer}>
@@ -173,7 +220,8 @@ const RentsDetails = () => {
                       color={theme.colors.primary}
                     />
                     <Text variant="titleSmall" style={styles.detail}>
-                      Valor Base: R${parseFloatBR(rent.base_value)}
+                      Valor Base:{' '}
+                      <Text style={styles.detailValue}>R${parseFloatBR(rent.base_value)}</Text>
                     </Text>
                   </View>
                   <View style={styles.detailContainer}>
@@ -183,25 +231,32 @@ const RentsDetails = () => {
                       color={theme.colors.primary}
                     />
                     <Text variant="titleSmall" style={styles.detail}>
-                      Dia de Vencimento: {rent.due_date}
+                      Dia de Vencimento: <Text style={styles.detailValue}>{rent.due_date}</Text>
                     </Text>
                   </View>
-                  <View style={styles.detailContainer}>
-                    <MaterialCommunityIcons name="percent" size={24} color={theme.colors.primary} />
-                    <Text variant="titleSmall" style={styles.detail}>
-                      Taxa de Reajuste: {rent.reajustment_rate}%
-                    </Text>
-                  </View>
+                  {rent.reajustment_rate && rent.reajustment_rate !== 'None' && (
+                    <View style={styles.detailContainer}>
+                      <MaterialCommunityIcons
+                        name="percent"
+                        size={24}
+                        color={theme.colors.primary}
+                      />
+                      <Text variant="titleSmall" style={styles.detail}>
+                        Taxa de Reajuste:{' '}
+                        <Text style={styles.detailValue}>{rent.reajustment_rate}%</Text>
+                      </Text>
+                    </View>
+                  )}
                   <View style={styles.detailContainer}>
                     <MaterialCommunityIcons name="home" size={24} color={theme.colors.primary} />
                     <Text variant="titleSmall" style={styles.detail}>
-                      Nome da Casa: {rent.house.nickname}
+                      Nome da Casa: <Text style={styles.detailValue}>{rent.house.nickname}</Text>
                     </Text>
                   </View>
                   <View style={styles.detailContainer}>
                     <MaterialCommunityIcons name="account" size={24} color={theme.colors.primary} />
                     <Text variant="titleSmall" style={styles.detail}>
-                      Nome do Inquilino: {rent.tenant.name}
+                      Nome do Inquilino: <Text style={styles.detailValue}>{rent.tenant.name}</Text>
                     </Text>
                   </View>
                   {rent.signed_pdf && (
@@ -215,7 +270,8 @@ const RentsDetails = () => {
                         variant="titleSmall"
                         style={[styles.detail, { color: theme.colors.primary }]}
                         onPress={() => Linking.openURL(rent.signed_pdf || '')}>
-                        Contrato Assinado: Clique aqui para abrir
+                        Contrato Assinado:{' '}
+                        <Text style={styles.detailValue}>Clique aqui para abrir</Text>
                       </Text>
                     </View>
                   )}
@@ -230,7 +286,8 @@ const RentsDetails = () => {
                         variant="titleSmall"
                         style={[styles.detail, { color: theme.colors.primary }]}
                         onPress={() => Linking.openURL(inspection.pdf_inspection || '')}>
-                        Laudo de Vistoria: Clique aqui para abrir
+                        Laudo de Vistoria:{' '}
+                        <Text style={styles.detailValue}>Clique aqui para abrir</Text>
                       </Text>
                     </View>
                   )}
@@ -359,6 +416,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  detailValue: {
+    color: '#494c4e',
+    fontWeight: 'semibold',
   },
 });
 

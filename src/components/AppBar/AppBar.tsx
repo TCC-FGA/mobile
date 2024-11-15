@@ -15,7 +15,7 @@ type AppBarProps = {
 };
 
 const CustomAppBar: React.FC<AppBarProps> = ({ title }) => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const handleToggleModal = () => {
     navigation.navigate('NotificationsScreen');
@@ -33,10 +33,13 @@ const CustomAppBar: React.FC<AppBarProps> = ({ title }) => {
         <Appbar.Content title={title} titleStyle={{ fontWeight: 'bold' }} />
         <Appbar.Action
           size={36}
-          icon={() => <Avatar.Image size={36} source={require('@assets/avatar.png')} />}
-          onPress={() => {
-            alert('Clicou no avatar');
-          }}
+          icon={() => (
+            <Avatar.Image
+              size={36}
+              source={{ uri: user.photo ?? 'https://i.imgur.com/xCvzudW.png' }}
+            />
+          )}
+          onPress={() => navigation.navigate('AccountSettingsScreen')}
         />
       </Appbar.Header>
     </>

@@ -7,6 +7,7 @@ import { GuarantorDTO } from '~/dtos/GuarantorDTO';
 import { TextInputMask } from 'react-native-masked-text';
 import CustomPicker from '../CustomPicker';
 import { statesOfBrazil } from '~/dtos/PropertiesDTO';
+import { convertStringDateToYYYYMMDD } from '~/helpers/convert_data';
 
 type GuarantorComponentProps = {
   tenantId: number;
@@ -40,9 +41,9 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
     const fetchGuarantor = async () => {
       try {
         const guarantors = await getGuarantorByTenantId(tenantId);
-        if (guarantors.length > 0) {
-          setGuarantorData(guarantors[0]);
-          setGuarantorId(guarantors[0].id);
+        if (guarantors) {
+          setGuarantorData(guarantors);
+          setGuarantorId(guarantors.id);
         }
       } catch (error) {
         Alert.alert('Erro', 'Não foi possível carregar os dados do fiador.');
@@ -57,13 +58,55 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
   }, [tenantId, visible]);
 
   const handleSave = async () => {
+    const {
+      name,
+      cpf,
+      contact,
+      email,
+      profession,
+      marital_status,
+      birth_date,
+      income,
+      street,
+      neighborhood,
+      number,
+      zip_code,
+      city,
+      state,
+    } = guarantorData;
+
+    if (
+      !name ||
+      !cpf ||
+      !contact ||
+      !email ||
+      !profession ||
+      !marital_status ||
+      !birth_date ||
+      !income ||
+      !street ||
+      !neighborhood ||
+      !number ||
+      !zip_code ||
+      !city ||
+      !state
+    ) {
+      Alert.alert('Erro', 'Todos os campos são obrigatórios.');
+      return;
+    }
+
     try {
       setIsLoading(true);
+      const updatedGuarantorData = {
+        ...guarantorData,
+        birth_date: convertStringDateToYYYYMMDD(guarantorData.birth_date || ''),
+      };
+
       if (guarantorId) {
-        await updateGuarantor(guarantorId, guarantorData);
+        await updateGuarantor(guarantorId, updatedGuarantorData);
         Alert.alert('Sucesso', 'Fiador atualizado com sucesso!');
       } else {
-        await createGuarantor(tenantId, guarantorData);
+        await createGuarantor(tenantId, updatedGuarantorData);
         Alert.alert('Sucesso', 'Fiador cadastrado com sucesso!');
       }
     } catch (error) {
@@ -79,7 +122,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
     <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modal}>
       <ScrollView style={styles.scrollContainer}>
         <TextInput
-          label="Nome"
+          label={
+            <Text>
+              Nome <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.name || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, name: text })}
           style={styles.input}
@@ -94,7 +141,9 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
         <TextInputMask
           type="cpf"
           value={guarantorData.cpf || ''}
-          onChangeText={(text) => setGuarantorData({ ...guarantorData, cpf: text })}
+          onChangeText={(text) =>
+            setGuarantorData({ ...guarantorData, cpf: text.replace(/\D/g, '') })
+          }
           style={styles.input}
           customTextInput={TextInput}
           customTextInputProps={{
@@ -105,7 +154,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
                 )}
               />
             ),
-            label: 'CPF',
+            label: (
+              <Text>
+                CPF <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
           }}
         />
         <TextInputMask
@@ -116,7 +169,9 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
             dddMask: '(99) ',
           }}
           value={guarantorData.contact || ''}
-          onChangeText={(text) => setGuarantorData({ ...guarantorData, contact: text })}
+          onChangeText={(text) =>
+            setGuarantorData({ ...guarantorData, contact: text.replace(/\D/g, '') })
+          }
           style={styles.input}
           customTextInput={TextInput}
           customTextInputProps={{
@@ -127,11 +182,19 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
                 )}
               />
             ),
-            label: 'Contato',
+            label: (
+              <Text>
+                Contato <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
           }}
         />
         <TextInput
-          label="Email"
+          label={
+            <Text>
+              Email <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.email || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, email: text })}
           style={styles.input}
@@ -144,7 +207,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
           }
         />
         <TextInput
-          label="Profissão"
+          label={
+            <Text>
+              Profissão <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.profession || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, profession: text })}
           style={styles.input}
@@ -157,7 +224,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
           }
         />
         <TextInput
-          label="Estado Civil"
+          label={
+            <Text>
+              Estado Civil <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.marital_status || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, marital_status: text })}
           style={styles.input}
@@ -186,11 +257,19 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
                 )}
               />
             ),
-            label: 'Data de Nascimento',
+            label: (
+              <Text>
+                Data de Nascimento <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
           }}
         />
         <TextInput
-          label="Renda"
+          label={
+            <Text>
+              Renda <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.income ? guarantorData.income.toString() : ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, income: parseFloat(text) })}
           style={styles.input}
@@ -204,7 +283,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
           keyboardType="numeric"
         />
         <TextInput
-          label="Rua"
+          label={
+            <Text>
+              Rua <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.street || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, street: text })}
           style={styles.input}
@@ -217,7 +300,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
           }
         />
         <TextInput
-          label="Bairro"
+          label={
+            <Text>
+              Bairro <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.neighborhood || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, neighborhood: text })}
           style={styles.input}
@@ -230,7 +317,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
           }
         />
         <TextInput
-          label="Número"
+          label={
+            <Text>
+              Número <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.number ? guarantorData.number.toString() : ''}
           onChangeText={(text) =>
             setGuarantorData({ ...guarantorData, number: parseInt(text, 10) })
@@ -268,7 +359,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
           }}
         />
         <TextInput
-          label="Cidade"
+          label={
+            <Text>
+              Cidade <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.city || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, city: text })}
           style={styles.input}
@@ -290,7 +385,11 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
         />
         <TextInput
           className="mt-2"
-          label="Observação"
+          label={
+            <Text>
+              Observação <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={guarantorData.comment || ''}
           onChangeText={(text) => setGuarantorData({ ...guarantorData, comment: text })}
           style={styles.input}

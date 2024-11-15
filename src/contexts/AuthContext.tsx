@@ -9,11 +9,13 @@ import {
   storageAuthTokenRemove,
   storageAuthTokenSave,
 } from '~/storage/storageAuthToken';
+import { setUserEmail, tagUserCreate } from '~/services/notifications';
 
 export type AuthContextDataProps = {
   user: UserDTO;
   signIn: (email: string, password: string) => Promise<boolean>;
   signOut: () => void;
+  updateUserData: () => void;
 };
 
 type AuthContextProviderProps = {
@@ -51,6 +53,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
     if (user && token) {
       userAndTokenUpdate(user, token);
+      await updateUserData();
+      tagUserCreate(user.user_id);
+      setUserEmail(user.email);
     }
   }
 
@@ -89,9 +94,24 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
+  async function updateUserData() {
+    try {
+      const { data: updatedUser } = await api.get('/users/me');
+      setUser(updatedUser);
+      await storageUserSave(updatedUser);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   useEffect(() => {
     loadUserData();
   }, []);
 
-  return <AuthContext.Provider value={{ user, signIn, signOut }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, signIn, signOut, updateUserData }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }

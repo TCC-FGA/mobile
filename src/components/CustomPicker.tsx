@@ -12,7 +12,7 @@ import {
   Keyboard,
   TextInput as RNTextInput,
 } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import { Text, TextInput, IconButton } from 'react-native-paper';
 
 interface PickerItem {
   label: string;
@@ -44,8 +44,10 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
     item.label.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  const selectedLabel = data.find((item) => item.value === selectedValue)?.label || '';
+
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <TouchableOpacity onPress={() => setModalVisible(true)}>
         <TextInput
           label={
@@ -53,7 +55,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
               {title} <Text style={{ color: 'red' }}>*</Text>
             </Text>
           }
-          value={selectedValue}
+          value={selectedLabel}
           placeholder={placeholder}
           editable={false}
           left={
@@ -81,7 +83,7 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}>
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
             <View
               style={{
                 flex: 1,
@@ -89,36 +91,40 @@ const CustomPicker: React.FC<CustomPickerProps> = ({
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <View
-                style={{
-                  width: width * 0.8,
-                  height: height * 0.6,
-                  backgroundColor: 'white',
-                  padding: 20,
-                  borderRadius: 10,
-                }}>
-                <RNTextInput
-                  placeholder="Buscar..."
-                  value={searchText}
-                  onChangeText={setSearchText}
-                  style={{ marginBottom: 20, borderBottomWidth: 1 }}
-                />
-
-                <FlatList
-                  data={filteredData}
-                  keyExtractor={(item) => item.value}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        onValueChange(item);
-                        setModalVisible(false);
-                        setSearchText('');
-                      }}>
-                      <Text style={{ padding: 10 }}>{item.label}</Text>
-                    </TouchableOpacity>
-                  )}
-                />
-              </View>
+              <TouchableWithoutFeedback onPress={() => {}}>
+                <View
+                  style={{
+                    width: width * 0.8,
+                    height: height * 0.6,
+                    backgroundColor: 'white',
+                    padding: 20,
+                    borderRadius: 10,
+                  }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                    <IconButton icon="close" size={24} onPress={() => setModalVisible(false)} />
+                  </View>
+                  <RNTextInput
+                    placeholder="Buscar..."
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    style={{ marginBottom: 20, borderBottomWidth: 1 }}
+                  />
+                  <FlatList
+                    data={filteredData}
+                    keyExtractor={(item) => item.value}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          onValueChange(item);
+                          setModalVisible(false);
+                          setSearchText('');
+                        }}>
+                        <Text style={{ padding: 10 }}>{item.label}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </View>
+              </TouchableWithoutFeedback>
             </View>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>

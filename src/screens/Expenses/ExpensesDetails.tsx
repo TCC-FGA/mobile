@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import { View, StyleSheet, Alert, ScrollView } from 'react-native';
-import { TextInput, Button, Appbar } from 'react-native-paper';
+import { TextInput, Button, Appbar, RadioButton, Text } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { getHouses, getHouseById } from '~/api/houses';
 import { createExpense, getExpenseById, updateExpense } from '~/api/expenses';
@@ -8,7 +8,7 @@ import { HouseDTO } from '~/dtos/HouseDTO';
 import { ExpenseDTO } from '~/dtos/ExpenseDTO';
 import CustomPicker from '~/components/CustomPicker';
 import { TextInputMask } from 'react-native-masked-text';
-import { convertStringDateToYYYYMMDD } from '~/helpers/convert_data';
+import { convertStringDateInDDMMYYYY, convertStringDateToYYYYMMDD } from '~/helpers/convert_data';
 
 type RouteParamsProps = {
   houseId?: number;
@@ -24,7 +24,7 @@ const ExpenseDetails: React.FC = () => {
   const [selectedHouse, setSelectedHouse] = useState<HouseDTO | null>(null);
   const [expenseData, setExpenseData] = useState<Partial<ExpenseDTO>>({
     expense_type: 'manutenção',
-    value: 0,
+    value: '0' as string,
     expense_date: '01/12/2024',
     house_id: houseId || 0,
   });
@@ -64,13 +64,25 @@ const ExpenseDetails: React.FC = () => {
   }, [houseId, expenseId]);
 
   const handleSave = async () => {
+    const { expense_type, value, expense_date, house_id } = expenseData;
+
+    if (!expense_type || !value || !expense_date || !house_id) {
+      Alert.alert('Erro', 'Todos os campos são obrigatórios.');
+      return;
+    }
+
     setLoading(true);
     try {
+      const updatedExpenseData = {
+        ...expenseData,
+        expense_date: convertStringDateToYYYYMMDD(expense_date as string),
+      };
+
       if (expenseId) {
-        await updateExpense(expenseId, expenseData);
+        await updateExpense(expenseId, updatedExpenseData);
         Alert.alert('Sucesso', 'Despesa atualizada com sucesso!');
       } else {
-        await createExpense(expenseData.house_id!, expenseData);
+        await createExpense(updatedExpenseData.house_id!, updatedExpenseData);
         Alert.alert('Sucesso', 'Despesa criada com sucesso!');
       }
       navigation.goBack();
@@ -101,25 +113,22 @@ const ExpenseDetails: React.FC = () => {
           placeholder="Selecione uma casa"
           leftIcon="home"
         />
-        <TextInput
-          label="Tipo de Despesa"
-          className="mt-4"
-          value={expenseData.expense_type}
-          onChangeText={(text) =>
-            setExpenseData({ ...expenseData, expense_type: text as ExpenseDTO['expense_type'] })
-          }
-          style={styles.input}
-        />
         <TextInputMask
+          className="mt-4"
           type="money"
-          value={expenseData.value?.toString() || ''}
-          onChangeText={(text) =>
-            setExpenseData({ ...expenseData, value: parseFloat(text.replace(/[^0-9,-]+/g, '')) })
-          }
+          value={(expenseData?.value as string) ?? '0'}
+          onChangeText={(text) => {
+            const numericValue = text.replace(/[^0-9.,]/g, '').replace(',', '.');
+            setExpenseData({ ...expenseData, value: Number(numericValue) });
+          }}
           style={styles.input}
           customTextInput={TextInput}
           customTextInputProps={{
-            label: 'Valor',
+            label: (
+              <Text>
+                Valor <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
           }}
         />
         <TextInputMask
@@ -127,16 +136,32 @@ const ExpenseDetails: React.FC = () => {
           options={{
             format: 'DD/MM/YYYY',
           }}
-          value={expenseData.expense_date as string}
-          onChangeText={(text) =>
-            setExpenseData({ ...expenseData, expense_date: convertStringDateToYYYYMMDD(text) })
-          }
+          value={convertStringDateInDDMMYYYY(expenseData.expense_date as string)}
+          onChangeText={(text) => setExpenseData({ ...expenseData, expense_date: text })}
           style={styles.input}
           customTextInput={TextInput}
           customTextInputProps={{
-            label: 'Data da Despesa',
+            label: (
+              <Text>
+                Data da Despesa <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
           }}
         />
+        <Text variant="titleMedium">
+          Tipo de despesa <Text style={{ color: 'red' }}>*</Text>:
+        </Text>
+        <RadioButton.Group
+          onValueChange={(newValue) =>
+            setExpenseData({ ...expenseData, expense_type: newValue as ExpenseDTO['expense_type'] })
+          }
+          value={expenseData.expense_type as string}>
+          <View style={styles.radioButtonContainer}>
+            <RadioButton.Item label="Manutenção" value="manutenção" />
+            <RadioButton.Item label="Reparo" value="reparo" />
+            <RadioButton.Item label="Imposto" value="imposto" />
+          </View>
+        </RadioButton.Group>
         <Button mode="contained" onPress={handleSave} loading={loading} style={styles.button}>
           Salvar
         </Button>
@@ -157,6 +182,10 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
+  },
+  radioButtonContainer: {
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
 });
 

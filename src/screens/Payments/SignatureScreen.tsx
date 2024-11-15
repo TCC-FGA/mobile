@@ -70,9 +70,9 @@ const SignatureScreen = () => {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Assinatura" />
+        <Appbar.Content title="Assinatura" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
       {loading ? (
         <ActivityIndicator animating color={theme.colors.primary} style={{ flex: 1 }} />

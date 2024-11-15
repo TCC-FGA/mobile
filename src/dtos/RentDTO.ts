@@ -9,7 +9,7 @@ export type RentDTO = {
   end_date: string;
   base_value: number;
   due_date: number;
-  reajustment_rate?: string;
+  reajustment_rate?: 'IGPM' | 'None' | null;
   house: HouseDTO;
   template_id: number;
   tenant: TenantDTO;
@@ -23,7 +23,7 @@ export type RentCreateDTO = {
   end_date: Date | string;
   base_value: number;
   due_date: number;
-  reajustment_rate?: string | null;
+  reajustment_rate?: 'IGPM' | 'None' | null;
   house_id: number;
   template_id: number;
   tenant_id: number;
