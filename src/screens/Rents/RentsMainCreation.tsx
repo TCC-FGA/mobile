@@ -2,7 +2,6 @@ import React, { useState, useEffect, memo } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Text, TextInput, Button, IconButton, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
@@ -18,6 +17,8 @@ import { TemplateDTO } from '~/dtos/TemplateDTO';
 import { theme } from '~/core/theme';
 import { TextInputMask } from 'react-native-masked-text';
 import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
+import { RentCreateDTO } from '~/dtos/RentDTO';
+import CustomPicker from '~/components/CustomPicker';
 
 const RentsMainCreation = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -39,6 +40,7 @@ const RentsMainCreation = () => {
   const [loadingHouses, setLoadingHouses] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [depositValue, setDepositValue] = useState<string>('');
+  const [reajustment_rate, setReajustment_rate] = useState<string>('IGMP');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +98,8 @@ const RentsMainCreation = () => {
       !rentValue ||
       !dueDay ||
       !startDate ||
-      !endDate
+      !endDate ||
+      !reajustment_rate
     ) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
@@ -112,6 +115,7 @@ const RentsMainCreation = () => {
       start_date: formatDate(startDate),
       end_date: formatDate(endDate),
       deposit_value: depositValue ? Number(depositValue) : null,
+      reajustment_rate: reajustment_rate as RentCreateDTO['reajustment_rate'],
     };
 
     try {
@@ -129,30 +133,23 @@ const RentsMainCreation = () => {
     <ScrollView contentContainerStyle={styles.container}>
       {currentSection === 1 && (
         <View style={styles.section}>
-          <Text>
+          <Text variant="titleMedium">
             Escolha a propriedade <Text style={{ color: 'red' }}>*</Text>
           </Text>
-          <View style={styles.pickerContainer}>
-            <MaterialCommunityIcons
-              name="home-city"
-              size={24}
-              color={theme.colors.primary}
-              style={styles.icon}
+          <View style={styles.customPicker}>
+            <CustomPicker
+              data={properties.map((property) => ({
+                label: property.nickname || property.zip_code || 'Propriedade sem nome',
+                value: property.id.toString(),
+              }))}
+              selectedValue={selectedProperty ? selectedProperty.toString() : ''}
+              onValueChange={(item) => setSelectedProperty(item.value)}
+              title="Propriedade"
+              placeholder="Selecione uma propriedade"
+              leftIcon="home-city"
             />
-            <Picker
-              selectedValue={selectedProperty}
-              onValueChange={(itemValue) => setSelectedProperty(itemValue)}
-              style={styles.picker}>
-              <Picker.Item label="Selecione uma propriedade" value="" />
-              {properties.map((property) => (
-                <Picker.Item
-                  key={property.id}
-                  label={property.nickname || property.zip_code || 'Propriedade sem nome'}
-                  value={property.id.toString()}
-                />
-              ))}
-            </Picker>
             <IconButton
+              mode="contained-tonal"
               icon={({ size, color }) => (
                 <MaterialCommunityIcons name="plus" size={size} color={theme.colors.primary} />
               )}
@@ -173,34 +170,23 @@ const RentsMainCreation = () => {
                 <ActivityIndicator animating color={theme.colors.primary} />
               ) : (
                 <>
-                  <Text>
+                  <Text variant="titleMedium">
                     Escolha a casa <Text style={{ color: 'red' }}>*</Text>
                   </Text>
-                  <View style={styles.pickerContainer}>
-                    <MaterialCommunityIcons
-                      name="home"
-                      size={24}
-                      color={theme.colors.primary}
-                      style={styles.icon}
+                  <View style={styles.customPicker}>
+                    <CustomPicker
+                      data={houses.map((house) => ({
+                        label: house.nickname || 'Casa sem nome',
+                        value: house.id.toString(),
+                      }))}
+                      selectedValue={selectedHouse ? selectedHouse.toString() : ''}
+                      onValueChange={(item) => setSelectedHouse(item.value)}
+                      title="Casa"
+                      placeholder="Selecione uma casa"
+                      leftIcon="home"
                     />
-                    <Picker
-                      selectedValue={selectedHouse}
-                      onValueChange={(itemValue) => setSelectedHouse(itemValue)}
-                      style={styles.picker}>
-                      <Picker.Item label="Selecione uma casa" value="" />
-                      {houses.length === 0 ? (
-                        <Picker.Item label="Nenhuma casa encontrada" value="" />
-                      ) : (
-                        houses.map((house) => (
-                          <Picker.Item
-                            key={house.id}
-                            label={house.nickname || 'Casa sem nome'}
-                            value={house.id.toString()}
-                          />
-                        ))
-                      )}
-                    </Picker>
                     <IconButton
+                      mode="contained-tonal"
                       icon={({ size, color }) => (
                         <MaterialCommunityIcons
                           name="plus"
@@ -219,30 +205,23 @@ const RentsMainCreation = () => {
                       }
                     />
                   </View>
-                  <Text>
-                    Escolha o inquilino <Text style={{ color: 'red' }}>*</Text>
+                  <Text variant="titleMedium">
+                    Escolha o inquilino<Text style={{ color: 'red' }}>*</Text>
                   </Text>
-                  <View style={styles.pickerContainer}>
-                    <MaterialCommunityIcons
-                      name="account"
-                      size={24}
-                      color={theme.colors.primary}
-                      style={styles.icon}
+                  <View style={styles.customPicker}>
+                    <CustomPicker
+                      data={tenants.map((tenant) => ({
+                        label: tenant.name,
+                        value: tenant.id.toString(),
+                      }))}
+                      selectedValue={selectedTenant ? selectedTenant.toString() : ''}
+                      onValueChange={(item) => setSelectedTenant(item.value)}
+                      title="Inquilino"
+                      placeholder="Selecione um inquilino"
+                      leftIcon="account"
                     />
-                    <Picker
-                      selectedValue={selectedTenant}
-                      onValueChange={(itemValue) => setSelectedTenant(itemValue)}
-                      style={styles.picker}>
-                      <Picker.Item label="Selecione um inquilino" value="" />
-                      {tenants.map((tenant) => (
-                        <Picker.Item
-                          key={tenant.id}
-                          label={tenant.name}
-                          value={tenant.id.toString()}
-                        />
-                      ))}
-                    </Picker>
                     <IconButton
+                      mode="contained-tonal"
                       icon={({ size, color }) => (
                         <MaterialCommunityIcons
                           name="plus"
@@ -261,7 +240,43 @@ const RentsMainCreation = () => {
                       }
                     />
                   </View>
+                  <Text variant="titleMedium">
+                    Escolha o template de contrato <Text style={{ color: 'red' }}>*</Text>
+                  </Text>
+                  <View style={styles.customPicker}>
+                    <CustomPicker
+                      data={templates.map((template) => ({
+                        label: template.template_name,
+                        value: template.id.toString(),
+                      }))}
+                      selectedValue={selectedTemplate ? selectedTemplate.toString() : ''}
+                      onValueChange={(item) => setSelectedTemplate(item.value)}
+                      title="Template"
+                      placeholder="Selecione um template"
+                      leftIcon="file-document-outline"
+                    />
+                    <IconButton
+                      mode="contained-tonal"
+                      icon={({ size, color }) => (
+                        <MaterialCommunityIcons
+                          name="plus"
+                          size={size}
+                          color={theme.colors.primary}
+                        />
+                      )}
+                      size={24}
+                      onPress={() =>
+                        navigation.navigate('ContractsStack', {
+                          screen: 'ContractsDetails',
+                          params: {
+                            templateId: null,
+                          },
+                        })
+                      }
+                    />
+                  </View>
                   <IconButton
+                    mode="contained"
                     icon={({ size, color }) => (
                       <MaterialCommunityIcons
                         name="chevron-right"
@@ -274,6 +289,9 @@ const RentsMainCreation = () => {
                     style={styles.nextSectionIcon}
                     disabled={!canAdvance}
                   />
+                  <Text style={{ alignSelf: 'center', fontWeight: 'bold' }} variant="titleLarge">
+                    Avançar
+                  </Text>
                 </>
               )}
             </>
@@ -282,27 +300,18 @@ const RentsMainCreation = () => {
       )}
       {currentSection === 2 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Escolher Template de Contrato</Text>
           <View style={styles.pickerContainer}>
-            <MaterialCommunityIcons
-              name="file-document-outline"
-              size={24}
-              color={theme.colors.primary}
-              style={styles.icon}
+            <CustomPicker
+              data={[
+                { label: 'IGPM', value: 'IGPM' },
+                { label: 'Nenhum', value: 'None' },
+              ]}
+              selectedValue={reajustment_rate}
+              onValueChange={(item) => setReajustment_rate(item.value)}
+              title="Reajuste"
+              placeholder="Selecione o reajuste"
+              leftIcon="percent"
             />
-            <Picker
-              selectedValue={selectedTemplate}
-              onValueChange={(itemValue) => setSelectedTemplate(itemValue)}
-              style={styles.picker}>
-              <Picker.Item label="Selecione um template" value="" />
-              {templates.map((template) => (
-                <Picker.Item
-                  key={template.id}
-                  label={template.template_name}
-                  value={template.id.toString()}
-                />
-              ))}
-            </Picker>
           </View>
           {selectedTemplate &&
             templates.find((template) => template.id.toString() === selectedTemplate)?.warranty ===
@@ -434,13 +443,18 @@ const RentsMainCreation = () => {
             />
           )}
           <IconButton
+            mode="contained"
             icon={({ size, color }) => (
               <MaterialCommunityIcons name="check" size={size} color={color} />
             )}
             size={48}
             onPress={handleSubmit}
+            disabled={!rentValue || !dueDay || !startDate || !endDate}
             style={styles.nextSectionIcon}
           />
+          <Text style={{ alignSelf: 'center', fontWeight: 'bold' }} variant="titleLarge">
+            Criar Contrato
+          </Text>
         </View>
       )}
     </ScrollView>
@@ -476,7 +490,7 @@ const styles = StyleSheet.create({
   },
   nextSectionIcon: {
     alignSelf: 'center',
-    marginBottom: 24,
+    marginBottom: 14,
   },
   input: {
     marginBottom: 16,
@@ -490,6 +504,7 @@ const styles = StyleSheet.create({
     marginTop: -10,
     marginBottom: 10,
   },
+  customPicker: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
 });
 
 export default memo(RentsMainCreation);
