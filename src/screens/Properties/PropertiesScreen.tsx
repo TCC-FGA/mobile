@@ -20,6 +20,7 @@ import {
   FAB,
   Menu,
   Divider,
+  Badge,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
@@ -119,7 +120,15 @@ const PropertiesScreen = () => {
             {/* Informações da propriedade à direita da imagem */}
             <View style={{ flex: 1, marginLeft: 16 }}>
               <Text style={styles.cardTitle}>{item.nickname}</Text>
-              <Text style={styles.cardSubtitle}>CEP: {item.zip_code}</Text>
+              <View style={styles.infoRow}>
+                <MaterialCommunityIcons name="home-map-marker" size={16} color="#666" />
+                <Text style={styles.infoText}>CEP: {item.zip_code}</Text>
+              </View>
+              {item.city && item.state && (
+                <Badge
+                  style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.tertiary }}
+                  size={22}>{`${item.city}, ${item.state}`}</Badge>
+              )}
             </View>
 
             {/* Ícone de três pontinhos no topo à direita */}
@@ -315,6 +324,16 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 2,
+  },
+  infoText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#666',
   },
 });
 

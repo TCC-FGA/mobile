@@ -61,13 +61,15 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
   return (
     <View style={styles.container}>
       <View style={styles.headerWrapper}>
-        <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
-          Fluxo de Caixa
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
+            Fluxo de Caixa
+          </Text>
+          <Text style={{ fontSize: 14, color: theme.colors.onSurfaceVariant, marginLeft: 4 }}>
+            (mês atual)
+          </Text>
+        </View>
         <IconButton
-          onPress={() => {
-            alert('Visão geral do controle financeiro');
-          }}
           icon={() => {
             return (
               <MaterialCommunityIcons
@@ -119,9 +121,6 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
           Resumo Geral
         </Text>
         <IconButton
-          onPress={() => {
-            alert('Visão geral do controle financeiro');
-          }}
           icon={() => {
             return (
               <MaterialCommunityIcons

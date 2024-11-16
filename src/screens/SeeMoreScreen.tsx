@@ -1,14 +1,47 @@
 import React, { memo } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { Appbar, Divider, Avatar, IconButton, List, Surface } from 'react-native-paper';
+import { SafeAreaView, StyleSheet, View, Alert } from 'react-native';
+import { Divider, List, Surface } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '~/core/theme';
 import CustomAppBar from '~/components/AppBar/AppBar';
-import { th } from 'date-fns/locale';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { generateReport } from '~/api/rents';
+
 const SeeMoreScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const openPdfReport = async () => {
+    if (isLoading) {
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const pdfBlob = await generateReport();
+      const pdfUri = `${FileSystem.documentDirectory}financeiro.pdf`;
+      await FileSystem.writeAsStringAsync(pdfUri, pdfBlob, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(pdfUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: 'Compartilhar Relatório Financeiro',
+          UTI: 'com.adobe.pdf',
+        });
+      } else {
+        Alert.alert('Erro', 'A visualização do PDF não está disponível no dispositivo.');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível obter o PDF.');
+      console.error('Erro ao obter o PDF:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -103,6 +136,26 @@ const SeeMoreScreen = () => {
                 style={styles.listItem}
               />
 
+              <List.Item
+                title="Gerar Relatório Financeiro"
+                titleStyle={{ fontWeight: 'bold' }}
+                left={() => (
+                  <MaterialCommunityIcons name="finance" size={34} color={theme.colors.primary} />
+                )}
+                onPress={() => openPdfReport()}
+                style={styles.listItem}
+                right={
+                  isLoading
+                    ? () => (
+                        <MaterialCommunityIcons
+                          name="loading"
+                          size={24}
+                          color={theme.colors.primary}
+                        />
+                      )
+                    : undefined
+                }
+              />
               {/* Item Laudo de Vistorias */}
               {/* <List.Item
                 title="Laudo de Vistorias"

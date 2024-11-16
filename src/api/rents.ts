@@ -112,3 +112,24 @@ export const getPdfByContractId = async (contractId: number) => {
     throw error;
   }
 };
+
+// Função para gerar um relatório em PDF
+export const generateReport = async (): Promise<string> => {
+  try {
+    const url = '/generate-report';
+    const response = await api({
+      url,
+      method: 'POST',
+      responseType: 'arraybuffer',
+      headers: {
+        'Content-Type': 'application/pdf',
+      },
+    });
+    return Buffer.from(response.data, 'binary').toString('base64');
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erro ao gerar relatório em PDF:', error.response?.data);
+    }
+    throw error;
+  }
+};

@@ -217,7 +217,6 @@ const AccountSettingsScreen: React.FC = () => {
           <Appbar.Header className="flex-1 bg-transparent p-0 mt-0 pt-0" statusBarHeight={2}>
             <Appbar.BackAction color="white" onPress={() => navigation.goBack()} />
             <Appbar.Content title />
-            <Appbar.Action icon="logout" color="white" onPress={signOut} />
           </Appbar.Header>
           <View style={styles.headerColumn}>
             <View style={{ position: 'relative' }}>
@@ -547,6 +546,15 @@ const AccountSettingsScreen: React.FC = () => {
               </View>
             </List.Accordion>
           </List.AccordionGroup>
+          <View style={{ backgroundColor: theme.colors.surface }}>
+            <List.Item
+              onPress={() => signOut()}
+              titleStyle={{ fontWeight: 'bold' }}
+              className="mt-2"
+              title="Sair"
+              left={(props) => <List.Icon {...props} icon="logout" color={theme.colors.primary} />}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -30,8 +30,7 @@ import {
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
-import { View, StyleSheet } from 'react-native';
-import { theme } from '~/core/theme';
+import { View } from 'react-native';
 
 type AppRoutesType = {
   PropertiesStack: {

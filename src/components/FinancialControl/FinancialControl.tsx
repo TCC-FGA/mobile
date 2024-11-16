@@ -51,9 +51,14 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
   return (
     <View style={styles.containerHeaderFinancialControl}>
       <View style={styles.headerWrapper}>
-        <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
-          Controle Financeiro
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
+            Controle Financeiro
+          </Text>
+          <Text style={{ fontSize: 14, color: theme.colors.onSurfaceVariant, marginLeft: 4 }}>
+            (mês atual)
+          </Text>
+        </View>
         <IconButton
           icon={() => {
             return (

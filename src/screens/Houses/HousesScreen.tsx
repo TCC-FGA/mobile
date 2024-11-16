@@ -13,6 +13,7 @@ import {
   Menu,
   Divider,
   Chip,
+  Badge,
 } from 'react-native-paper';
 import { HouseDTO } from '~/dtos/HouseDTO';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
@@ -154,35 +155,45 @@ const HousesScreen = () => {
             {/* Informações da casa */}
             <View style={styles.infoContainer}>
               <Title style={styles.cardTitle}>{item.nickname}</Title>
-              <View style={styles.chipContainer}>
-                <Chip
-                  textStyle={{ fontWeight: 'bold' }}
-                  icon={({ size, color }) => (
-                    <MaterialCommunityIcons
-                      name={
-                        item.status === 'vaga'
-                          ? 'home'
-                          : item.status === 'alugada'
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={styles.chipContainer}>
+                  <Chip
+                    textStyle={{ fontWeight: 'bold' }}
+                    icon={({ size, color }) => (
+                      <MaterialCommunityIcons
+                        name={
+                          item.status === 'vaga'
                             ? 'home'
-                            : 'tools'
-                      }
-                      size={size}
-                      color="black"
-                    />
-                  )}
-                  style={[
-                    styles.chip,
-                    item.status === 'vaga'
-                      ? styles.chipVaga
-                      : item.status === 'alugada'
-                        ? styles.chipAlugada
-                        : styles.chipReforma,
-                  ]}>
-                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                </Chip>
+                            : item.status === 'alugada'
+                              ? 'home'
+                              : 'tools'
+                        }
+                        size={size}
+                        color="black"
+                      />
+                    )}
+                    style={[
+                      styles.chip,
+                      item.status === 'vaga'
+                        ? styles.chipVaga
+                        : item.status === 'alugada'
+                          ? styles.chipAlugada
+                          : styles.chipReforma,
+                    ]}>
+                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                  </Chip>
+                </View>
+                {item.furnished && (
+                  <Badge
+                    style={{
+                      backgroundColor: theme.colors.outline,
+                      marginLeft: 8,
+                      marginBottom: 2,
+                    }}
+                    size={25}>{`${'Mobiliada'}`}</Badge>
+                )}
               </View>
             </View>
-
             {/* Botão de Menu (três pontos) */}
             <Menu
               visible={menuVisible === item.id}
@@ -273,7 +284,11 @@ const HousesScreen = () => {
                 uri: propertyPhoto,
               }}
             />
-            <Appbar.Content className="ml-2" title={propertyNickname} />
+            <Appbar.Content
+              className="ml-2"
+              title={propertyNickname || 'Todas as Casas'}
+              titleStyle={{ fontWeight: 'bold' }}
+            />
           </View>
         ) : (
           <Appbar.Content title="Todas as Casas" titleStyle={{ fontWeight: 'bold' }} />
@@ -368,7 +383,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   chip: {
-    marginTop: 8,
+    marginTop: 0,
   },
   chipVaga: {
     backgroundColor: '#4caf50',
