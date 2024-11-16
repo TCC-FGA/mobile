@@ -24,3 +24,4 @@ export { default as InspectionsScreen } from './Inspection/InspectionsScreen';
 export { default as ExpensesScreen } from './Expenses/ExpensesScreen';
 export { default as ExpensesDetails } from './Expenses/ExpensesDetails';
 export { default as NotificationsScreen } from './Notifications';
+export { default as CustomDetailsScreen } from './CustomDetailsScreen';

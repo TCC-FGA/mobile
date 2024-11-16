@@ -151,6 +151,53 @@ const TenantScreen = () => {
                   title="Ver Contratos"
                   leadingIcon="file-document-outline"
                 />
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    navigation.navigate('CustomDetailsScreen', {
+                      data: item,
+                      title: `Inquilino ${item.name}`,
+                      fieldsToShow: [
+                        'name',
+                        'cpf',
+                        'contact',
+                        'email',
+                        'profession',
+                        'marital_status',
+                        'birth_date',
+                        'income',
+                        'residents',
+                        'street',
+                        'neighborhood',
+                        'number',
+                        'zip_code',
+                        'city',
+                        'state',
+                      ],
+                      labels: {
+                        name: 'Nome',
+                        cpf: 'CPF',
+                        contact: 'Contato',
+                        email: 'Email',
+                        profession: 'Profissão',
+                        marital_status: 'Estado Civil',
+                        emergency_contact: 'Contato de Emergência',
+                        income: 'Renda',
+                        residents: 'Residentes',
+                        street: 'Rua',
+                        neighborhood: 'Bairro',
+                        number: 'Número',
+                        zip_code: 'CEP',
+                        city: 'Cidade',
+                        state: 'Estado',
+                      },
+                    });
+                  }}
+                  title="Ver Inquilino"
+                  leadingIcon={() => (
+                    <MaterialCommunityIcons name="account-arrow-right" size={20} />
+                  )}
+                />
                 <Divider />
                 <Menu.Item
                   onPress={() => {

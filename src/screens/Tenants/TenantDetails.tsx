@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { ScrollView, View, Alert, StyleSheet, Platform } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { TextInput, Button, HelperText, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
@@ -9,6 +9,8 @@ import { TenantDTO } from '~/dtos/TenantDTO';
 import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
 import { theme } from '~/core/theme';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
+import { TextInputMask } from 'react-native-masked-text';
+import { err } from 'react-native-svg';
 
 type RouteParamsProps = {
   tenantId?: number;
@@ -40,6 +42,14 @@ const TenantDetails = () => {
     state: '',
   });
 
+  const [errors, setErrors] = useState({
+    name: false,
+    cpf: false,
+    contact: false,
+    email: false,
+    zip_code: false,
+  });
+
   useEffect(() => {
     if (tenantId) {
       const fetchTenant = async () => {
@@ -66,11 +76,29 @@ const TenantDetails = () => {
     setShowDatePicker(true);
   };
 
+  const validateFields = () => {
+    const newErrors = {
+      name: !newTenant.name,
+      cpf: !newTenant.cpf,
+      contact: !newTenant.contact,
+      email: !newTenant.email,
+      zip_code: !newTenant.zip_code,
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((error) => error);
+  };
+
   const handleSave = async () => {
-    if (!newTenant.name || !newTenant.cpf || !newTenant.contact || !newTenant.email) {
+    if (!validateFields()) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
+    // limpar mascaras
+    newTenant.cpf = newTenant.cpf.replace(/[^0-9]+/g, '');
+    newTenant.contact = newTenant.contact.replace(/[^0-9]+/g, '');
+    newTenant.emergency_contact = newTenant.emergency_contact
+      ? newTenant?.emergency_contact?.replace(/[^0-9]+/g, '')
+      : null;
 
     try {
       if (tenantId) {
@@ -90,7 +118,11 @@ const TenantDetails = () => {
     <>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <TextInput
-          label="Nome"
+          label={
+            <Text>
+              Nome <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={newTenant.name}
           style={styles.input}
           onChangeText={(text) => handleInputChange('name', text)}
@@ -102,36 +134,74 @@ const TenantDetails = () => {
             />
           }
         />
-        <TextInput
-          label="CPF"
+        {errors.name && (
+          <HelperText type="error" visible={errors.name}>
+            Nome é obrigatório!
+          </HelperText>
+        )}
+        <TextInputMask
+          type="cpf"
           value={newTenant.cpf}
-          style={styles.input}
           onChangeText={(text) => handleInputChange('cpf', text)}
-          keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="card-account-details" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
-          label="Contato"
-          value={newTenant.contact}
           style={styles.input}
-          onChangeText={(text) => handleInputChange('contact', text)}
-          keyboardType="phone-pad"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="phone" size={size} color={color} />
-              )}
-            />
-          }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: (
+              <Text>
+                CPF <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="card-account-details" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
         />
+        {errors.cpf && (
+          <HelperText type="error" visible={errors.cpf}>
+            CPF é obrigatório!
+          </HelperText>
+        )}
+        <TextInputMask
+          type="cel-phone"
+          options={{
+            maskType: 'BRL',
+            withDDD: true,
+            dddMask: '(99) ',
+          }}
+          value={newTenant.contact}
+          onChangeText={(text) => handleInputChange('contact', text)}
+          style={styles.input}
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: (
+              <Text>
+                Contato <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="phone" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
+        />
+        {errors.contact && (
+          <HelperText type="error" visible={errors.contact}>
+            Contato é obrigatório!
+          </HelperText>
+        )}
         <TextInput
-          label="Email"
+          label={
+            <Text>
+              Email <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={newTenant.email || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('email', text)}
@@ -144,6 +214,37 @@ const TenantDetails = () => {
             />
           }
         />
+        {errors.email && (
+          <HelperText type="error" visible={errors.email}>
+            Email é obrigatório!
+          </HelperText>
+        )}
+        <TextInputMask
+          type="zip-code"
+          value={newTenant.zip_code}
+          onChangeText={(text) => handleInputChange('zip_code', text)}
+          style={styles.input}
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: (
+              <Text>
+                CEP <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="map-marker" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
+        />
+        {errors.zip_code && (
+          <HelperText type="error" visible={errors.zip_code}>
+            CEP é obrigatório!
+          </HelperText>
+        )}
         <TextInput
           label="Profissão"
           value={newTenant.profession || ''}
@@ -199,33 +300,46 @@ const TenantDetails = () => {
             />
           )}
         </>
-        <TextInput
-          label="Contato de Emergência"
+        <TextInputMask
+          type="cel-phone"
+          options={{
+            maskType: 'BRL',
+            withDDD: true,
+            dddMask: '(99) ',
+          }}
           value={newTenant.emergency_contact || ''}
-          style={styles.input}
           onChangeText={(text) => handleInputChange('emergency_contact', text)}
-          keyboardType="phone-pad"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="phone-in-talk" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
-          label="Renda"
-          value={newTenant.income ? newTenant.income.toString() : ''}
           style={styles.input}
-          onChangeText={(text) => handleInputChange('income', Number(text))}
-          keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="currency-usd" size={size} color={color} />
-              )}
-            />
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: 'Contato de Emergência',
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="phone-in-talk" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
+        />
+        <TextInputMask
+          type="money"
+          value={newTenant.income ? newTenant.income.toString() : ''}
+          onChangeText={(text) =>
+            handleInputChange('income', Number(text.replace(/[^0-9,-]+/g, '')))
           }
+          style={styles.input}
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: 'Renda',
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="currency-usd" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
         />
         <TextInput
           label="Residentes"
@@ -277,20 +391,6 @@ const TenantDetails = () => {
             <TextInput.Icon
               icon={({ size, color }) => (
                 <MaterialCommunityIcons name="numeric" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
-          label="CEP"
-          value={newTenant.zip_code || ''}
-          style={styles.input}
-          onChangeText={(text) => handleInputChange('zip_code', text)}
-          keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="map-marker" size={size} color={color} />
               )}
             />
           }

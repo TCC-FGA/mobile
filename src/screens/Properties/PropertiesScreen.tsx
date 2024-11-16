@@ -159,7 +159,7 @@ const PropertiesScreen = () => {
                   onDeletePropertie(item.id);
                 }}
                 title="Excluir"
-                leadingIcon={() => <MaterialCommunityIcons name="delete" size={20} />}
+                leadingIcon={() => <MaterialCommunityIcons name="delete" size={20} color="red" />}
               />
               <Menu.Item
                 onPress={() => {
@@ -177,6 +177,35 @@ const PropertiesScreen = () => {
                 }}
                 title="Ver Casas"
                 leadingIcon={() => <MaterialCommunityIcons name="home-outline" size={20} />}
+              />
+              <Menu.Item
+                onPress={() => {
+                  closeMenu();
+                  navigation.navigate('CustomDetailsScreen', {
+                    data: item,
+                    title: `${item.nickname}`,
+                    fieldsToShow: [
+                      'nickname',
+                      'zip_code',
+                      'city',
+                      'state',
+                      'neighborhood',
+                      'street',
+                      'number',
+                    ],
+                    labels: {
+                      nickname: 'Nome',
+                      zip_code: 'CEP',
+                      city: 'Cidade',
+                      state: 'Estado',
+                      neighborhood: 'Bairro',
+                      street: 'Rua',
+                      number: 'Número',
+                    },
+                  });
+                }}
+                title="Ver Propriedade"
+                leadingIcon={() => <MaterialCommunityIcons name="city-variant" size={20} />}
               />
             </Menu>
           </View>

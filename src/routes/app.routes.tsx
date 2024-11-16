@@ -27,10 +27,13 @@ import {
   ExpensesScreen,
   ExpensesDetails,
   NotificationsScreen,
+  CustomDetailsScreen,
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
 import { View } from 'react-native';
+import { UserDTO } from '~/dtos/UserDTO';
+import { TenantDTO } from '~/dtos/TenantDTO';
 
 type AppRoutesType = {
   PropertiesStack: {
@@ -72,6 +75,12 @@ type AppRoutesType = {
   };
   AccountSettingsScreen: undefined;
   NotificationsScreen: undefined;
+  CustomDetailsScreen: {
+    data: HouseDTO | PropertiesDTO | TenantDTO;
+    title: string;
+    fieldsToShow: (keyof HouseDTO | keyof PropertiesDTO | keyof TenantDTO)[];
+    labels: { [key in keyof HouseDTO | keyof PropertiesDTO | keyof TenantDTO]?: string };
+  };
 };
 
 export type AppNavigatorRoutesProps = BottomTabNavigationProp<AppRoutesType>;
@@ -362,6 +371,7 @@ function AppRoutes() {
       <Stack.Screen name="ExpensesStack" component={ExpensesStack} />
       <Stack.Screen name="AccountSettingsScreen" component={AccountSettingsScreen} />
       <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
+      <Stack.Screen name="CustomDetailsScreen" component={CustomDetailsScreen} />
     </Stack.Navigator>
   );
 }

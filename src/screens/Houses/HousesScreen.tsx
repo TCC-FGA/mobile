@@ -224,7 +224,7 @@ const HousesScreen = () => {
                 }}
                 title="Excluir"
                 leadingIcon={({ size, color }) => (
-                  <MaterialCommunityIcons name="delete" size={size} color={color} />
+                  <MaterialCommunityIcons name="delete" size={size} color="red" />
                 )}
               />
               {/* <Menu.Item
@@ -260,6 +260,25 @@ const HousesScreen = () => {
                 leadingIcon={({ size, color }) => (
                   <MaterialCommunityIcons name="cash" size={size} color={color} />
                 )}
+              />
+              <Menu.Item
+                onPress={() => {
+                  closeMenu();
+                  navigation.navigate('CustomDetailsScreen', {
+                    data: item,
+                    title: `${item.nickname}`,
+                    fieldsToShow: ['nickname', 'room_count', 'bathrooms', 'furnished', 'status'],
+                    labels: {
+                      nickname: 'Nome',
+                      room_count: 'Quantidade de quartos',
+                      bathrooms: 'Quantidade de banheiros',
+                      furnished: 'Mobiliada?',
+                      status: 'Status',
+                    },
+                  });
+                }}
+                title="Ver Casa"
+                leadingIcon={() => <MaterialCommunityIcons name="home-search" size={20} />}
               />
             </Menu>
           </View>
