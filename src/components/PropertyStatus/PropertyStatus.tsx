@@ -20,9 +20,6 @@ const PropertyStatus: React.FC<PropertyStatusProps> = ({ housesAvailability }) =
           Status dos Imóveis
         </Text>
         <IconButton
-          onPress={() => {
-            alert('Visão geral do controle financeiro');
-          }}
           icon={() => {
             return (
               <MaterialCommunityIcons

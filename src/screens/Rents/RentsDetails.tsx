@@ -7,6 +7,12 @@ import {
   Text,
   IconButton,
   ActivityIndicator,
+  Divider,
+  Modal,
+  Portal,
+  Card,
+  Avatar,
+  Appbar,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -43,6 +49,7 @@ const RentsDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [inspection, setInspection] = useState<ResponseInspectionDTO | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     if (rentId) {
@@ -165,27 +172,35 @@ const RentsDetails = () => {
     }
   };
 
+  const showMenuOption = () => {
+    if (!rent) return;
+
+    setModalVisible(true);
+  };
+
   return (
     <>
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
+        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.Content title="Meus Aluguéis" titleStyle={{ fontWeight: 'bold' }} />
+        <Appbar.Action icon="dots-vertical" onPress={showMenuOption} />
+      </Appbar.Header>
       {isLoadingPage ? (
         <ActivityIndicator animating color={theme.colors.primary} style={{ flex: 1 }} />
       ) : (
         <>
-          <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <ScrollView contentContainerStyle={{ padding: 16, backgroundColor: '#fff' }}>
             {rent && (
               <Surface style={styles.surface}>
                 <View style={styles.detailContainer} className="mb-4 justify-center">
-                  <IconButton
-                    icon="delete"
-                    iconColor={theme.colors.error}
-                    size={24}
-                    onPress={handleDeleteContract}
-                    style={{ marginRight: 8 }}
-                  />
                   <Text style={{ fontWeight: 'bold' }} variant="headlineSmall">
                     Detalhes do Contrato
                   </Text>
                 </View>
+                <Divider bold className="mb-2" theme={{ colors: { primary: 'green' } }} />
                 <View className="p-3 justify-center">
                   <View style={styles.detailContainer}>
                     <MaterialCommunityIcons
@@ -259,6 +274,7 @@ const RentsDetails = () => {
                       Nome do Inquilino: <Text style={styles.detailValue}>{rent.tenant.name}</Text>
                     </Text>
                   </View>
+                  <Divider bold className="mb-4" theme={{ colors: { primary: 'green' } }} />
                   {rent.signed_pdf && (
                     <View style={styles.detailContainer}>
                       <MaterialCommunityIcons
@@ -291,7 +307,21 @@ const RentsDetails = () => {
                       </Text>
                     </View>
                   )}
-                  <Button onPress={openPdfNotSigned}>Ver contrato</Button>
+                  {inspection?.signed_pdf && (
+                    <Button
+                      icon="file-pdf-box"
+                      mode="outlined"
+                      onPress={() => Linking.openURL(inspection.signed_pdf || '')}>
+                      Ver Laudo de Vistoria Assinado
+                    </Button>
+                  )}
+                  <Button
+                    icon="open-in-new"
+                    className="mt-2"
+                    mode="outlined"
+                    onPress={openPdfNotSigned}>
+                    Ver contrato
+                  </Button>
                 </View>
               </Surface>
             )}
@@ -299,7 +329,7 @@ const RentsDetails = () => {
           <View style={styles.buttonContainer}>
             {hasPayments && hasPayments.length > 0 ? (
               <Button
-                mode="contained"
+                mode="outlined"
                 onPress={() =>
                   navigation.navigate('PaymentsStack', {
                     screen: 'PaymentsScreen',
@@ -307,7 +337,11 @@ const RentsDetails = () => {
                   })
                 }
                 icon={() => (
-                  <MaterialCommunityIcons name="file-document-outline" size={20} color="#fff" />
+                  <MaterialCommunityIcons
+                    name="cash-multiple"
+                    size={20}
+                    color={theme.colors.primary}
+                  />
                 )}
                 contentStyle={{ paddingHorizontal: 16 }}
                 style={styles.button}>
@@ -388,6 +422,33 @@ const RentsDetails = () => {
           </View>
         </>
       )}
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={styles.modal}>
+          <Text style={styles.modalTitle}>Opções</Text>
+          <Button
+            mode="contained"
+            icon={() => <MaterialCommunityIcons name="cloud-upload" size={20} color="#fff" />}
+            onPress={handleUploadContract}
+            disabled={!rent?.signed_pdf}
+            style={styles.modalButton}>
+            Atualizar Contrato Assinado
+          </Button>
+          <Button
+            mode="contained"
+            icon={() => <MaterialCommunityIcons name="cloud-upload" size={20} color="#fff" />}
+            onPress={handleUploadInspection}
+            disabled={!inspection?.pdf_inspection}
+            style={styles.modalButton}>
+            Atualizar Vistoria Assinada
+          </Button>
+          <Button mode="text" onPress={() => setModalVisible(false)} style={styles.modalButton}>
+            Cancelar
+          </Button>
+        </Modal>
+      </Portal>
     </>
   );
 };
@@ -420,6 +481,21 @@ const styles = StyleSheet.create({
   detailValue: {
     color: '#494c4e',
     fontWeight: 'semibold',
+  },
+  modal: {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    alignSelf: 'center',
+  },
+  modalButton: {
+    marginVertical: 8,
   },
 });
 

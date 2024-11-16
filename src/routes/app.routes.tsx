@@ -132,9 +132,9 @@ function AppRoutesTab() {
         name="Home"
         component={Dashboard}
         options={{
-          tabBarLabel: 'Início',
+          tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" size={size} color={color} />
+            <MaterialCommunityIcons name="view-dashboard" size={size} color={color} />
           ),
         }}
       />
@@ -271,17 +271,7 @@ export function RentsStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="RentsScreen" component={RentsScreen} options={{ headerShown: false }} />
-      <Stack.Screen
-        name="RentsDetails"
-        component={RentsDetails}
-        options={{
-          headerTitle: 'Meus Aluguéis',
-          headerTitleAlign: 'center',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}
-      />
+      <Stack.Screen name="RentsDetails" component={RentsDetails} options={{ headerShown: false }} />
       <Stack.Screen
         name="RentsMainCreation"
         component={RentsMainCreation}

@@ -9,6 +9,7 @@ import {
   Dialog,
   Portal,
   RadioButton,
+  Divider,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -18,15 +19,17 @@ import { getPaymentInstallments, updatePaymentInstallment } from '~/api/payments
 import { format, parse } from 'date-fns';
 import { convertDateInDDMMYYYY, formatDate, parseFloatBR } from '~/helpers/convert_data';
 import { capitalizeWords } from '~/helpers/utils';
+import { theme } from '~/core/theme';
 
 type RouteParamsProps = {
   paymentId: number;
+  contractId: number;
 };
 
 const PaymentDetails = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
-  const { paymentId } = route.params as RouteParamsProps;
+  const { paymentId, contractId } = route.params as RouteParamsProps;
   const [payment, setPayment] = useState<PaymentDTO | null>(null);
   const [visible, setVisible] = useState(false);
   const [paymentType, setPaymentType] = useState<PaymentDTO['payment_type']>('dinheiro');
@@ -34,7 +37,7 @@ const PaymentDetails = () => {
   useEffect(() => {
     const fetchPayment = async () => {
       try {
-        const paymentsData = await getPaymentInstallments(paymentId);
+        const paymentsData = await getPaymentInstallments(contractId);
         const paymentData = paymentsData.find((p) => p.id === paymentId);
         setPayment(paymentData || null);
       } catch (error) {
@@ -73,7 +76,10 @@ const PaymentDetails = () => {
 
   return (
     <>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Detalhes do Pagamento" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
@@ -81,29 +87,45 @@ const PaymentDetails = () => {
         {payment && (
           <Surface style={styles.surface}>
             <Text style={styles.title}>Detalhes da Parcela</Text>
+            <Divider bold className="mb-2" />
             <Text style={styles.detail}>
-              Valor da Parcela: R${parseFloatBR(payment.installment_value)}
+              Valor da Parcela:{' '}
+              <Text style={styles.detailValue}>R${parseFloatBR(payment.installment_value)}</Text>
             </Text>
             {payment.payment_type !== 'None' && (
               <Text style={styles.detail}>
-                Método de Pagamento: {capitalizeWords(payment.payment_type)}
+                Método de Pagamento:{' '}
+                <Text style={styles.detailValue}>{capitalizeWords(payment.payment_type)}</Text>
               </Text>
             )}
             <Text style={styles.detail}>
               Data de Vencimento:{' '}
-              {convertDateInDDMMYYYY(parse(payment.due_date, 'yyyy-MM-dd', new Date()))}
+              <Text style={styles.detailValue}>
+                {convertDateInDDMMYYYY(parse(payment.due_date, 'yyyy-MM-dd', new Date()))}
+              </Text>
             </Text>
             {payment.payment_date && (
               <Text style={styles.detail}>
                 Data de Pagamento:{' '}
-                {convertDateInDDMMYYYY(parse(payment.payment_date, 'yyyy-MM-dd', new Date()))}
+                <Text style={styles.detailValue}>
+                  {convertDateInDDMMYYYY(parse(payment.payment_date, 'yyyy-MM-dd', new Date()))}
+                </Text>
               </Text>
             )}
-            <Chip
-              icon={payment.fg_paid ? 'check-circle' : 'alert-circle'}
-              style={[styles.chip, payment.fg_paid ? styles.chipPaid : styles.chipUnpaid]}>
-              {payment.fg_paid ? 'Pago' : 'Em Aberto'}
-            </Chip>
+            <Divider bold className="mb-2 mt-2" />
+            <View style={{ alignItems: 'center', marginTop: 2 }}>
+              <Chip
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons
+                    name={payment.fg_paid ? 'check-circle' : 'alert-circle'}
+                    size={size}
+                    color="black"
+                  />
+                )}
+                style={[styles.chip, payment.fg_paid ? styles.chipPaid : styles.chipUnpaid]}>
+                {payment.fg_paid ? 'Pago' : 'Em Aberto'}
+              </Chip>
+            </View>
           </Surface>
         )}
       </ScrollView>
@@ -118,6 +140,7 @@ const PaymentDetails = () => {
         </Button>
         <Button
           mode="contained"
+          disabled={!payment?.fg_paid}
           onPress={handleGenerateReceipt}
           icon={() => (
             <MaterialCommunityIcons name="file-document-outline" size={20} color="#fff" />
@@ -135,7 +158,7 @@ const PaymentDetails = () => {
               value={paymentType}>
               <View style={styles.radioItem}>
                 <RadioButton value="dinheiro" />
-                <Text>Dinheiro</Text>
+                <Text>Dinheiro/PIX</Text>
               </View>
               <View style={styles.radioItem}>
                 <RadioButton value="cartao" />
@@ -153,7 +176,9 @@ const PaymentDetails = () => {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={hideDialog}>Cancelar</Button>
-            <Button onPress={handleMarkAsPaid}>Marcar como Pago</Button>
+            <Button mode="outlined" onPress={handleMarkAsPaid}>
+              Marcar como Pago
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -163,20 +188,27 @@ const PaymentDetails = () => {
 
 const styles = StyleSheet.create({
   surface: {
-    padding: 16,
-    marginVertical: 8,
+    padding: 24,
+    marginVertical: 16,
     borderRadius: 8,
     elevation: 2,
   },
   title: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 12,
+    alignSelf: 'center',
   },
   detail: {
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: 18,
+    marginBottom: 6,
     fontWeight: 'bold',
+    paddingLeft: 8,
+  },
+  detailValue: {
+    color: 'gray',
+    fontWeight: 'normal',
+    fontSize: 18,
   },
   chip: {
     marginTop: 8,

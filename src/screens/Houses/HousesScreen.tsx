@@ -258,8 +258,8 @@ const HousesScreen = () => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
-      <Appbar.Header>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+      <Appbar.Header mode="center-aligned">
         <Appbar.BackAction
           onPress={() => {
             navigation.goBack();
@@ -276,7 +276,7 @@ const HousesScreen = () => {
             <Appbar.Content className="ml-2" title={propertyNickname} />
           </View>
         ) : (
-          <Appbar.Content title="Todas as Casas" />
+          <Appbar.Content title="Todas as Casas" titleStyle={{ fontWeight: 'bold' }} />
         )}
       </Appbar.Header>
 
@@ -315,6 +315,7 @@ const HousesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   image: {
     width: 74,

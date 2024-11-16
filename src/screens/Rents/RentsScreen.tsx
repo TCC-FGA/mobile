@@ -83,6 +83,7 @@ const RentsScreen = () => {
     <SafeAreaView style={styles.container}>
       <CustomAppBar title="Aluguéis" />
       <FlatList
+        className="mt-2"
         data={rents}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}

@@ -1,14 +1,10 @@
 import * as React from 'react';
-import { Appbar, Avatar, Portal, Modal } from 'react-native-paper';
-import { Platform, SafeAreaView, StyleSheet, View } from 'react-native';
+import { Appbar, Avatar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '~/core/theme';
 import { useAuth } from '~/hooks/useAuth';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { useNavigation } from '@react-navigation/native';
-
-const MORE_ICON = Platform.OS === 'ios' ? 'dots-horizontal' : 'dots-vertical';
-const modeAppBar = Platform.OS === 'ios' ? 'center-aligned' : 'small';
 
 type AppBarProps = {
   title: string;
@@ -23,10 +19,17 @@ const CustomAppBar: React.FC<AppBarProps> = ({ title }) => {
 
   return (
     <>
-      <Appbar.Header mode="center-aligned" theme={theme}>
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.Action
           icon={() => (
-            <MaterialCommunityIcons size={24} name="bell" color={theme.colors.onSurfaceVariant} />
+            <MaterialCommunityIcons
+              size={24}
+              name="bell-badge"
+              color={theme.colors.onSurfaceVariant}
+            />
           )}
           onPress={handleToggleModal}
         />
@@ -45,14 +48,5 @@ const CustomAppBar: React.FC<AppBarProps> = ({ title }) => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  modal: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
-  },
-});
 
 export default CustomAppBar;

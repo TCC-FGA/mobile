@@ -15,6 +15,7 @@ import { UserDTO } from '~/dtos/UserDTO';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { useAuth } from '~/hooks/useAuth';
+import { theme } from '~/core/theme';
 
 type RouteParamsProps = {
   paymentId: number;
@@ -168,7 +169,10 @@ const ReceiptScreen = () => {
 
   return (
     <>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Recibo" titleStyle={{ fontWeight: 'bold' }} />
         <Appbar.Action icon="printer" onPress={handlePrint} />

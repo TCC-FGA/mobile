@@ -55,9 +55,6 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
           Controle Financeiro
         </Text>
         <IconButton
-          onPress={() => {
-            alert('Visão geral do controle financeiro');
-          }}
           icon={() => {
             return (
               <MaterialCommunityIcons

@@ -9,6 +9,7 @@ import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { convertDateInDDMMYYYY } from '~/helpers/convert_data';
 import { parse } from 'date-fns';
 import { capitalizeWords } from '~/helpers/utils';
+import { theme } from '~/core/theme';
 
 type RouteParamsProps = {
   houseId: number;
@@ -75,7 +76,7 @@ const ExpensesScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header>
+      <Appbar.Header elevated style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Despesas" />
       </Appbar.Header>

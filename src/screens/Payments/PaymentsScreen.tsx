@@ -8,6 +8,7 @@ import { getPaymentInstallments } from '~/api/payments';
 import { format, parse, set } from 'date-fns';
 import { convertDateInDDMMYYYY, parseFloatBR } from '~/helpers/convert_data';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { theme } from '~/core/theme';
 
 type RouteParamsProps = {
   contractId: number;
@@ -43,7 +44,7 @@ const PaymentsScreen = () => {
       onPress={() =>
         navigation.navigate('PaymentsStack', {
           screen: 'PaymentsDetails',
-          params: { paymentId: item.id },
+          params: { paymentId: item.id, contractId },
         })
       }>
       <View style={styles.paymentContainer}>
@@ -75,7 +76,10 @@ const PaymentsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Pagamentos" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>

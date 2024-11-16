@@ -6,19 +6,19 @@ import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '~/core/theme';
 import CustomAppBar from '~/components/AppBar/AppBar';
+import { th } from 'date-fns/locale';
 const SeeMoreScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-
-  const onNavigate = (screen: string) => {
-    console.log(`Navigating to ${screen}`);
-  };
 
   return (
     <>
       <CustomAppBar title="Mais opções" />
       <SafeAreaView style={styles.container}>
         {/* Appbar com ícone de usuário e sino de notificação */}
-        <Surface className="bg-white rounded-md mt-3 m-4" elevation={1}>
+        <Surface
+          style={{ backgroundColor: theme.colors.surface }}
+          className="rounded-md mt-3 m-4"
+          elevation={1}>
           {/* Listagem de itens usando List.Item para estilo similar ao Drawer */}
           <View style={styles.listContainer}>
             <List.Section>
@@ -147,7 +147,7 @@ const SeeMoreScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#fff',
   },
   listContainer: {
     paddingHorizontal: 16,

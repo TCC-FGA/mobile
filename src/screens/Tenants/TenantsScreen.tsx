@@ -18,6 +18,7 @@ import { getTenants } from '~/api/tenants';
 import { TenantDTO } from '~/dtos/TenantDTO';
 import GuarantorComponent from '~/components/guarantor/GuarantorComponent';
 import { set } from 'date-fns';
+import { theme } from '~/core/theme';
 
 const getInitials = (name: string) => {
   const names = name.split(' ');
@@ -170,7 +171,10 @@ const TenantScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        elevated
+        style={{ backgroundColor: theme.colors.surface, alignSelf: 'center' }}
+        mode="center-aligned">
         {isSearchVisible ? (
           <Searchbar
             placeholder="Pesquisar"
@@ -188,6 +192,7 @@ const TenantScreen = () => {
         <Appbar.Action icon="magnify" onPress={toggleSearchBar} />
       </Appbar.Header>
       <FlatList
+        className="mt-2"
         data={tenants}
         renderItem={renderItem}
         refreshing={refreshing}

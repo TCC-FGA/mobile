@@ -84,8 +84,8 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
         withCustomBarColorFromData
         width={screenWidth - 32}
         height={220}
-        yAxisLabel="R$"
-        yAxisSuffix=""
+        yAxisLabel=""
+        yAxisSuffix="R$"
         chartConfig={{
           backgroundGradientFrom: theme.colors.primary,
           backgroundGradientFromOpacity: 0.1,
@@ -103,12 +103,15 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
           },
           propsForLabels: {
             fontWeight: 'bold',
+            fontSize: 10,
           },
         }}
         style={{
           marginVertical: 8,
           borderRadius: 16,
         }}
+        withInnerLines={false}
+        showValuesOnTopOfBars
       />
 
       <View style={styles.headerWrapper}>

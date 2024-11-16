@@ -70,7 +70,10 @@ const SignatureScreen = () => {
 
   return (
     <>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Assinatura" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
@@ -100,6 +103,7 @@ const SignatureScreen = () => {
             </>
           ) : null} */}
           <Text variant="titleLarge">Sua assinatura:</Text>
+          <Text variant="labelSmall">Assinatura será utilizada nos recibos de pagamentos</Text>
           <Signature
             ref={signatureRef}
             onOK={handleSignature}

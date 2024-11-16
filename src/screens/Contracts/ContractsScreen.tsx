@@ -141,7 +141,10 @@ const ContractsScreen = () => {
 
   return (
     <>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Contratos" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>

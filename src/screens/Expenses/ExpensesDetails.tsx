@@ -9,6 +9,7 @@ import { ExpenseDTO } from '~/dtos/ExpenseDTO';
 import CustomPicker from '~/components/CustomPicker';
 import { TextInputMask } from 'react-native-masked-text';
 import { convertStringDateInDDMMYYYY, convertStringDateToYYYYMMDD } from '~/helpers/convert_data';
+import { theme } from '~/core/theme';
 
 type RouteParamsProps = {
   houseId?: number;
@@ -96,7 +97,7 @@ const ExpenseDetails: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header>
+      <Appbar.Header elevated style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={expenseId ? 'Editar Despesa' : 'Nova Despesa'} />
       </Appbar.Header>
