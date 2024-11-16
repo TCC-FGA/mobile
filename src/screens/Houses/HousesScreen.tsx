@@ -17,7 +17,7 @@ import {
 } from 'react-native-paper';
 import { HouseDTO } from '~/dtos/HouseDTO';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '~/core/theme';
 import { deleteHouse, getHouses, getHousesByPropertyId } from '~/api/houses';
@@ -36,6 +36,7 @@ const HousesScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
+  const isFocused = useIsFocused();
   const closeMenu = () => setMenuVisible(null);
   const { propertyId, propertyPhoto, propertyNickname } = route.params as HousesScreenProps;
 
@@ -58,8 +59,10 @@ const HousesScreen = () => {
   };
 
   useEffect(() => {
-    fetchHouses();
-  }, [propertyId]);
+    if (isFocused) {
+      fetchHouses();
+    }
+  }, [propertyId, isFocused]);
 
   const onRefresh = async () => {
     setRefreshing(true);

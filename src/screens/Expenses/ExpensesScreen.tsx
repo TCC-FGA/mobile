@@ -4,7 +4,7 @@ import { List, FAB, Appbar, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getExpensesByHouseId, deleteExpense } from '~/api/expenses';
 import { ExpenseDTO } from '~/dtos/ExpenseDTO';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useIsFocused, useNavigation, useRoute } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { convertDateInDDMMYYYY } from '~/helpers/convert_data';
 import { parse } from 'date-fns';
@@ -21,6 +21,7 @@ const ExpensesScreen: React.FC = () => {
   const { houseId } = route.params as RouteParamsProps;
   const [expenses, setExpenses] = useState<ExpenseDTO[]>([]);
   const [loading, setLoading] = useState(false);
+  const isFocused = useIsFocused();
 
   const fetchExpenses = async () => {
     setLoading(true);
@@ -36,25 +37,44 @@ const ExpensesScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchExpenses();
-  }, [houseId]);
+    if (isFocused) {
+      fetchExpenses();
+    }
+  }, [houseId, isFocused]);
 
   const handleDeleteExpense = async (expenseId: number) => {
-    try {
-      await deleteExpense(expenseId);
-      setExpenses(expenses.filter((expense) => expense.id !== expenseId));
-      Alert.alert('Sucesso', 'Despesa deletada com sucesso!');
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível deletar a despesa.');
-      console.error('Erro ao deletar a despesa:', error);
-    }
+    Alert.alert(
+      'Confirmar Exclusão',
+      'Você tem certeza que deseja excluir esta despesa?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteExpense(expenseId);
+              setExpenses(expenses.filter((expense) => expense.id !== expenseId));
+              Alert.alert('Sucesso', 'Despesa deletada com sucesso!');
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível deletar a despesa.');
+              console.error('Erro ao deletar a despesa:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const renderExpenseItem = ({ item }: { item: ExpenseDTO }) => (
     <List.Item
       title={`R$ ${typeof item.value === 'number' ? item.value.toFixed(2) : item.value}`}
       description={`${item.expense_type.toUpperCase()} - ${convertDateInDDMMYYYY(parse(item.expense_date as string, 'yyyy-MM-dd', new Date()))}`}
-      left={(props) => <List.Icon {...props} icon="currency-usd" color="red" />}
+      left={(props) => <List.Icon {...props} icon="finance" color="red" />}
       right={(props) => (
         <View style={styles.iconContainer}>
           <TouchableOpacity
@@ -76,9 +96,12 @@ const ExpensesScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header elevated style={{ backgroundColor: theme.colors.surface }}>
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Despesas" />
+        <Appbar.Content title="Despesas" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
       {loading ? (
         <View style={styles.loadingContainer}>
@@ -115,6 +138,7 @@ const ExpensesScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   loadingContainer: {
     flex: 1,

@@ -97,9 +97,15 @@ const ExpenseDetails: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header elevated style={{ backgroundColor: theme.colors.surface }}>
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={expenseId ? 'Editar Despesa' : 'Nova Despesa'} />
+        <Appbar.Content
+          title={expenseId ? 'Editar Despesa' : 'Nova Despesa'}
+          titleStyle={{ fontWeight: 'bold' }}
+        />
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.content}>
         <CustomPicker
@@ -174,6 +180,7 @@ const ExpenseDetails: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   content: {
     padding: 16,

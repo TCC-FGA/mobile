@@ -2,7 +2,7 @@ import React, { useState, useEffect, memo } from 'react';
 import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Card, Text, Avatar, Chip, Appbar, Divider, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getRents } from '~/api/rents';
 import { RentDTO } from '~/dtos/RentDTO';
@@ -19,6 +19,7 @@ const RentsScreen = () => {
   const [rents, setRents] = useState<RentDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const isFocused = useIsFocused();
 
   const fetchRents = async () => {
     try {
@@ -33,8 +34,10 @@ const RentsScreen = () => {
   };
 
   useEffect(() => {
-    fetchRents();
-  }, []);
+    if (isFocused) {
+      fetchRents();
+    }
+  }, [isFocused]);
 
   const onViewRent = (rent: RentDTO) => {
     navigation.navigate('RentsStack', {

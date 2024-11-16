@@ -12,12 +12,11 @@ import {
   FAB,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getTenants } from '~/api/tenants';
 import { TenantDTO } from '~/dtos/TenantDTO';
 import GuarantorComponent from '~/components/guarantor/GuarantorComponent';
-import { set } from 'date-fns';
 import { theme } from '~/core/theme';
 
 const getInitials = (name: string) => {
@@ -28,6 +27,7 @@ const getInitials = (name: string) => {
 
 const TenantScreen = () => {
   const [tenants, setTenants] = useState<TenantDTO[]>([]);
+  const [filteredTenants, setFilteredTenants] = useState<TenantDTO[]>([]);
   const [visibleMenu, setVisibleMenu] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -35,12 +35,14 @@ const TenantScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const [modalVisible, setModalVisible] = useState(false);
   const [itemTenant, setTenantItem] = useState<TenantDTO>();
+  const isFocused = useIsFocused();
 
   const fetchTenants = async () => {
     setRefreshing(true);
     try {
       const fetchedTenants = await getTenants();
       setTenants(fetchedTenants);
+      setFilteredTenants(fetchedTenants);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar os inquilinos.');
     } finally {
@@ -49,8 +51,10 @@ const TenantScreen = () => {
   };
 
   useEffect(() => {
-    fetchTenants();
-  }, []);
+    if (isFocused) {
+      fetchTenants();
+    }
+  }, [isFocused]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -61,11 +65,25 @@ const TenantScreen = () => {
     }
   };
 
-  const onChangeSearch = (query: string) => setSearchQuery(query);
+  const onChangeSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = tenants.filter(
+        (tenant) =>
+          tenant.name.toLowerCase().includes(query.toLowerCase()) ||
+          tenant.cpf.toLowerCase().includes(query.toLowerCase()) ||
+          tenant.contact.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredTenants(filtered);
+    } else {
+      setFilteredTenants(tenants);
+    }
+  };
 
   const toggleSearchBar = () => {
     setIsSearchVisible(!isSearchVisible);
     setSearchQuery('');
+    setFilteredTenants(tenants);
   };
 
   const openMenu = (tenantId: string) => setVisibleMenu(tenantId);
@@ -146,14 +164,6 @@ const TenantScreen = () => {
                 <Menu.Item
                   onPress={() => {
                     closeMenu();
-                    console.log('Ver contratos', item.name);
-                  }}
-                  title="Ver Contratos"
-                  leadingIcon="file-document-outline"
-                />
-                <Menu.Item
-                  onPress={() => {
-                    closeMenu();
                     navigation.navigate('CustomDetailsScreen', {
                       data: item,
                       title: `Inquilino ${item.name}`,
@@ -220,7 +230,7 @@ const TenantScreen = () => {
     <SafeAreaView style={styles.container}>
       <Appbar.Header
         elevated
-        style={{ backgroundColor: theme.colors.surface, alignSelf: 'center' }}
+        style={{ backgroundColor: theme.colors.surface }}
         mode="center-aligned">
         {isSearchVisible ? (
           <Searchbar
@@ -240,7 +250,7 @@ const TenantScreen = () => {
       </Appbar.Header>
       <FlatList
         className="mt-2"
-        data={tenants}
+        data={filteredTenants}
         renderItem={renderItem}
         refreshing={refreshing}
         onRefresh={onRefresh}

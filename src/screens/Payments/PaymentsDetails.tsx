@@ -161,11 +161,11 @@ const PaymentDetails = () => {
                 <Text>Dinheiro/PIX</Text>
               </View>
               <View style={styles.radioItem}>
-                <RadioButton value="cartao" />
+                <RadioButton value="cartão" />
                 <Text>Cartão</Text>
               </View>
               <View style={styles.radioItem}>
-                <RadioButton value="transferencia" />
+                <RadioButton value="transferência" />
                 <Text>Transferência</Text>
               </View>
               <View style={styles.radioItem}>
@@ -176,7 +176,7 @@ const PaymentDetails = () => {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={hideDialog}>Cancelar</Button>
-            <Button mode="outlined" onPress={handleMarkAsPaid}>
+            <Button mode="contained" onPress={handleMarkAsPaid}>
               Marcar como Pago
             </Button>
           </Dialog.Actions>

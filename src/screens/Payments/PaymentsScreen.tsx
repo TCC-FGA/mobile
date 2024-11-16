@@ -1,7 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { View, SafeAreaView, FlatList, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { Text, Chip, Appbar } from 'react-native-paper';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { PaymentDTO } from '~/dtos/PaymentDTO';
 import { getPaymentInstallments } from '~/api/payments';
@@ -20,6 +20,7 @@ const PaymentsScreen = () => {
   const { contractId } = route.params as RouteParamsProps;
   const [payments, setPayments] = useState<PaymentDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const isFocused = useIsFocused();
 
   const fetchPayments = async () => {
     try {
@@ -35,8 +36,10 @@ const PaymentsScreen = () => {
   };
 
   useEffect(() => {
-    fetchPayments();
-  }, [contractId]);
+    if (isFocused) {
+      fetchPayments();
+    }
+  }, [contractId, isFocused]);
 
   const renderItem = ({ item, index }: { item: PaymentDTO; index: number }) => (
     <TouchableOpacity

@@ -51,25 +51,27 @@ const RentsDetails = () => {
   const [inspection, setInspection] = useState<ResponseInspectionDTO | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const fetchRent = async () => {
+    if (rentId) {
+      setIsLoadingPage(true);
+      try {
+        const rentData = await getRentById(rentId);
+        const hasPayments = await getPaymentInstallments(rentId);
+        const inspectionData = await getInspectionByContractId(rentId);
+        setPayments(hasPayments);
+        setRent(rentData);
+        setInspection(inspectionData);
+        navigation.setOptions({ title: 'Detalhes do Aluguel' });
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível carregar os detalhes do aluguel.');
+      } finally {
+        setIsLoadingPage(false);
+      }
+    }
+  };
+
   useEffect(() => {
     if (rentId) {
-      const fetchRent = async () => {
-        setIsLoadingPage(true);
-        try {
-          const rentData = await getRentById(rentId);
-          const hasPayments = await getPaymentInstallments(rentId);
-          const inspectionData = await getInspectionByContractId(rentId);
-          setPayments(hasPayments);
-          setRent(rentData);
-          setInspection(inspectionData);
-          navigation.setOptions({ title: 'Detalhes do Aluguel' });
-        } catch (error) {
-          Alert.alert('Erro', 'Não foi possível carregar os detalhes do aluguel.');
-        } finally {
-          setIsLoadingPage(false);
-        }
-      };
-
       fetchRent();
     } else {
       navigation.setOptions({ title: 'Adicionar Aluguel' });
@@ -95,6 +97,8 @@ const RentsDetails = () => {
       }
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível anexar o contrato.');
+    } finally {
+      fetchRent();
     }
   };
 
@@ -169,6 +173,8 @@ const RentsDetails = () => {
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível anexar o laudo de vistoria.');
       console.error('Erro ao anexar o laudo de vistoria:', error);
+    } finally {
+      fetchRent();
     }
   };
 
@@ -443,6 +449,14 @@ const RentsDetails = () => {
             disabled={!inspection?.pdf_inspection}
             style={styles.modalButton}>
             Atualizar Vistoria Assinada
+          </Button>
+          <Button
+            mode="contained"
+            buttonColor={theme.colors.error}
+            icon={() => <MaterialCommunityIcons name="delete" size={20} color="#fff" />}
+            onPress={handleDeleteContract}
+            style={styles.modalButton}>
+            Excluir Contrato
           </Button>
           <Button mode="text" onPress={() => setModalVisible(false)} style={styles.modalButton}>
             Cancelar

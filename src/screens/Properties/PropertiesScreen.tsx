@@ -22,7 +22,7 @@ import {
   Divider,
   Badge,
 } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 import { theme } from '~/core/theme';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
@@ -36,13 +36,16 @@ const PropertiesScreen = () => {
   const [properties, setProperties] = useState<PropertiesDTO[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState<string | null>(null);
+  const isFocused = useIsFocused();
 
   const openMenu = (propertyId: string) => setVisibleMenu(propertyId);
   const closeMenu = () => setVisibleMenu(null);
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    if (isFocused) {
+      fetchProperties();
+    }
+  }, [isFocused]);
 
   const fetchProperties = async () => {
     try {
