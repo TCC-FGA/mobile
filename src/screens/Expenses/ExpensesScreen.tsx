@@ -74,7 +74,7 @@ const ExpensesScreen: React.FC = () => {
     <List.Item
       title={`R$ ${typeof item.value === 'number' ? item.value.toFixed(2) : item.value}`}
       description={`${item.expense_type.toUpperCase()} - ${convertDateInDDMMYYYY(parse(item.expense_date as string, 'yyyy-MM-dd', new Date()))}`}
-      left={(props) => <List.Icon {...props} icon="finance" color="red" />}
+      left={(props) => <List.Icon {...props} icon="finance" color={theme.colors.error} />}
       right={(props) => (
         <View style={styles.iconContainer}>
           <TouchableOpacity
@@ -87,7 +87,7 @@ const ExpensesScreen: React.FC = () => {
             <List.Icon {...props} icon="pencil" color="blue" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => handleDeleteExpense(item.id)}>
-            <List.Icon {...props} icon="delete" color="red" />
+            <List.Icon {...props} icon="delete" color={theme.colors.error} />
           </TouchableOpacity>
         </View>
       )}
@@ -151,10 +151,10 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: 22,
     right: 0,
-    bottom: 0,
-    backgroundColor: 'red',
+    bottom: 35,
+    backgroundColor: theme.colors.error,
   },
   iconContainer: {
     flexDirection: 'row',
