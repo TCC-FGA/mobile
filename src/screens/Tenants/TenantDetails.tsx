@@ -11,6 +11,8 @@ import { theme } from '~/core/theme';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text';
 import { err } from 'react-native-svg';
+import CustomPicker from '~/components/CustomPicker';
+import { statesOfBrazil } from '~/dtos/PropertiesDTO';
 
 type RouteParamsProps = {
   tenantId?: number;
@@ -408,19 +410,16 @@ const TenantDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Estado"
-          value={newTenant.state || ''}
-          style={styles.input}
-          onChangeText={(text) => handleInputChange('state', text)}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="map" size={size} color={color} />
-              )}
-            />
-          }
-        />
+        <View className="mb-4">
+          <CustomPicker
+            data={statesOfBrazil}
+            selectedValue={newTenant.state ?? ''}
+            onValueChange={(value) => handleInputChange('state', value.value)}
+            placeholder="Selecione um estado"
+            leftIcon="map-marker"
+            title="Estado"
+          />
+        </View>
       </ScrollView>
       <View
         style={{
