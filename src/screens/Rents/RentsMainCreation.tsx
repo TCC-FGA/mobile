@@ -96,11 +96,6 @@ const RentsMainCreation = () => {
     return false;
   };
 
-  if (!validateDates(startDate, endDate)) {
-    Alert.alert('Atenção', 'A data de início deve ser anterior à data de fim do contrato.');
-    return;
-  }
-
   const handleSubmit = async () => {
     if (
       !selectedProperty ||
@@ -114,6 +109,11 @@ const RentsMainCreation = () => {
       !reajustment_rate
     ) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    if (!validateDates(startDate, endDate)) {
+      Alert.alert('Atenção', 'A data de início deve ser anterior à data de fim do contrato.');
       return;
     }
 
