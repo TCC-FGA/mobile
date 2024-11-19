@@ -68,7 +68,7 @@ const PaymentDetails = () => {
   const handleGenerateReceipt = () => {
     navigation.navigate('PaymentsStack', {
       screen: 'ReceiptScreen',
-      params: { paymentId: payment?.id, rentId: payment?.id },
+      params: { paymentId: payment?.id, rentId: contractId },
     });
   };
 
@@ -95,7 +95,7 @@ const PaymentDetails = () => {
             {payment.payment_type !== 'None' && (
               <Text style={styles.detail}>
                 Método de Pagamento:{' '}
-                <Text style={styles.detailValue}>{capitalizeWords(payment.payment_type)}</Text>
+                <Text style={styles.detailValue}>{payment.payment_type.toUpperCase()}</Text>
               </Text>
             )}
             <Text style={styles.detail}>

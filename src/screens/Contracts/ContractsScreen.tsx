@@ -177,7 +177,9 @@ const ContractsScreen = () => {
               ListEmptyComponent={() =>
                 !isLoadingTemplates && (
                   <View style={{ alignItems: 'center', marginTop: 16 }}>
-                    <Text style={{ fontSize: 16, color: '#666' }}>Nenhum template encontrado.</Text>
+                    <Text style={{ fontSize: 16, color: '#666' }}>
+                      Nenhum modelo de contrato encontrado.
+                    </Text>
                   </View>
                 )
               }

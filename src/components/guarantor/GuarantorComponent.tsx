@@ -196,6 +196,8 @@ const GuarantorComponent: React.FC<GuarantorComponentProps> = ({ tenantId, visib
             </Text>
           }
           value={guarantorData.email || ''}
+          keyboardType="email-address"
+          textContentType="emailAddress"
           onChangeText={(text) => setGuarantorData({ ...guarantorData, email: text })}
           style={styles.input}
           left={

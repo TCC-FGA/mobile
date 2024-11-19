@@ -74,7 +74,7 @@ const ContractDetails = () => {
     <>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <TextInput
-          label="Nome do Template"
+          label="Nome do Modelo"
           value={newTemplate.template_name}
           style={styles.input}
           onChangeText={(text) => handleInputChange('template_name', text)}
@@ -183,7 +183,7 @@ const ContractDetails = () => {
           padding: 10,
         }}>
         <Button mode="contained" onPress={handleSave} contentStyle={{ paddingHorizontal: 16 }}>
-          {templateId ? 'Atualizar Template' : 'Criar Template'}
+          {templateId ? 'Atualizar Template' : 'Criar Modelo'}
         </Button>
         <Button mode="text" onPress={() => navigation.goBack()}>
           Cancelar

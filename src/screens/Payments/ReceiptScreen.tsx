@@ -9,7 +9,7 @@ import { getPaymentInstallments } from '~/api/payments';
 import { getRentById } from '~/api/rents';
 import { format, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { parseFloatBR } from '~/helpers/convert_data';
+import { convertDateInDDMMYYYY, parseFloatBR } from '~/helpers/convert_data';
 import { api } from '~/services/api';
 import { UserDTO } from '~/dtos/UserDTO';
 import * as Print from 'expo-print';
@@ -113,12 +113,12 @@ const ReceiptScreen = () => {
                 <span id="receboDe" style="font-weight: normal; text-transform: uppercase; display: inline-block;">${rent ? rent.tenant.name : ''}, CPF nº ${rent ? rent.tenant.cpf : '000.000.000-00'}</span><br><br>
                 a importância de R$${payment ? parseFloatBR(payment.installment_value) : ''} referente ao mês de
                 <span id="correspondeA" style="font-weight: normal; text-transform: uppercase;">${payment ? translateMonth(new Date(payment.due_date)) : ''}</span><br><br>
-                Pagamento realizado em: ${payment && payment.payment_date ? format(new Date(payment.payment_date), 'dd/MM/yyyy') : 'N/A'} e para clareza firmo(amos) o presente.
+                Pagamento realizado em: ${payment?.payment_date ? convertDateInDDMMYYYY(parse(payment?.payment_date, 'yyyy-MM-dd', new Date())) : ''}. Para clareza, firmo(amos) o presente.
               </p>
               <p id="cidadeEstadoData" style="margin-top: 32px; text-align: center;">${format(new Date(), 'dd')} ${translateMonth(new Date())}.</p>
               <div style="display: flex; flex-direction: column; align-items: center; margin: 32px 0;">
                 <p style="font-size: 0.875rem; font-weight: bold; line-height: 1.25; text-align: center;">
-                  Assinatura do locador(a)
+                  Assinatura do(a) locador(a)
                 </p>
                 <br>
                 <div style="border-bottom: 1px solid #000; width: 200px; margin: 8px auto;">
@@ -216,9 +216,9 @@ const ReceiptScreen = () => {
               </Text>
               <Text style={styles.message}>
                 Pagamento realizado em:{' '}
-                {payment.payment_date
-                  ? format(new Date(payment.payment_date), 'dd/MM/yyyy')
-                  : 'N/A'}{' '}
+                {payment?.payment_date
+                  ? convertDateInDDMMYYYY(parse(payment?.payment_date, 'yyyy-MM-dd', new Date()))
+                  : ''}{' '}
                 e para clareza firmo(amos) o presente.
               </Text>
               <Text style={styles.date}>
@@ -227,7 +227,7 @@ const ReceiptScreen = () => {
 
               {/* Assinatura */}
               <View style={styles.signatureContainer}>
-                <Text style={styles.signatureLabel}>Assinatura do locatário(a)</Text>
+                <Text style={styles.signatureLabel}>Assinatura do(a) locador(a)</Text>
                 {signature ? (
                   <Image
                     source={{ uri: signature }}

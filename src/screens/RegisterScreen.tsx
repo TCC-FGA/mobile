@@ -29,10 +29,16 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
-import { ActivityIndicator, Button as BtnPaper, TextInput as Input } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Button as BtnPaper,
+  TextInput as Input,
+  Text as TextPaper,
+} from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { AuthRouterProps } from '~/routes/auth.routes';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { TextInputMask } from 'react-native-masked-text';
 
 const RegisterScreen = () => {
   const navigation = useNavigation<AuthRouterProps>();
@@ -43,7 +49,6 @@ const RegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState({ value: '', error: '' });
   const [cpf, setCpf] = useState({ value: '', error: '' });
   const [telephone, setTelephone] = useState({ value: '', error: '' });
-  const [monthly_income, setMonthlyIncome] = useState({ value: '', error: '' });
   const [loading, setLoading] = useState(false);
   const [birthDatePicker, setBirthDatePicker] = useState<Date>();
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -84,17 +89,6 @@ const RegisterScreen = () => {
         secureTextEntry: false,
         textContentType: 'telephoneNumber' as 'telephoneNumber',
         left: <Input.Icon icon={() => <MaterialCommunityIcons name="phone" size={20} />} />,
-      },
-    ],
-    [
-      {
-        label: 'Renda Mensal',
-        value: monthly_income,
-        setValue: setMonthlyIncome,
-        keyboardType: 'numeric' as KeyboardTypeOptions,
-        secureTextEntry: false,
-        textContentType: 'none' as 'none',
-        left: <Input.Icon icon={() => <MaterialCommunityIcons name="cash" size={20} />} />,
       },
     ],
     [
@@ -192,8 +186,6 @@ const RegisterScreen = () => {
           error = phoneValidator(input.value.value);
           setTelephone({ ...input.value, error });
           break;
-        case 'Renda Mensal':
-          break;
         default:
           break;
       }
@@ -229,8 +221,7 @@ const RegisterScreen = () => {
         photo: '',
         zip_code: '00000-000',
       });
-      console.log(response.data);
-      Alert.alert('Sucesso', `Usuário registrado com sucesso ->${response.data.user_id}`);
+      Alert.alert('Seja bem-vindo!', `Agora você está no e-aluguel! Aproveite!`);
       navigation.navigate('LoginScreen');
       await signIn(email.value, password.value);
 
@@ -277,6 +268,9 @@ const RegisterScreen = () => {
       <View style={styles.inputContainer}>
         {numSections === 1 && (
           <>
+            <TextPaper className="mb-2" variant="labelLarge">
+              Selecione a data de nascimento:
+            </TextPaper>
             <BtnPaper
               mode="outlined"
               onPress={showDatePickerHandler}

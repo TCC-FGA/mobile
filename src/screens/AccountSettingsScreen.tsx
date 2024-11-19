@@ -49,7 +49,6 @@ const AccountSettingsScreen: React.FC = () => {
   const [personalData, setPersonalData] = useState({
     name: user.name || '',
     telephone: user.telephone || '',
-    monthly_income: user.monthly_income ? user.monthly_income.toString() : '',
     cpf: user.cpf || '',
     birth_date: user.birth_date || '',
     email: user.email || '',
@@ -175,7 +174,6 @@ const AccountSettingsScreen: React.FC = () => {
         ...personalData,
         cpf: personalData.cpf.replace(/\D/g, ''),
         telephone: personalData.telephone.replace(/\D/g, ''),
-        monthly_income: parseFloat(personalData.monthly_income.replace(/\D/g, '')),
         birth_date: personalData.birth_date.split('/').reverse().join('-'),
       });
       if (response.status === 200) {
@@ -223,7 +221,7 @@ const AccountSettingsScreen: React.FC = () => {
   const renderHeader = () => {
     const avatar = user.photo ?? 'https://i.imgur.com/xCvzudW.png';
     const avatarBackground = 'https://i.imgur.com/rXVcgTZ.jpg';
-    const name = user.name;
+    const name = user.name.split(' ').slice(0, 2).join(' ');
 
     return (
       <View style={styles.headerContainer}>
@@ -492,7 +490,7 @@ const AccountSettingsScreen: React.FC = () => {
                     label: 'Data de Nascimento',
                   }}
                 />
-                <TextInputMask
+                {/* <TextInputMask
                   type="money"
                   value={personalData.monthly_income}
                   onChangeText={(text) => {
@@ -516,7 +514,7 @@ const AccountSettingsScreen: React.FC = () => {
                       </Text>
                     ),
                   }}
-                />
+                /> */}
                 <TextInput
                   label={
                     <Text>

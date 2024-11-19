@@ -208,6 +208,7 @@ const TenantDetails = () => {
           style={styles.input}
           onChangeText={(text) => handleInputChange('email', text)}
           keyboardType="email-address"
+          textContentType="emailAddress"
           left={
             <TextInput.Icon
               icon={({ size, color }) => (

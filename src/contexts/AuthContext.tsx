@@ -10,6 +10,7 @@ import {
   storageAuthTokenSave,
 } from '~/storage/storageAuthToken';
 import { setUserEmail, tagUserCreate } from '~/services/notifications';
+import { Platform } from 'react-native';
 
 export type AuthContextDataProps = {
   user: UserDTO;
@@ -54,8 +55,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     if (user && token) {
       userAndTokenUpdate(user, token);
       await updateUserData();
-      tagUserCreate(user.user_id);
-      setUserEmail(user.email);
+      if (Platform.OS === 'android') {
+        tagUserCreate(user.user_id);
+        setUserEmail(user.email);
+      }
     }
   }
 
