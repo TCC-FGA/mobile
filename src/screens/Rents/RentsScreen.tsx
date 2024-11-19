@@ -63,6 +63,13 @@ const RentsScreen = () => {
     });
   };
 
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+    return text;
+  };
+
   const renderItem = ({ item }: { item: RentDTO }) => (
     <TouchableOpacity activeOpacity={0.8} onPress={() => onViewRent(item)}>
       <Card style={styles.card}>
@@ -73,7 +80,7 @@ const RentsScreen = () => {
 
             {/* Informações do aluguel */}
             <View style={styles.info}>
-              <Text style={styles.cardTitle}>{item.house.nickname}</Text>
+              <Text style={styles.cardTitle}>{truncateText(item.house.nickname, 15)}</Text>
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="currency-usd" size={16} color="#666" />
                 <Text style={styles.infoText}>{parseFloatBR(item.base_value)}</Text>
@@ -174,6 +181,9 @@ const styles = StyleSheet.create({
   },
   chip: {
     marginLeft: 16,
+    position: 'absolute',
+    right: 16,
+    top: -5,
   },
   chipActive: {
     backgroundColor: '#4caf50',

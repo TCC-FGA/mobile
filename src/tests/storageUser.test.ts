@@ -16,7 +16,6 @@ describe('storageUser', () => {
     email: 'john.doe@example.com',
     password: '',
     telephone: '',
-    monthly_income: 0,
     cpf: '',
     birth_date: '',
     hashed_signature: null,

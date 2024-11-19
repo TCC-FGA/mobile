@@ -13,6 +13,7 @@ import { TextInputMask } from 'react-native-masked-text';
 import { err } from 'react-native-svg';
 import CustomPicker from '~/components/CustomPicker';
 import { statesOfBrazil } from '~/dtos/PropertiesDTO';
+import { stringToFloat } from '~/helpers/utils';
 
 type RouteParamsProps = {
   tenantId?: number;
@@ -328,9 +329,7 @@ const TenantDetails = () => {
         <TextInputMask
           type="money"
           value={newTenant.income ? newTenant.income.toString() : ''}
-          onChangeText={(text) =>
-            handleInputChange('income', Number(text.replace(/[^0-9,-]+/g, '')))
-          }
+          onChangeText={(text) => handleInputChange('income', stringToFloat(text))}
           style={styles.input}
           customTextInput={TextInput}
           customTextInputProps={{

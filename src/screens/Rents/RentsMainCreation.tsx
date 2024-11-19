@@ -19,6 +19,7 @@ import { TextInputMask } from 'react-native-masked-text';
 import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
 import { RentCreateDTO } from '~/dtos/RentDTO';
 import CustomPicker from '~/components/CustomPicker';
+import { stringToFloat } from '~/helpers/utils';
 
 const RentsMainCreation = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -117,19 +118,20 @@ const RentsMainCreation = () => {
       return;
     }
 
+    const reajustment_rate_parsed = reajustment_rate === 'IGPM' ? 'IGPM' : null;
+
     const newRent = {
       property_id: Number(selectedProperty),
       house_id: Number(selectedHouse),
       tenant_id: Number(selectedTenant),
       template_id: Number(selectedTemplate),
-      base_value: Number(rentValue),
+      base_value: stringToFloat(rentValue),
       due_date: Number(dueDay),
       start_date: formatDate(startDate),
       end_date: formatDate(endDate),
-      deposit_value: depositValue ? Number(depositValue) : null,
-      reajustment_rate: reajustment_rate as RentCreateDTO['reajustment_rate'],
+      deposit_value: depositValue ? stringToFloat(depositValue) : null,
+      reajustment_rate: reajustment_rate_parsed as RentCreateDTO['reajustment_rate'],
     };
-
     try {
       await createRent(newRent);
       Alert.alert('Sucesso', 'Contrato de aluguel criado com sucesso!');
@@ -332,8 +334,7 @@ const RentsMainCreation = () => {
                 type="money"
                 value={depositValue}
                 onChangeText={(text) => {
-                  const numericValue = text.replace(/[^0-9.,]/g, '').replace(',', '.');
-                  setDepositValue(numericValue);
+                  setDepositValue(text);
                 }}
                 style={styles.input}
                 keyboardType="numeric"
@@ -358,8 +359,7 @@ const RentsMainCreation = () => {
             type="money"
             value={rentValue}
             onChangeText={(text) => {
-              const numericValue = text.replace(/[^0-9.,]/g, '').replace(',', '.');
-              setRentValue(numericValue);
+              setRentValue(text);
             }}
             style={styles.input}
             keyboardType="numeric"
