@@ -34,7 +34,7 @@ const NotificationsModal = () => {
             kind: 1,
           },
           headers: {
-            Authorization: `Basic ${'api_key'}`,
+            Authorization: `Basic ${'client_id:client_secret'}`,
           },
         });
 
@@ -94,7 +94,10 @@ const NotificationsModal = () => {
 
   return (
     <>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title="Notificações" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>

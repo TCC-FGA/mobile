@@ -113,7 +113,7 @@ const TenantScreen = () => {
           <Card.Content style={styles.cardContent}>
             <View style={styles.tenantInfo}>
               {/* Avatar com as iniciais */}
-              <Avatar.Text size={48} label={getInitials(item.name)} style={styles.avatar} />
+              <Avatar.Text size={48} label={getInitials(item.name)} />
 
               {/* Informações do inquilino */}
               <View style={styles.info}>
@@ -306,9 +306,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     flex: 1,
-  },
-  avatar: {
-    backgroundColor: '#6200ee',
   },
   info: {
     flex: 1,

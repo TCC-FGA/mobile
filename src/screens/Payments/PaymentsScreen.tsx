@@ -53,7 +53,7 @@ const PaymentsScreen = () => {
       <View style={styles.paymentContainer}>
         <View style={styles.paymentInfo}>
           <Text style={styles.paymentTitle}>
-            Parcela {item.id} de {payments.length}
+            Parcela {index + 1} de {payments.length}
           </Text>
           <Text style={styles.dueDate}>
             Vence em {convertDateInDDMMYYYY(parse(item.due_date, 'yyyy-MM-dd', new Date()))}

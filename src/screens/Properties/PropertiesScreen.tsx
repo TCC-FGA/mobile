@@ -162,7 +162,7 @@ const PropertiesScreen = () => {
                   onDeletePropertie(item.id);
                 }}
                 title="Excluir"
-                leadingIcon={() => <MaterialCommunityIcons name="delete" size={20} color="red" />}
+                leadingIcon={() => <MaterialCommunityIcons name="delete" size={20} />}
               />
               <Menu.Item
                 onPress={() => {

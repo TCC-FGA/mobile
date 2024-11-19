@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { Card, Text, Avatar, Chip, Appbar, Divider, FAB } from 'react-native-paper';
+import { Card, Text, Avatar, Chip, Appbar, Divider, FAB, Searchbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
@@ -17,7 +17,9 @@ const getInitials = (name: string) => {
 
 const RentsScreen = () => {
   const [rents, setRents] = useState<RentDTO[]>([]);
+  const [filteredRents, setFilteredRents] = useState<RentDTO[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const isFocused = useIsFocused();
 
@@ -26,6 +28,7 @@ const RentsScreen = () => {
       setIsLoading(true);
       const fetchedRents = await getRents();
       setRents(fetchedRents);
+      setFilteredRents(fetchedRents);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível carregar os alugueis.');
     } finally {
@@ -38,6 +41,20 @@ const RentsScreen = () => {
       fetchRents();
     }
   }, [isFocused]);
+
+  const onChangeSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = rents.filter(
+        (rent) =>
+          rent.house.nickname.toLowerCase().includes(query.toLowerCase()) ||
+          rent.tenant.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredRents(filtered);
+    } else {
+      setFilteredRents(rents);
+    }
+  };
 
   const onViewRent = (rent: RentDTO) => {
     navigation.navigate('RentsStack', {
@@ -57,10 +74,6 @@ const RentsScreen = () => {
             {/* Informações do aluguel */}
             <View style={styles.info}>
               <Text style={styles.cardTitle}>{item.house.nickname}</Text>
-              {/* <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="map-marker" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.houseDto.}</Text>
-              </View> */}
               <View style={styles.infoRow}>
                 <MaterialCommunityIcons name="currency-usd" size={16} color="#666" />
                 <Text style={styles.infoText}>{parseFloatBR(item.base_value)}</Text>
@@ -85,9 +98,14 @@ const RentsScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <CustomAppBar title="Aluguéis" />
+      <Searchbar
+        placeholder="Buscar aluguel"
+        onChangeText={onChangeSearch}
+        value={searchQuery}
+        style={styles.searchbar}
+      />
       <FlatList
-        className="mt-2"
-        data={rents}
+        data={filteredRents}
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
@@ -162,6 +180,9 @@ const styles = StyleSheet.create({
   },
   chipInactive: {
     backgroundColor: '#f44336',
+  },
+  searchbar: {
+    margin: 10,
   },
 });
 

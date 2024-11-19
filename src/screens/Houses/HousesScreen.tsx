@@ -227,7 +227,7 @@ const HousesScreen = () => {
                 }}
                 title="Excluir"
                 leadingIcon={({ size, color }) => (
-                  <MaterialCommunityIcons name="delete" size={size} color="red" />
+                  <MaterialCommunityIcons name="delete" size={size} />
                 )}
               />
               {/* <Menu.Item
@@ -270,12 +270,11 @@ const HousesScreen = () => {
                   navigation.navigate('CustomDetailsScreen', {
                     data: item,
                     title: `${item.nickname}`,
-                    fieldsToShow: ['nickname', 'room_count', 'bathrooms', 'furnished', 'status'],
+                    fieldsToShow: ['nickname', 'room_count', 'bathrooms', 'status'],
                     labels: {
                       nickname: 'Nome',
                       room_count: 'Quantidade de quartos',
                       bathrooms: 'Quantidade de banheiros',
-                      furnished: 'Mobiliada?',
                       status: 'Status',
                     },
                   });
@@ -292,7 +291,10 @@ const HousesScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
-      <Appbar.Header mode="center-aligned">
+      <Appbar.Header
+        mode="center-aligned"
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction
           onPress={() => {
             navigation.goBack();

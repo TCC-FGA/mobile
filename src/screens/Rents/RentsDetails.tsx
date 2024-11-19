@@ -50,6 +50,7 @@ const RentsDetails = () => {
   const [isLoadingPage, setIsLoadingPage] = useState(false);
   const [inspection, setInspection] = useState<ResponseInspectionDTO | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loadSubmissions, setLoadSubmissions] = useState(false);
 
   const fetchRent = async () => {
     if (rentId) {
@@ -83,7 +84,7 @@ const RentsDetails = () => {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',
       });
-
+      setLoadSubmissions(true);
       if (result.assets && rent) {
         const formData = new FormData();
         formData.append('signed_pdf', {
@@ -99,6 +100,7 @@ const RentsDetails = () => {
       Alert.alert('Erro', 'Não foi possível anexar o contrato.');
     } finally {
       fetchRent();
+      setLoadSubmissions(false);
     }
   };
 
@@ -158,7 +160,7 @@ const RentsDetails = () => {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',
       });
-
+      setLoadSubmissions(true);
       if (result.assets && rent && inspection) {
         const formData = new FormData();
         formData.append('inspection_pdf', {
@@ -175,6 +177,7 @@ const RentsDetails = () => {
       console.error('Erro ao anexar o laudo de vistoria:', error);
     } finally {
       fetchRent();
+      setLoadSubmissions(false);
     }
   };
 
@@ -264,7 +267,7 @@ const RentsDetails = () => {
                       />
                       <Text variant="titleSmall" style={styles.detail}>
                         Taxa de Reajuste:{' '}
-                        <Text style={styles.detailValue}>{rent.reajustment_rate}%</Text>
+                        <Text style={styles.detailValue}>{rent.reajustment_rate}</Text>
                       </Text>
                     </View>
                   )}
@@ -330,6 +333,9 @@ const RentsDetails = () => {
                   </Button>
                 </View>
               </Surface>
+            )}
+            {loadSubmissions && (
+              <ActivityIndicator animating color={theme.colors.primary} style={{ flex: 1 }} />
             )}
           </ScrollView>
           <View style={styles.buttonContainer}>

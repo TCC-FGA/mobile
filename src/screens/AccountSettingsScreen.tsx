@@ -61,21 +61,38 @@ const AccountSettingsScreen: React.FC = () => {
   const navigation = useNavigation();
 
   const deleteAccount = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.delete('/users/me');
-      if (response.status === 204) {
-        Alert.alert('Conta excluída', 'Sua conta foi excluída com sucesso.');
-        signOut();
-      } else {
-        Alert.alert('Erro', 'Não foi possível excluir a conta.');
-      }
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível excluir a conta.');
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert(
+      'Confirmar Exclusão',
+      'Você tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            setIsLoading(true);
+            try {
+              const response = await api.delete('/users/me');
+              if (response.status === 204) {
+                Alert.alert('Conta excluída', 'Sua conta foi excluída com sucesso.');
+                signOut();
+              } else {
+                Alert.alert('Erro', 'Não foi possível excluir a conta.');
+              }
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível excluir a conta.');
+              console.error(error);
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const changePassword = async () => {

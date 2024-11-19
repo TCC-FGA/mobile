@@ -89,6 +89,18 @@ const RentsMainCreation = () => {
     setEndDate(currentDate);
   };
 
+  const validateDates = (startDate: Date | null, endDate: Date | null): boolean => {
+    if (startDate && endDate) {
+      return startDate <= endDate;
+    }
+    return false;
+  };
+
+  if (!validateDates(startDate, endDate)) {
+    Alert.alert('Atenção', 'A data de início deve ser anterior à data de fim do contrato.');
+    return;
+  }
+
   const handleSubmit = async () => {
     if (
       !selectedProperty ||
