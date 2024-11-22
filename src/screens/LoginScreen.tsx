@@ -1,5 +1,5 @@
-import React, { memo, useState } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, Alert } from 'react-native';
+import React, { memo, useState, useEffect } from 'react';
+import { TouchableOpacity, StyleSheet, Text, View, Alert, Keyboard } from 'react-native';
 import Background from '../components/Background';
 import Button from '../components/Button';
 import TextInput from '../components/TextInput';
@@ -9,6 +9,9 @@ import { useAuth } from '../hooks/useAuth';
 import { Navigation } from '../types';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '~/components/Logo';
+import { TextInput as Input } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { fi } from 'date-fns/locale';
 
 type Props = {
   navigation: Navigation;
@@ -18,6 +21,23 @@ const LoginScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
   const [password, setPassword] = useState({ value: '', error: '' });
   const { signIn } = useAuth();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const _onLoginPressed = async () => {
     const emailError = emailValidator(email.value);
@@ -30,6 +50,7 @@ const LoginScreen = ({ navigation }: Props) => {
     }
 
     try {
+      setIsLoading(true);
       const response = await signIn(email.value, password.value);
       if (!response) {
         Alert.alert('Erro ao fazer Login', 'Senha ou e-mail incorretos.');
@@ -37,20 +58,23 @@ const LoginScreen = ({ navigation }: Props) => {
     } catch (error) {
       Alert.alert('Erro ao fazer Login', 'Senha ou e-mail incorretos.');
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Background>
-      {/* <BackButton goBack={() => navigation.navigate('WelcomeScreen')} /> */}
       <SafeAreaView>
-        <View style={styles.containerHead}>
-          <Logo isIcon size="lg" style={styles.logo} />
-          <Text style={styles.headline}>Simplifique a gestão do seu imóvel.</Text>
-          <Text style={styles.paragraph}>
-            Faça login e descubra como é fácil administrar suas locações.
-          </Text>
-        </View>
+        {!isKeyboardVisible && (
+          <View style={styles.containerHead}>
+            <Logo isIcon size="lg" style={styles.logo} />
+            <Text style={styles.headline}>Simplifique a gestão do seu imóvel.</Text>
+            <Text style={styles.paragraph}>
+              Faça login e descubra como é fácil administrar suas locações.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.inputGroup}>
           <TextInput
@@ -63,6 +87,7 @@ const LoginScreen = ({ navigation }: Props) => {
             autoCapitalize="none"
             textContentType="emailAddress"
             keyboardType="email-address"
+            left={<Input.Icon icon={() => <MaterialCommunityIcons name="email" size={21} />} />}
           />
           <View style={styles.forgotPassword}>
             <TextInput
@@ -72,7 +97,16 @@ const LoginScreen = ({ navigation }: Props) => {
               onChangeText={(text) => setPassword({ value: text, error: '' })}
               error={!!password.error}
               errorText={password.error}
-              secureTextEntry
+              secureTextEntry={!showPassword}
+              left={<Input.Icon icon={() => <MaterialCommunityIcons name="lock" size={21} />} />}
+              right={
+                <Input.Icon
+                  onPress={() => setShowPassword(!showPassword)}
+                  icon={() => (
+                    <MaterialCommunityIcons name={showPassword ? 'eye-off' : 'eye'} size={21} />
+                  )}
+                />
+              }
             />
             <TouchableOpacity onPress={() => navigation.navigate('ForgotPasswordScreen')}>
               <Text style={styles.label}>Esqueceu sua senha?</Text>
@@ -80,7 +114,7 @@ const LoginScreen = ({ navigation }: Props) => {
           </View>
         </View>
 
-        <Button mode="contained" onPress={_onLoginPressed}>
+        <Button mode="contained" onPress={_onLoginPressed} loading={isLoading} disabled={isLoading}>
           Fazer Login
         </Button>
 

@@ -11,6 +11,9 @@ import { theme } from '../core/theme';
 import { emailValidator } from '../core/utils';
 import { api } from '../services/api';
 import { Navigation } from '../types';
+import { TextInput as Input } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { set } from 'date-fns';
 
 type Props = {
   navigation: Navigation;
@@ -18,6 +21,7 @@ type Props = {
 
 const ForgotPasswordScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState({ value: '', error: '' });
+  const [isLoading, setIsLoading] = useState(false);
 
   const _onSendPressed = async () => {
     const emailError = emailValidator(email.value);
@@ -27,14 +31,23 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
       return;
     }
 
-    await api.post('/users/forgot-password', { email: email.value });
+    setIsLoading(true);
 
-    Alert.alert(
-      'E-mail enviado',
-      'Se o e-mail fornecido for válido, enviaremos um link para a recuperação de sua senha. Por favor, verifique sua caixa de entrada e siga as instruções.'
-    );
+    try {
+      await api.post('/users/forgot-password', { email: email.value });
 
-    setEmail({ value: '', error: '' });
+      Alert.alert(
+        'E-mail enviado',
+        'Se o e-mail fornecido for válido, enviaremos um link para a recuperação de sua senha. Por favor, verifique sua caixa de entrada e siga as instruções.'
+      );
+
+      setEmail({ value: '', error: '' });
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível enviar o e-mail de recuperação de senha.');
+      console.error('Erro ao enviar e-mail de recuperação de senha:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -55,9 +68,10 @@ const ForgotPasswordScreen = ({ navigation }: Props) => {
         autoCapitalize="none"
         textContentType="emailAddress"
         keyboardType="email-address"
+        left={<Input.Icon icon={() => <MaterialCommunityIcons name="email" size={21} />} />}
       />
 
-      <Button mode="contained" onPress={_onSendPressed}>
+      <Button mode="contained" onPress={_onSendPressed} loading={isLoading} disabled={isLoading}>
         Enviar
       </Button>
 

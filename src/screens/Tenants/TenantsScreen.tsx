@@ -1,5 +1,5 @@
-import React, { memo, useState } from 'react';
-import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { memo, useState, useEffect } from 'react';
+import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import {
   Card,
   Text,
@@ -12,50 +12,13 @@ import {
   FAB,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
+import { getTenants } from '~/api/tenants';
+import { TenantDTO } from '~/dtos/TenantDTO';
+import GuarantorComponent from '~/components/guarantor/GuarantorComponent';
+import { theme } from '~/core/theme';
 
-// Mock dos dados TenantsDTO
-const tenantsMock = [
-  {
-    cpf: '123.456.789-00',
-    contact: '(11) 98765-4321',
-    email: 'vitor.farias@email.com',
-    name: 'Vitor Farias',
-    profession: 'Engenheiro',
-    marital_status: 'Solteiro',
-    birth_date: '1990-05-10',
-    emergency_contact: '(11) 99999-1234',
-    income: 7000,
-    residents: 2,
-    street: 'Rua das Flores',
-    neighborhood: 'Centro',
-    number: 123,
-    zip_code: '12345-678',
-    city: 'São Paulo',
-    state: 'SP',
-  },
-  {
-    cpf: '987.654.321-00',
-    contact: '(21) 91234-5678',
-    email: 'ana.silva@email.com',
-    name: 'Ana Silva',
-    profession: 'Médica',
-    marital_status: 'Casada',
-    birth_date: '1985-02-20',
-    emergency_contact: '(21) 98888-8765',
-    income: 10000,
-    residents: 3,
-    street: 'Rua das Laranjeiras',
-    neighborhood: 'Jardim América',
-    number: 456,
-    zip_code: '87654-321',
-    city: 'Rio de Janeiro',
-    state: 'RJ',
-  },
-];
-
-// Função para extrair as iniciais do nome
 const getInitials = (name: string) => {
   const names = name.split(' ');
   const initials = names[0][0] + names[names.length - 1][0];
@@ -63,16 +26,64 @@ const getInitials = (name: string) => {
 };
 
 const TenantScreen = () => {
+  const [tenants, setTenants] = useState<TenantDTO[]>([]);
+  const [filteredTenants, setFilteredTenants] = useState<TenantDTO[]>([]);
   const [visibleMenu, setVisibleMenu] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [itemTenant, setTenantItem] = useState<TenantDTO>();
+  const isFocused = useIsFocused();
 
-  const onChangeSearch = (query: string) => setSearchQuery(query);
+  const fetchTenants = async () => {
+    setRefreshing(true);
+    try {
+      const fetchedTenants = await getTenants();
+      setTenants(fetchedTenants);
+      setFilteredTenants(fetchedTenants);
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível carregar os inquilinos.');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isFocused) {
+      fetchTenants();
+    }
+  }, [isFocused]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchTenants();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const onChangeSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query) {
+      const filtered = tenants.filter(
+        (tenant) =>
+          tenant.name.toLowerCase().includes(query.toLowerCase()) ||
+          tenant.cpf.toLowerCase().includes(query.toLowerCase()) ||
+          tenant.contact.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredTenants(filtered);
+    } else {
+      setFilteredTenants(tenants);
+    }
+  };
 
   const toggleSearchBar = () => {
     setIsSearchVisible(!isSearchVisible);
     setSearchQuery('');
+    setFilteredTenants(tenants);
   };
 
   const openMenu = (tenantId: string) => setVisibleMenu(tenantId);
@@ -82,88 +93,145 @@ const TenantScreen = () => {
     navigation.navigate('TenantsStack', {
       screen: 'TenantDetails',
       params: {
-        tenant: null,
+        tenantId: null,
       },
     });
   };
 
-  const renderItem = ({ item }: { item: (typeof tenantsMock)[0] }) => (
-    <TouchableOpacity activeOpacity={0.8}>
-      <Card style={styles.card}>
-        <Card.Content style={styles.cardContent}>
-          <View style={styles.tenantInfo}>
-            {/* Avatar com as iniciais */}
-            <Avatar.Text size={48} label={getInitials(item.name)} style={styles.avatar} />
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
 
-            {/* Informações do inquilino */}
-            <View style={styles.info}>
-              <Text style={styles.name}>{item.name}</Text>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="phone" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.contact}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <MaterialCommunityIcons name="email" size={16} color="#666" />
-                <Text style={styles.infoText}>{item.email}</Text>
-              </View>
-            </View>
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
 
-            {/* Menu de opções (ícone de três pontinhos) */}
-            <Menu
-              visible={visibleMenu === item.cpf}
-              onDismiss={closeMenu}
-              anchor={
-                <IconButton
-                  icon={({ size, color }) => (
-                    <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
-                  )}
-                  onPress={() => openMenu(item.cpf)}
+  const renderItem = ({ item }: { item: TenantDTO }) => (
+    <>
+      <TouchableOpacity activeOpacity={0.8}>
+        <Card style={styles.card}>
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.tenantInfo}>
+              {/* Avatar com as iniciais */}
+              <Avatar.Text size={48} label={getInitials(item.name)} />
+
+              {/* Informações do inquilino */}
+              <View style={styles.info}>
+                <Text style={styles.name}>{item.name}</Text>
+                <View style={styles.infoRow}>
+                  <MaterialCommunityIcons name="phone" size={16} color="#666" />
+                  <Text style={styles.infoText}>{item.contact}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <MaterialCommunityIcons name="email" size={16} color="#666" />
+                  <Text style={styles.infoText}>{item.email}</Text>
+                </View>
+              </View>
+
+              {/* Menu de opções (ícone de três pontinhos) */}
+              <Menu
+                visible={visibleMenu === item.cpf}
+                onDismiss={closeMenu}
+                anchor={
+                  <IconButton
+                    icon={({ size, color }) => (
+                      <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
+                    )}
+                    onPress={() => openMenu(item.cpf)}
+                  />
+                }>
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    navigation.navigate('TenantsStack', {
+                      screen: 'TenantDetails',
+                      params: {
+                        tenantId: item.id,
+                      },
+                    });
+                  }}
+                  title="Editar"
+                  leadingIcon="pencil"
                 />
-              }>
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Editar', item.name);
-                }}
-                title="Editar"
-                leadingIcon="pencil"
-              />
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Excluir', item.name);
-                }}
-                title="Excluir"
-                leadingIcon="delete"
-              />
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Ver contratos', item.name);
-                }}
-                title="Ver Contratos"
-                leadingIcon="file-document-outline"
-              />
-              <Divider />
-              <Menu.Item
-                onPress={() => {
-                  closeMenu();
-                  console.log('Ver Detalhes', item.name);
-                }}
-                title="Ver Detalhes"
-                leadingIcon="account-details"
-              />
-            </Menu>
-          </View>
-        </Card.Content>
-      </Card>
-    </TouchableOpacity>
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    console.log('Excluir', item.name);
+                  }}
+                  title="Excluir"
+                  leadingIcon="delete"
+                />
+                <Menu.Item
+                  onPress={() => {
+                    closeMenu();
+                    navigation.navigate('CustomDetailsScreen', {
+                      data: item,
+                      title: `Inquilino ${item.name}`,
+                      fieldsToShow: [
+                        'name',
+                        'cpf',
+                        'contact',
+                        'email',
+                        'profession',
+                        'marital_status',
+                        'birth_date',
+                        'income',
+                        'residents',
+                        'street',
+                        'neighborhood',
+                        'number',
+                        'zip_code',
+                        'city',
+                        'state',
+                      ],
+                      labels: {
+                        name: 'Nome',
+                        cpf: 'CPF',
+                        contact: 'Contato',
+                        email: 'Email',
+                        profession: 'Profissão',
+                        marital_status: 'Estado Civil',
+                        emergency_contact: 'Contato de Emergência',
+                        income: 'Renda',
+                        residents: 'Residentes',
+                        street: 'Rua',
+                        neighborhood: 'Bairro',
+                        number: 'Número',
+                        zip_code: 'CEP',
+                        city: 'Cidade',
+                        state: 'Estado',
+                      },
+                    });
+                  }}
+                  title="Ver Inquilino"
+                  leadingIcon={() => (
+                    <MaterialCommunityIcons name="account-arrow-right" size={20} />
+                  )}
+                />
+                <Divider />
+                <Menu.Item
+                  onPress={() => {
+                    setTenantItem(item);
+                    closeMenu();
+                    handleOpenModal();
+                  }}
+                  title="Adicionar Fiador"
+                  leadingIcon="account-details"
+                />
+              </Menu>
+            </View>
+          </Card.Content>
+        </Card>
+      </TouchableOpacity>
+    </>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
+      <Appbar.Header
+        elevated
+        style={{ backgroundColor: theme.colors.surface }}
+        mode="center-aligned">
         {isSearchVisible ? (
           <Searchbar
             placeholder="Pesquisar"
@@ -173,21 +241,45 @@ const TenantScreen = () => {
             onBlur={toggleSearchBar}
           />
         ) : (
-          <Appbar.Content title="Inquilinos" />
+          <>
+            <Appbar.BackAction onPress={() => navigation.goBack()} />
+            <Appbar.Content title="Inquilinos" titleStyle={{ fontWeight: 'bold' }} />
+          </>
         )}
         <Appbar.Action icon="magnify" onPress={toggleSearchBar} />
       </Appbar.Header>
       <FlatList
-        data={tenantsMock}
+        className="mt-2"
+        data={filteredTenants}
         renderItem={renderItem}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         keyExtractor={(item) => item.cpf}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={() =>
+          !refreshing && (
+            <View style={{ alignItems: 'center', marginTop: 20 }}>
+              <Text>Nenhum inquilino encontrado.</Text>
+            </View>
+          )
+        }
       />
-      <FAB
-        icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
-        style={styles.fab}
-        onPress={onAddTenants}
-      />
+      {itemTenant && (
+        <GuarantorComponent
+          tenantId={itemTenant?.id}
+          visible={modalVisible}
+          onClose={handleCloseModal}
+        />
+      )}
+      {!modalVisible && (
+        <FAB
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="account-plus" size={size} color={color} />
+          )}
+          style={styles.fab}
+          onPress={onAddTenants}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -195,6 +287,7 @@ const TenantScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   list: {
     paddingHorizontal: 16,
@@ -213,9 +306,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     flex: 1,
-  },
-  avatar: {
-    backgroundColor: '#6200ee',
   },
   info: {
     flex: 1,

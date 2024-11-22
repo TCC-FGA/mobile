@@ -1,30 +1,65 @@
+import React from 'react';
 import { ProgressChart } from 'react-native-chart-kit';
-import { Incoming, progressChartDataAmountsReceived, TotalValue } from '~/data/FinancialControl';
 import { theme } from '~/core/theme';
 import { StyleSheet, View, Dimensions, Text } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { DashboardPaymentStatusDTO } from '~/api/dashboard';
 
 const width = Dimensions.get('window').width;
 const height = width * 0.4;
 
-function FinancialControl() {
+type FinancialControlProps = {
+  paymentStatus: DashboardPaymentStatusDTO | null;
+};
+
+const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) => {
   const graphStyle = {
     marginVertical: 8,
-    transform: [{ rotate: '180deg' }], // Gira para parecer um semicírculo
-    /*  ...chartConfig.style, */
+    transform: [{ rotate: '180deg' }],
+  };
+
+  if (!paymentStatus) {
+    return (
+      <View style={styles.containerHeaderFinancialControl}>
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
+
+  const totalPayments =
+    paymentStatus.total_monthly_paid +
+    paymentStatus.total_monthly_overdue +
+    paymentStatus.total_monthly_pending;
+
+  const progressChartDataAmountsReceived = {
+    labels: ['Recebidos'],
+    data: totalPayments > 0 ? [paymentStatus.total_monthly_paid / totalPayments] : [0],
+    value: paymentStatus.total_monthly_paid,
+  };
+
+  const Incoming = {
+    labels: ['A receber'],
+    value: paymentStatus.total_monthly_pending,
+  };
+
+  const TotalValue = {
+    labels: ['Total'],
+    value: totalPayments,
   };
 
   return (
     <View style={styles.containerHeaderFinancialControl}>
       <View style={styles.headerWrapper}>
-        <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
-          Controle Financeiro
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
+            Controle Financeiro
+          </Text>
+          <Text style={{ fontSize: 14, color: theme.colors.onSurfaceVariant, marginLeft: 4 }}>
+            (mês atual)
+          </Text>
+        </View>
         <IconButton
-          onPress={() => {
-            alert('Visão geral do controle financeiro');
-          }}
           icon={() => {
             return (
               <MaterialCommunityIcons
@@ -135,7 +170,8 @@ function FinancialControl() {
       </View>
     </View>
   );
-}
+};
+
 const styles = StyleSheet.create({
   containerHeaderFinancialControl: {
     marginVertical: 16,

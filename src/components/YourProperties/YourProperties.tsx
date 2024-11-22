@@ -1,8 +1,7 @@
 import { theme } from '~/core/theme';
-import { StyleSheet, View, Text, Dimensions } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { StyleSheet, View, Dimensions, Image } from 'react-native';
+import { Button, IconButton, Surface, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import CardStatus from '../CardStatus';
 
 const widthScreen = Dimensions.get('screen').width;
 
@@ -11,7 +10,7 @@ function YourProperties() {
     <View style={styles.containerStatus}>
       <View style={styles.headerWrapper}>
         <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
-          Status dos Imóveis
+          Seus Imóveis
         </Text>
         <IconButton
           onPress={() => {
@@ -28,29 +27,7 @@ function YourProperties() {
           }}
         />
       </View>
-      <View style={styles.cardList}>
-        <CardStatus
-          statusValue={10}
-          label="Disponíveis"
-          icon={() => (
-            <MaterialCommunityIcons name="home" size={28} color={theme.colors.onSurface} />
-          )}
-        />
-        <CardStatus
-          statusValue={20}
-          label="Alugados"
-          icon={() => (
-            <MaterialCommunityIcons name="home-account" size={28} color={theme.colors.onSurface} />
-          )}
-        />
-        <CardStatus
-          statusValue={5}
-          label="Manutenção"
-          icon={() => (
-            <MaterialCommunityIcons name="home-alert" size={28} color={theme.colors.onSurface} />
-          )}
-        />
-      </View>
+      <View></View>
     </View>
   );
 }
@@ -64,21 +41,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  cardList: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'center',
-    maxWidth: widthScreen,
+  cardProperties: {
+    padding: 4,
+    gap: 12,
   },
-  cardStatus: {
-    padding: 16,
-    borderRadius: 8,
-    justifyContent: 'center',
-    gap: 16,
-    backgroundColor: theme.colors.surface,
-  },
-  cardContet: {
-    flexDirection: 'column',
+  cardContentProperties: {
     gap: 4,
   },
 });

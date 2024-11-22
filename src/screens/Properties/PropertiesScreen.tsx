@@ -1,7 +1,15 @@
 import { PropertiesDTO } from '@dtos/PropertiesDTO';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { memo, useEffect, useState } from 'react';
-import { SafeAreaView, FlatList, View, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import {
+  SafeAreaView,
+  FlatList,
+  View,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import {
   Appbar,
   Card,
@@ -12,36 +20,54 @@ import {
   FAB,
   Menu,
   Divider,
+  Badge,
 } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 import { theme } from '~/core/theme';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { api } from '~/services/api';
+import CustomAppBar from '~/components/AppBar/AppBar';
 
 const PropertiesScreen = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProperties, setFilteredProperties] = useState<PropertiesDTO[]>([]);
   const [properties, setProperties] = useState<PropertiesDTO[]>([]);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [visibleMenu, setVisibleMenu] = useState<string | null>(null);
+  const isFocused = useIsFocused();
 
   const openMenu = (propertyId: string) => setVisibleMenu(propertyId);
   const closeMenu = () => setVisibleMenu(null);
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
+    if (isFocused) {
+      fetchProperties();
+    }
+  }, [isFocused]);
 
   const fetchProperties = async () => {
     try {
+      setRefreshing(true);
       const response = await api.get('/properties');
       setProperties(response.data);
       setFilteredProperties(response.data);
     } catch (error) {
       console.error('Erro ao buscar propriedades:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchProperties();
+    } catch (error) {
+      console.error('Erro ao atualizar propriedades:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -71,13 +97,12 @@ const PropertiesScreen = () => {
   };
 
   const renderItem = ({ item }: { item: (typeof properties)[0] }) => (
-    <TouchableOpacity activeOpacity={3} onPress={() => onViewHouses(item)}>
+    <TouchableOpacity activeOpacity={0.8} onPress={() => onViewHouses(item)}>
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {/* Imagem à esquerda */}
-            <Avatar.Image
+            {/* <Avatar.Image
               size={64}
               source={{
                 uri:
@@ -85,20 +110,28 @@ const PropertiesScreen = () => {
                   'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
               }}
               style={styles.avatar}
+            /> */}
+            <Image
+              source={{
+                uri:
+                  item.photo ||
+                  'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
+              }}
+              style={styles.image}
             />
 
             {/* Informações da propriedade à direita da imagem */}
             <View style={{ flex: 1, marginLeft: 16 }}>
               <Text style={styles.cardTitle}>{item.nickname}</Text>
-              <Text>
-                {item.street}, {item.id}
-              </Text>
-              <Text>{item.neighborhood}</Text>
-              <Text>
-                {item.city} - {item.state}
-              </Text>
-              <Text>IPTU: {item.iptu}</Text>
-              <Text>CEP: {item.zip_code}</Text>
+              <View style={styles.infoRow}>
+                <MaterialCommunityIcons name="home-map-marker" size={16} color="#666" />
+                <Text style={styles.infoText}>CEP: {item.zip_code}</Text>
+              </View>
+              {item.city && item.state && (
+                <Badge
+                  style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.tertiary }}
+                  size={22}>{`${item.city}, ${item.state}`}</Badge>
+              )}
             </View>
 
             {/* Ícone de três pontinhos no topo à direita */}
@@ -111,6 +144,7 @@ const PropertiesScreen = () => {
                     <MaterialCommunityIcons name="dots-vertical" size={size} color={color} />
                   )}
                   onPress={() => openMenu(item.id)}
+                  style={{ marginRight: -10, marginTop: -45 }}
                 />
               }>
               {/* Itens do Menu */}
@@ -147,6 +181,35 @@ const PropertiesScreen = () => {
                 title="Ver Casas"
                 leadingIcon={() => <MaterialCommunityIcons name="home-outline" size={20} />}
               />
+              <Menu.Item
+                onPress={() => {
+                  closeMenu();
+                  navigation.navigate('CustomDetailsScreen', {
+                    data: item,
+                    title: `${item.nickname}`,
+                    fieldsToShow: [
+                      'nickname',
+                      'zip_code',
+                      'city',
+                      'state',
+                      'neighborhood',
+                      'street',
+                      'number',
+                    ],
+                    labels: {
+                      nickname: 'Nome',
+                      zip_code: 'CEP',
+                      city: 'Cidade',
+                      state: 'Estado',
+                      neighborhood: 'Bairro',
+                      street: 'Rua',
+                      number: 'Número',
+                    },
+                  });
+                }}
+                title="Ver Propriedade"
+                leadingIcon={() => <MaterialCommunityIcons name="city-variant" size={20} />}
+              />
             </Menu>
           </View>
         </Card.Content>
@@ -177,6 +240,9 @@ const PropertiesScreen = () => {
       screen: 'HousesScreen',
       params: {
         propertyId: parseInt(propertie.id, 10),
+        propertyPhoto:
+          propertie.photo || 'https://storage.googleapis.com/e-aluguel/aluguelapp/padronizado.jpg',
+        propertyNickname: propertie.nickname || 'Propriedade',
       },
     });
   };
@@ -204,23 +270,33 @@ const PropertiesScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header>
-        <Appbar.Content title="Propriedades" color={theme.colors.primary} />
-      </Appbar.Header>
+      <CustomAppBar title="Propriedades" />
       <Searchbar
         placeholder="Buscar propriedades"
         onChangeText={onChangeSearch}
         value={searchQuery}
         style={styles.searchbar}
       />
+
       <FlatList
         data={filteredProperties}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         style={styles.list}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        ListEmptyComponent={() =>
+          !refreshing && (
+            <View style={styles.loadingIndicator}>
+              <Text>Nenhuma propriedade encontrada.</Text>
+            </View>
+          )
+        }
       />
       <FAB
-        icon={({ size, color }) => <MaterialCommunityIcons name="plus" size={size} color={color} />}
+        icon={({ size, color }) => (
+          <MaterialCommunityIcons name="home-group-plus" size={size} color={color} />
+        )}
         style={styles.fab}
         onPress={onAddPropertie}
       />
@@ -231,9 +307,10 @@ const PropertiesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   avatar: {
-    borderRadius: 28,
+    borderRadius: 50,
   },
   searchbar: {
     margin: 10,
@@ -262,9 +339,33 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    margin: 16,
+    margin: 14,
     right: 0,
     bottom: 0,
+  },
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: '#666',
+  },
+  image: {
+    width: 64,
+    height: 64,
+    borderRadius: 8,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 2,
+  },
+  infoText: {
+    marginLeft: 4,
+    fontSize: 14,
+    color: '#666',
   },
 });
 

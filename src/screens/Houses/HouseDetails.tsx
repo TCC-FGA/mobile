@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { ScrollView, View, Image, Text, Alert, StyleSheet } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { TextInput, Button, RadioButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
@@ -11,6 +11,9 @@ import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { getProperties } from '~/api/properties';
 import { Picker } from '@react-native-picker/picker';
 import { theme } from '~/core/theme';
+import { getUpdatedFields } from '~/core/utils';
+import { TextInputMask } from 'react-native-masked-text';
+import CustomPicker from '~/components/CustomPicker';
 
 type RouteParamsProps = {
   house?: {
@@ -109,7 +112,26 @@ const HouseDetails = () => {
     if (newHouse.nickname && newHouse.room_count && newHouse.bathrooms) {
       try {
         if (house?.id) {
-          await updateHouse(house.id, newHouse);
+          const updatedFields = getUpdatedFields(house, newHouse);
+
+          if (selectedImage && selectedImage.uri !== house.photo) {
+            const formData = new FormData();
+            formData.append('photo', {
+              uri: selectedImage.uri,
+              name: 'photo.jpg',
+              type: 'image/jpeg',
+            } as any);
+
+            for (const key in updatedFields) {
+              if (key !== 'photo') {
+                formData.append(key, updatedFields[key]);
+              }
+            }
+            await updateHouse(house.id, formData);
+          } else {
+            await updateHouse(house.id, updatedFields);
+          }
+
           Alert.alert('Casa atualizada', 'A casa foi atualizada com sucesso.');
         } else {
           const formData = new FormData();
@@ -124,13 +146,11 @@ const HouseDetails = () => {
             formData.append('photo', {
               uri: selectedImage.uri,
               name: 'photo.jpg',
-              type: 'image/jpg',
+              type: 'image/jpeg',
             } as any);
           }
-          console.log(formData);
-          console.log(house?.property_id);
 
-          await createHouse(9, formData);
+          await createHouse(selectedProperty, formData);
           Alert.alert('Casa salva', 'A casa foi salva com sucesso.');
         }
         navigation.goBack();
@@ -150,41 +170,30 @@ const HouseDetails = () => {
           <Text style={{ color: theme.colors.primary }} className="mb-2 text-sm">
             {selectedProperty ? 'Propriedade vinculada:' : 'Escolha a propriedade:'}
           </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: theme.colors.surfaceVariant,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              marginBottom: 4,
-            }}>
-            <MaterialCommunityIcons
-              name="home-city"
-              size={24}
-              color={theme.colors.primary}
-              style={{ marginRight: 8 }}
+          {properties && (
+            <CustomPicker
+              data={properties.map((property) => ({
+                label: property.nickname || property.zip_code || 'Propriedade sem nome',
+                value: property.id.toString(),
+              }))}
+              selectedValue={selectedProperty ? selectedProperty.toString() : ''}
+              onValueChange={(item) => setSelectedProperty(Number(item.value))}
+              title={selectedProperty ? 'Propriedade vinculada:' : 'Escolha a propriedade:'}
+              placeholder="Selecione uma propriedade"
+              leftIcon="home-city"
             />
-            <Picker
-              selectedValue={selectedProperty}
-              onValueChange={(itemValue) => setSelectedProperty(itemValue)}
-              style={{
-                flex: 1,
-                color: theme.colors.onSurface,
-              }}>
-              <Picker.Item label="Vincular propriedade" value="" />
-              {properties?.map((property) => (
-                <Picker.Item
-                  key={property.id}
-                  label={property.nickname || property.zip_code || 'Propriedade sem nome'}
-                  value={property.id}
-                />
-              ))}
-            </Picker>
-          </View>
+          )}
         </View>
         <TextInput
-          label="Apelido da casa"
+          label={
+            selectedProperty ? (
+              'Apelido da casa'
+            ) : (
+              <Text>
+                Apelido da casa <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            )
+          }
           value={newHouse.nickname}
           style={styles.input}
           onChangeText={(text) => setNewHouse({ ...newHouse, nickname: text })}
@@ -196,59 +205,92 @@ const HouseDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Quantidade de quartos"
+        <TextInputMask
+          type="only-numbers"
           value={newHouse.room_count?.toString() || ''}
           onChangeText={(text) =>
             setNewHouse({ ...newHouse, room_count: Number(text.replace(/[^0-9]/g, '')) })
           }
           style={styles.input}
           keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="bed" size={size} color={color} />
-              )}
-            />
-          }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="bed" size={size} color={color} />
+                )}
+              />
+            ),
+            label: (
+              <Text>
+                Quantidade de quartos <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+          }}
         />
-        <TextInput
-          label="Quantidade de banheiros"
+        <TextInputMask
+          type="only-numbers"
           value={newHouse.bathrooms?.toString() || ''}
           onChangeText={(text) =>
             setNewHouse({ ...newHouse, bathrooms: Number(text.replace(/[^0-9]/g, '')) })
           }
           style={styles.input}
           keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="shower" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
-          label="Status"
-          value={newHouse.status || 'vaga'}
-          onChangeText={(text) => {
-            if (text === 'vaga' || text === 'alugada' || text === 'reforma') {
-              setNewHouse({ ...newHouse, status: text });
-            } else {
-              Alert.alert('Erro', 'Status inválido. Use "vaga", "alugada" ou "reforma".');
-            }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="shower" size={size} color={color} />
+                )}
+              />
+            ),
+            label: (
+              <Text>
+                Quantidade de banheiros <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
           }}
-          style={styles.input}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="information" size={size} color={color} />
-              )}
-            />
-          }
         />
+        <View style={styles.radioButtonContainer}>
+          <Text style={styles.radioButtonLabel}>Mobiliada:</Text>
+          <RadioButton.Group
+            onValueChange={(value) => setNewHouse({ ...newHouse, furnished: value === 'true' })}
+            value={newHouse.furnished ? 'true' : 'false'}>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="true" />
+              <Text>Sim</Text>
+            </View>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="false" />
+              <Text>Não</Text>
+            </View>
+          </RadioButton.Group>
+        </View>
+        <View style={styles.radioButtonContainer}>
+          <Text style={styles.radioButtonLabel}>Status casa:</Text>
+          <RadioButton.Group
+            onValueChange={(value) =>
+              setNewHouse({ ...newHouse, status: value as 'alugada' | 'reforma' | 'vaga' })
+            }
+            value={newHouse.status}>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="vaga" />
+              <Text>Vaga</Text>
+            </View>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="alugada" />
+              <Text>Alugada</Text>
+            </View>
+            <View style={styles.radioButtonItem}>
+              <RadioButton value="reforma" />
+              <Text>Em Reforma</Text>
+            </View>
+          </RadioButton.Group>
+        </View>
         <Button mode="outlined" onPress={pickImage} icon="camera">
-          {selectedImage ? 'Alterar imagem' : 'Selecionar imagem'}
+          {selectedImage && selectedImage.uri ? 'Alterar imagem' : 'Selecionar imagem'}
         </Button>
 
         {selectedImage?.uri && (
@@ -283,6 +325,18 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 10,
+  },
+  radioButtonContainer: {
+    marginBottom: 10,
+  },
+  radioButtonLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  radioButtonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
 });
 

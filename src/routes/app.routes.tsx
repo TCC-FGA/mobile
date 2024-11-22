@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BottomTabNavigationProp, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import React from 'react';
-import { BottomNavigation } from 'react-native-paper';
+import { BottomNavigation, FAB } from 'react-native-paper';
 import { createStackNavigator } from '@react-navigation/stack';
 import {
   Dashboard,
@@ -14,9 +14,25 @@ import {
   SeeMoreScreen,
   TenantsScreen,
   TenantDetails,
+  ContractsScreen,
+  ContractsDetails,
+  RentsScreen,
+  RentsDetails,
+  PaymentsScreen,
+  PaymentsDetails,
+  ReceiptScreen,
+  RentsMainCreation,
+  SignatureScreen,
+  InspectionsScreen,
+  ExpensesScreen,
+  ExpensesDetails,
+  NotificationsScreen,
+  CustomDetailsScreen,
 } from '../screens';
 import { PropertiesDTO } from '~/dtos/PropertiesDTO';
 import { HouseDTO } from '~/dtos/HouseDTO';
+import { View } from 'react-native';
+import { UserDTO } from '~/dtos/UserDTO';
 import { TenantDTO } from '~/dtos/TenantDTO';
 
 type AppRoutesType = {
@@ -26,11 +42,44 @@ type AppRoutesType = {
   };
   HousesStack: {
     screen: 'HousesScreen' | 'HouseDetails';
-    params: { propertyId?: number; house?: HouseDTO | null };
+    params: {
+      propertyId?: number;
+      propertyPhoto?: string;
+      propertyNickname?: string;
+      house?: HouseDTO | null;
+    };
   };
   TenantsStack: {
     screen: 'TenantsScreen' | 'TenantDetails';
-    params?: { tenant?: TenantDTO | null };
+    params?: { tenantId?: number | null };
+  };
+  ContractsStack: {
+    screen: 'ContractsScreen' | 'ContractsDetails';
+    params?: { templateId?: number | null };
+  };
+  RentsStack: {
+    screen: 'RentsScreen' | 'RentsDetails' | 'RentsMainCreation';
+    params?: { rentId?: number | null };
+  };
+  PaymentsStack: {
+    screen: 'PaymentsScreen' | 'PaymentsDetails' | 'ReceiptScreen' | 'SignatureScreen';
+    params?: { contractId?: number | null; paymentId?: number | null; rentId?: number | null };
+  };
+  InspectionsStack: {
+    screen: 'InspectionsScreen';
+    params?: { rentId: number };
+  };
+  ExpensesStack: {
+    screen: 'ExpensesScreen' | 'ExpensesDetails';
+    params?: { houseId?: number | null; expenseId?: number | null };
+  };
+  AccountSettingsScreen: undefined;
+  NotificationsScreen: undefined;
+  CustomDetailsScreen: {
+    data: HouseDTO | PropertiesDTO | TenantDTO;
+    title: string;
+    fieldsToShow: (keyof HouseDTO | keyof PropertiesDTO | keyof TenantDTO)[];
+    labels: { [key in keyof HouseDTO | keyof PropertiesDTO | keyof TenantDTO]?: string };
   };
 };
 
@@ -45,53 +94,55 @@ function AppRoutesTab() {
         headerShown: false,
       }}
       tabBar={({ navigation, state, descriptors, insets }) => (
-        <BottomNavigation.Bar
-          navigationState={state}
-          safeAreaInsets={insets}
-          onTabPress={({ route, preventDefault }) => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (event.defaultPrevented) {
-              preventDefault();
-            } else {
-              navigation.dispatch({
-                ...CommonActions.navigate(route.name, route.params),
-                target: state.key,
+        <View>
+          <BottomNavigation.Bar
+            navigationState={state}
+            safeAreaInsets={insets}
+            onTabPress={({ route, preventDefault }) => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
               });
-            }
-          }}
-          renderIcon={({ route, focused, color }) => {
-            const { options } = descriptors[route.key];
-            if (options.tabBarIcon) {
-              return options.tabBarIcon({ focused, color, size: 24 });
-            }
 
-            return null;
-          }}
-          getLabelText={({ route }) => {
-            const { options } = descriptors[route.key];
-            const label =
-              options.tabBarLabel !== undefined
-                ? options.tabBarLabel
-                : options.title !== undefined
-                  ? options.title
-                  : route.name;
+              if (event.defaultPrevented) {
+                preventDefault();
+              } else {
+                navigation.dispatch({
+                  ...CommonActions.navigate(route.name, route.params),
+                  target: state.key,
+                });
+              }
+            }}
+            renderIcon={({ route, focused, color }) => {
+              const { options } = descriptors[route.key];
+              if (options.tabBarIcon) {
+                return options.tabBarIcon({ focused, color, size: 25 });
+              }
 
-            return typeof label === 'string' ? label : undefined;
-          }}
-        />
+              return null;
+            }}
+            getLabelText={({ route }) => {
+              const { options } = descriptors[route.key];
+              const label =
+                options.tabBarLabel !== undefined
+                  ? options.tabBarLabel
+                  : options.title !== undefined
+                    ? options.title
+                    : route.name;
+
+              return typeof label === 'string' ? label : undefined;
+            }}
+          />
+        </View>
       )}>
       <Tab.Screen
         name="Home"
         component={Dashboard}
         options={{
-          tabBarLabel: 'Início',
+          tabBarLabel: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" size={size} color={color} />
+            <MaterialCommunityIcons name="view-dashboard" size={size} color={color} />
           ),
         }}
       />
@@ -106,6 +157,16 @@ function AppRoutesTab() {
         }}
       />
       <Tab.Screen
+        name="Contratos"
+        component={RentsScreen}
+        options={{
+          tabBarLabel: 'Aluguéis',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="briefcase-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      {/* <Tab.Screen
         name="Settings"
         component={AccountSettingsScreen}
         options={{
@@ -114,7 +175,7 @@ function AppRoutesTab() {
             <MaterialCommunityIcons name="cog" size={size} color={color} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Mais"
         component={SeeMoreScreen}
@@ -137,7 +198,13 @@ export function PropertiesStack() {
       <Stack.Screen
         name="PropertyDetails"
         component={PropertyDetails}
-        options={{ headerTitle: 'Propriedades' }}
+        options={{
+          headerTitle: 'Propriedades',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -150,7 +217,13 @@ export function HousesStack() {
       <Stack.Screen
         name="HouseDetails"
         component={HouseDetails}
-        options={{ headerTitle: 'Casas' }}
+        options={{
+          headerTitle: 'Casas',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       />
     </Stack.Navigator>
   );
@@ -167,7 +240,118 @@ export function TenantsStack() {
       <Stack.Screen
         name="TenantDetails"
         component={TenantDetails}
-        options={{ headerTitle: 'Inquilinos' }}
+        options={{
+          headerTitle: 'Inquilinos',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function ContractsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ContractsScreen"
+        component={ContractsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ContractsDetails"
+        component={ContractsDetails}
+        options={{
+          headerTitle: 'Modelos de Contratos',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function RentsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="RentsScreen" component={RentsScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="RentsDetails" component={RentsDetails} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="RentsMainCreation"
+        component={RentsMainCreation}
+        options={{
+          headerTitle: 'Novo Aluguel',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function PaymentsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="PaymentsScreen"
+        component={PaymentsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PaymentsDetails"
+        component={PaymentsDetails}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ReceiptScreen"
+        component={ReceiptScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignatureScreen"
+        component={SignatureScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function InspectionsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="InspectionsScreen"
+        component={InspectionsScreen}
+        options={{
+          headerTitle: 'Vistorias',
+          headerTitleAlign: 'center',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export function ExpensesStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="ExpensesScreen"
+        component={ExpensesScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ExpensesDetails"
+        component={ExpensesDetails}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -180,8 +364,15 @@ function AppRoutes() {
       <Stack.Screen name="PropertiesStack" component={PropertiesStack} />
       <Stack.Screen name="HousesStack" component={HousesStack} />
       <Stack.Screen name="TenantsStack" component={TenantsStack} />
+      <Stack.Screen name="ContractsStack" component={ContractsStack} />
+      <Stack.Screen name="RentsStack" component={RentsStack} />
+      <Stack.Screen name="PaymentsStack" component={PaymentsStack} />
+      <Stack.Screen name="InspectionsStack" component={InspectionsStack} />
+      <Stack.Screen name="ExpensesStack" component={ExpensesStack} />
+      <Stack.Screen name="AccountSettingsScreen" component={AccountSettingsScreen} />
+      <Stack.Screen name="NotificationsScreen" component={NotificationsScreen} />
+      <Stack.Screen name="CustomDetailsScreen" component={CustomDetailsScreen} />
     </Stack.Navigator>
   );
 }
-
 export default AppRoutes;

@@ -1,72 +1,130 @@
 import React, { useState, useEffect, memo } from 'react';
-import { ScrollView, View, Alert, StyleSheet } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { ScrollView, View, Alert, StyleSheet, Platform } from 'react-native';
+import { TextInput, Button, HelperText, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
-
-const mockTenant = {
-  cpf: '',
-  contact: '',
-  email: '',
-  name: '',
-  profession: '',
-  marital_status: '',
-  birth_date: '',
-  emergency_contact: '',
-  income: null,
-  residents: null,
-  street: '',
-  neighborhood: '',
-  number: null,
-  zip_code: '',
-  city: '',
-  state: '',
-};
+import { getTenantById, createTenant, updateTenant } from '~/api/tenants';
+import { TenantDTO } from '~/dtos/TenantDTO';
+import { convertDateInDDMMYYYY, formatDate } from '~/helpers/convert_data';
+import { theme } from '~/core/theme';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
+import { TextInputMask } from 'react-native-masked-text';
+import { err } from 'react-native-svg';
+import CustomPicker from '~/components/CustomPicker';
+import { statesOfBrazil } from '~/dtos/PropertiesDTO';
 
 type RouteParamsProps = {
-  tenant?: typeof mockTenant;
+  tenantId?: number;
 };
 
 const TenantDetails = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const { tenant } = route.params as RouteParamsProps;
-  const [newTenant, setNewTenant] = useState(tenant || mockTenant);
+  const { tenantId } = route.params as RouteParamsProps;
+  const [newTenant, setNewTenant] = useState<TenantDTO>({
+    id: 0,
+    cpf: '',
+    contact: '',
+    email: null,
+    name: '',
+    profession: null,
+    marital_status: null,
+    birth_date: null,
+    emergency_contact: '',
+    income: null,
+    residents: null,
+    street: '',
+    neighborhood: '',
+    number: null,
+    zip_code: '',
+    city: '',
+    state: '',
+  });
+
+  const [errors, setErrors] = useState({
+    name: false,
+    cpf: false,
+    contact: false,
+    email: false,
+    zip_code: false,
+  });
 
   useEffect(() => {
-    if (tenant) {
-      navigation.setOptions({ title: 'Editar Inquilino' });
+    if (tenantId) {
+      const fetchTenant = async () => {
+        try {
+          const tenant = await getTenantById(tenantId);
+          setNewTenant(tenant);
+          navigation.setOptions({ title: 'Editar Inquilino' });
+        } catch (error) {
+          Alert.alert('Erro', 'Não foi possível carregar os detalhes do inquilino.');
+        }
+      };
+
+      fetchTenant();
     } else {
       navigation.setOptions({ title: 'Adicionar Inquilino' });
     }
-  }, [tenant, navigation]);
+  }, [tenantId, navigation]);
 
   const handleInputChange = (field: string, value: any) => {
     setNewTenant({ ...newTenant, [field]: value });
   };
 
-  const handleSave = () => {
-    if (!newTenant.name || !newTenant.cpf || !newTenant.contact || !newTenant.email) {
+  const showDatePickerHandler = () => {
+    setShowDatePicker(true);
+  };
+
+  const validateFields = () => {
+    const newErrors = {
+      name: !newTenant.name,
+      cpf: !newTenant.cpf,
+      contact: !newTenant.contact,
+      email: !newTenant.email,
+      zip_code: !newTenant.zip_code,
+    };
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((error) => error);
+  };
+
+  const handleSave = async () => {
+    if (!validateFields()) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios.');
       return;
     }
+    // limpar mascaras
+    newTenant.cpf = newTenant.cpf.replace(/[^0-9]+/g, '');
+    newTenant.contact = newTenant.contact.replace(/[^0-9]+/g, '');
+    newTenant.emergency_contact = newTenant.emergency_contact
+      ? newTenant?.emergency_contact?.replace(/[^0-9]+/g, '')
+      : null;
 
-    if (tenant) {
-      Alert.alert('Sucesso', 'Inquilino atualizado com sucesso!');
-    } else {
-      Alert.alert('Sucesso', 'Inquilino criado com sucesso!');
+    try {
+      if (tenantId) {
+        await updateTenant(tenantId, newTenant);
+        Alert.alert('Sucesso', 'Inquilino atualizado com sucesso!');
+      } else {
+        await createTenant(newTenant);
+        Alert.alert('Sucesso', 'Inquilino criado com sucesso!');
+      }
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível salvar o inquilino.');
     }
-
-    navigation.goBack();
   };
 
   return (
     <>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <TextInput
-          label="Nome"
+          label={
+            <Text>
+              Nome <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
           value={newTenant.name}
           style={styles.input}
           onChangeText={(text) => handleInputChange('name', text)}
@@ -78,37 +136,75 @@ const TenantDetails = () => {
             />
           }
         />
-        <TextInput
-          label="CPF"
+        {errors.name && (
+          <HelperText type="error" visible={errors.name}>
+            Nome é obrigatório!
+          </HelperText>
+        )}
+        <TextInputMask
+          type="cpf"
           value={newTenant.cpf}
-          style={styles.input}
           onChangeText={(text) => handleInputChange('cpf', text)}
-          keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="card-account-details" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
-          label="Contato"
-          value={newTenant.contact}
           style={styles.input}
-          onChangeText={(text) => handleInputChange('contact', text)}
-          keyboardType="phone-pad"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="phone" size={size} color={color} />
-              )}
-            />
-          }
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: (
+              <Text>
+                CPF <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="card-account-details" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
         />
+        {errors.cpf && (
+          <HelperText type="error" visible={errors.cpf}>
+            CPF é obrigatório!
+          </HelperText>
+        )}
+        <TextInputMask
+          type="cel-phone"
+          options={{
+            maskType: 'BRL',
+            withDDD: true,
+            dddMask: '(99) ',
+          }}
+          value={newTenant.contact}
+          onChangeText={(text) => handleInputChange('contact', text)}
+          style={styles.input}
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: (
+              <Text>
+                Contato <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="phone" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
+        />
+        {errors.contact && (
+          <HelperText type="error" visible={errors.contact}>
+            Contato é obrigatório!
+          </HelperText>
+        )}
         <TextInput
-          label="Email"
-          value={newTenant.email}
+          label={
+            <Text>
+              Email <Text style={{ color: 'red' }}>*</Text>
+            </Text>
+          }
+          value={newTenant.email || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('email', text)}
           keyboardType="email-address"
@@ -120,9 +216,40 @@ const TenantDetails = () => {
             />
           }
         />
+        {errors.email && (
+          <HelperText type="error" visible={errors.email}>
+            Email é obrigatório!
+          </HelperText>
+        )}
+        <TextInputMask
+          type="zip-code"
+          value={newTenant.zip_code}
+          onChangeText={(text) => handleInputChange('zip_code', text)}
+          style={styles.input}
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: (
+              <Text>
+                CEP <Text style={{ color: 'red' }}>*</Text>
+              </Text>
+            ),
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="map-marker" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
+        />
+        {errors.zip_code && (
+          <HelperText type="error" visible={errors.zip_code}>
+            CEP é obrigatório!
+          </HelperText>
+        )}
         <TextInput
           label="Profissão"
-          value={newTenant.profession}
+          value={newTenant.profession || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('profession', text)}
           left={
@@ -135,7 +262,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Estado Civil"
-          value={newTenant.marital_status}
+          value={newTenant.marital_status || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('marital_status', text)}
           left={
@@ -146,51 +273,79 @@ const TenantDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Data de Nascimento"
-          value={newTenant.birth_date}
-          style={styles.input}
-          onChangeText={(text) => handleInputChange('birth_date', text)}
-          placeholder="DD/MM/AAAA"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="calendar" size={size} color={color} />
-              )}
+        <>
+          <Button
+            className="mb-2"
+            mode="outlined"
+            onPress={showDatePickerHandler}
+            icon={() => (
+              <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+            )}>
+            Data de nascimento{' '}
+            {newTenant.birth_date
+              ? `: ${convertDateInDDMMYYYY(new Date(newTenant.birth_date))}`
+              : ''}
+          </Button>
+
+          {showDatePicker && (
+            <RNDateTimePicker
+              value={newTenant.birth_date ? new Date(newTenant.birth_date) : new Date()}
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                const currentDate = selectedDate || new Date();
+                setShowDatePicker(Platform.OS === 'ios');
+                handleInputChange('birth_date', formatDate(currentDate));
+              }}
+              accentColor={theme.colors.primary}
+              textColor={theme.colors.primary}
             />
-          }
-        />
-        <TextInput
-          label="Contato de Emergência"
-          value={newTenant.emergency_contact}
-          style={styles.input}
+          )}
+        </>
+        <TextInputMask
+          type="cel-phone"
+          options={{
+            maskType: 'BRL',
+            withDDD: true,
+            dddMask: '(99) ',
+          }}
+          value={newTenant.emergency_contact || ''}
           onChangeText={(text) => handleInputChange('emergency_contact', text)}
-          keyboardType="phone-pad"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="phone-in-talk" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
-          label="Renda"
-          value={newTenant.income ? newTenant.income : ''}
           style={styles.input}
-          onChangeText={(text) => handleInputChange('income', Number(text))}
-          keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="currency-usd" size={size} color={color} />
-              )}
-            />
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: 'Contato de Emergência',
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="phone-in-talk" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
+        />
+        <TextInputMask
+          type="money"
+          value={newTenant.income ? newTenant.income.toString() : ''}
+          onChangeText={(text) =>
+            handleInputChange('income', Number(text.replace(/[^0-9,-]+/g, '')))
           }
+          style={styles.input}
+          customTextInput={TextInput}
+          customTextInputProps={{
+            label: 'Renda',
+            left: (
+              <TextInput.Icon
+                icon={({ size, color }) => (
+                  <MaterialCommunityIcons name="currency-usd" size={size} color={color} />
+                )}
+              />
+            ),
+          }}
         />
         <TextInput
           label="Residentes"
-          value={newTenant.residents ? newTenant.residents : ''}
+          value={newTenant.residents ? newTenant.residents.toString() : ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('residents', Number(text))}
           keyboardType="numeric"
@@ -204,7 +359,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Rua"
-          value={newTenant.street}
+          value={newTenant.street || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('street', text)}
           left={
@@ -217,7 +372,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Bairro"
-          value={newTenant.neighborhood}
+          value={newTenant.neighborhood || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('neighborhood', text)}
           left={
@@ -230,7 +385,7 @@ const TenantDetails = () => {
         />
         <TextInput
           label="Número"
-          value={newTenant.number ? newTenant.number : ''}
+          value={newTenant.number ? newTenant.number.toString() : ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('number', Number(text))}
           keyboardType="numeric"
@@ -243,22 +398,8 @@ const TenantDetails = () => {
           }
         />
         <TextInput
-          label="CEP"
-          value={newTenant.zip_code}
-          style={styles.input}
-          onChangeText={(text) => handleInputChange('zip_code', text)}
-          keyboardType="numeric"
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="map-marker" size={size} color={color} />
-              )}
-            />
-          }
-        />
-        <TextInput
           label="Cidade"
-          value={newTenant.city}
+          value={newTenant.city || ''}
           style={styles.input}
           onChangeText={(text) => handleInputChange('city', text)}
           left={
@@ -269,19 +410,16 @@ const TenantDetails = () => {
             />
           }
         />
-        <TextInput
-          label="Estado"
-          value={newTenant.state}
-          style={styles.input}
-          onChangeText={(text) => handleInputChange('state', text)}
-          left={
-            <TextInput.Icon
-              icon={({ size, color }) => (
-                <MaterialCommunityIcons name="map" size={size} color={color} />
-              )}
-            />
-          }
-        />
+        <View className="mb-4">
+          <CustomPicker
+            data={statesOfBrazil}
+            selectedValue={newTenant.state ?? ''}
+            onValueChange={(value) => handleInputChange('state', value.value)}
+            placeholder="Selecione um estado"
+            leftIcon="map-marker"
+            title="Estado"
+          />
+        </View>
       </ScrollView>
       <View
         style={{
@@ -289,7 +427,7 @@ const TenantDetails = () => {
           padding: 10,
         }}>
         <Button mode="contained" onPress={handleSave} contentStyle={{ paddingHorizontal: 16 }}>
-          {tenant ? 'Atualizar Inquilino' : 'Criar Inquilino'}
+          {tenantId ? 'Atualizar Inquilino' : 'Criar Inquilino'}
         </Button>
         <Button mode="text" onPress={() => navigation.goBack()}>
           Cancelar
