@@ -1,5 +1,6 @@
 import { api } from '~/services/api';
 import axios from 'axios';
+import { Float } from 'react-native/Libraries/Types/CodegenTypes';
 
 // Tipos de retorno esperados
 export type DashboardTotalsDTO = {
@@ -21,9 +22,9 @@ export type DashboardCashFlowDTO = {
 };
 
 export type DashboardPaymentStatusDTO = {
-  total_monthly_paid: number;
-  total_monthly_overdue: number;
-  total_monthly_pending: number;
+  total_monthly_paid: Float;
+  total_monthly_overdue: Float;
+  total_monthly_pending: Float;
 };
 
 // Obter totais do dashboard

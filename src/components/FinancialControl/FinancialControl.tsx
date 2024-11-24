@@ -33,19 +33,19 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
     paymentStatus.total_monthly_pending;
 
   const progressChartDataAmountsReceived = {
-    labels: ['Recebidos'],
+    labels: ['Total Recebido'],
     data: totalPayments > 0 ? [paymentStatus.total_monthly_paid / totalPayments] : [0],
     value: paymentStatus.total_monthly_paid,
   };
 
   const Incoming = {
-    labels: ['A receber'],
+    labels: ['Pendente'],
     value: paymentStatus.total_monthly_pending,
   };
 
   const TotalValue = {
-    labels: ['Total'],
-    value: totalPayments,
+    labels: ['Em atraso'],
+    value: paymentStatus.total_monthly_overdue,
   };
 
   return (
