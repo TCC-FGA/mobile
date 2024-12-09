@@ -82,10 +82,11 @@ const ReceiptScreen = () => {
       'Outubro',
       'Novembro',
       'Dezembro',
+      'Janeiro',
     ];
     const month = date.getMonth();
     const year = date.getFullYear();
-    return `${months[month]} de ${year}`;
+    return `${months[month + 1]} de ${year}`;
   };
 
   const generateHtmlContent = () => {

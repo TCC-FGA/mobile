@@ -269,38 +269,40 @@ const PropertiesScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <CustomAppBar title="Propriedades" />
-      <Searchbar
-        placeholder="Buscar propriedades"
-        onChangeText={onChangeSearch}
-        value={searchQuery}
-        style={styles.searchbar}
-      />
+      <SafeAreaView style={styles.container}>
+        <Searchbar
+          placeholder="Buscar propriedades"
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          style={styles.searchbar}
+        />
 
-      <FlatList
-        data={filteredProperties}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        style={styles.list}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        ListEmptyComponent={() =>
-          !refreshing && (
-            <View style={styles.loadingIndicator}>
-              <Text>Nenhuma propriedade encontrada.</Text>
-            </View>
-          )
-        }
-      />
-      <FAB
-        icon={({ size, color }) => (
-          <MaterialCommunityIcons name="home-group-plus" size={size} color={color} />
-        )}
-        style={styles.fab}
-        onPress={onAddPropertie}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={filteredProperties}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListEmptyComponent={() =>
+            !refreshing && (
+              <View style={styles.loadingIndicator}>
+                <Text>Nenhuma propriedade encontrada.</Text>
+              </View>
+            )
+          }
+        />
+        <FAB
+          icon={({ size, color }) => (
+            <MaterialCommunityIcons name="home-group-plus" size={size} color={color} />
+          )}
+          style={styles.fab}
+          onPress={onAddPropertie}
+        />
+      </SafeAreaView>
+    </>
   );
 };
 

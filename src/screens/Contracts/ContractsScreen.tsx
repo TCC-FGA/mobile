@@ -1,5 +1,13 @@
 import React, { memo, useState, useEffect } from 'react';
-import { View, SafeAreaView, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  SafeAreaView,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Linking,
+} from 'react-native';
 import {
   Text,
   IconButton,
@@ -10,7 +18,7 @@ import {
   FAB,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { theme } from '~/core/theme';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getRents } from '~/api/rents';
@@ -27,6 +35,7 @@ const ContractsScreen = () => {
   const [signedContracts, setSignedContracts] = useState<RentDTO[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isLoadingSignedContracts, setIsLoadingSignedContracts] = useState(false);
+  const isFocused = useIsFocused();
 
   const fetchTemplates = async () => {
     setIsLoadingTemplates(true);
@@ -53,9 +62,11 @@ const ContractsScreen = () => {
   };
 
   useEffect(() => {
-    fetchTemplates();
-    fetchSignedContracts();
-  }, []);
+    if (isFocused) {
+      fetchTemplates();
+      fetchSignedContracts();
+    }
+  }, [isFocused]);
 
   const toggleExpand = (id: string) => {
     setExpandedContract(expandedContract === id ? null : id);
@@ -85,7 +96,7 @@ const ContractsScreen = () => {
                 </Text>
                 <Text style={styles.details}>
                   <Text style={styles.bold}>Garantia: </Text>
-                  {capitalizeWords(item.warranty)}
+                  {item.warranty.toUpperCase()}
                 </Text>
                 <Text style={styles.details}>
                   <Text style={styles.bold}>Animais: </Text>
@@ -126,13 +137,12 @@ const ContractsScreen = () => {
           <MaterialCommunityIcons name="file-pdf-box" size={48} color={theme.colors.primary} />
           <View style={styles.info}>
             <Text style={styles.title}>{item.house.nickname}</Text>
-            <Text style={styles.details}>{item.signed_pdf}</Text>
           </View>
           <IconButton
             icon={({ size, color }) => (
               <MaterialCommunityIcons name="download" size={size} color={color} />
             )}
-            onPress={() => console.log('Download link:', item.signed_pdf)}
+            onPress={() => Linking.openURL(item.signed_pdf ?? '')}
           />
         </View>
       </Surface>
@@ -155,7 +165,7 @@ const ContractsScreen = () => {
           buttons={[
             {
               value: 'templates',
-              label: 'Modelos',
+              label: 'Templates',
               icon: 'file',
             },
             {
@@ -178,7 +188,7 @@ const ContractsScreen = () => {
                 !isLoadingTemplates && (
                   <View style={{ alignItems: 'center', marginTop: 16 }}>
                     <Text style={{ fontSize: 16, color: '#666' }}>
-                      Nenhum modelo de contrato encontrado.
+                      Nenhum template de contrato encontrado.
                     </Text>
                   </View>
                 )

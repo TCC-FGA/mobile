@@ -5,6 +5,7 @@ import { BarChart } from 'react-native-chart-kit';
 import { DashboardCashFlowDTO, DashboardTotalsDTO } from '~/api/dashboard';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '~/core/theme';
+import { parseFloatBR } from '~/helpers/convert_data';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -69,7 +70,7 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
             (mês atual)
           </Text>
         </View>
-        <IconButton
+        {/* <IconButton
           icon={() => {
             return (
               <MaterialCommunityIcons
@@ -79,20 +80,32 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
               />
             );
           }}
-        />
+        /> */}
       </View>
       <BarChart
         data={barChartData}
         withCustomBarColorFromData
-        width={screenWidth - 32}
+        width={screenWidth - 40}
         height={220}
         yAxisLabel=""
-        yAxisSuffix="R$"
+        yAxisSuffix=""
         chartConfig={{
+          formatYLabel: (value) =>
+            Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+              minimumFractionDigits: 2,
+            }).format(Number(value)),
+          formatTopBarValue: (value) =>
+            Intl.NumberFormat('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+              minimumFractionDigits: 2,
+            }).format(Number(value)),
           backgroundGradientFrom: theme.colors.primary,
           backgroundGradientFromOpacity: 0.1,
           backgroundGradientToOpacity: 0,
-          decimalPlaces: 2,
+          decimalPlaces: 0,
           color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
           labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
           style: {
@@ -107,6 +120,18 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
             fontWeight: 'bold',
             fontSize: 10,
           },
+          propsForVerticalLabels: {
+            fontSize: 15,
+          },
+          propsForHorizontalLabels: {
+            fontSize: (() => {
+              const valueString = parseFloatBR(cashFlow.total_monthly_income).replace(/[^\d]/g, '');
+              const digitCount = valueString.length;
+              if (digitCount > 9) return 7;
+              if (digitCount > 6) return 8;
+              return 9;
+            })(),
+          },
         }}
         style={{
           marginVertical: 8,
@@ -120,7 +145,7 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
         <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
           Resumo Geral
         </Text>
-        <IconButton
+        {/* <IconButton
           icon={() => {
             return (
               <MaterialCommunityIcons
@@ -130,7 +155,7 @@ const DashboardTotals: React.FC<DashboardTotalsProps> = ({ cashFlow, housesAvail
               />
             );
           }}
-        />
+        /> */}
       </View>
       <BarChart
         data={horizontalBarChartData}

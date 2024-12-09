@@ -19,7 +19,7 @@ const PropertyStatus: React.FC<PropertyStatusProps> = ({ housesAvailability }) =
         <Text style={{ fontSize: 22, fontWeight: '600', color: theme.colors.onSurface }}>
           Status dos Imóveis
         </Text>
-        <IconButton
+        {/* <IconButton
           icon={() => {
             return (
               <MaterialCommunityIcons
@@ -29,7 +29,7 @@ const PropertyStatus: React.FC<PropertyStatusProps> = ({ housesAvailability }) =
               />
             );
           }}
-        />
+        /> */}
       </View>
       <View style={styles.cardList}>
         <CardStatus

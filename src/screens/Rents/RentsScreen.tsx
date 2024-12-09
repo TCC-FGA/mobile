@@ -10,7 +10,10 @@ import { parseFloatBR } from '~/helpers/convert_data';
 import CustomAppBar from '~/components/AppBar/AppBar';
 
 const getInitials = (name: string) => {
-  const names = name.split(' ');
+  const names = name.trim().split(' ');
+  if (names.length === 1) {
+    return names[0][0].toUpperCase();
+  }
   const initials = names[0][0] + names[names.length - 1][0];
   return initials.toUpperCase();
 };
@@ -103,35 +106,37 @@ const RentsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <CustomAppBar title="Aluguéis" />
-      <Searchbar
-        placeholder="Buscar aluguel"
-        onChangeText={onChangeSearch}
-        value={searchQuery}
-        style={styles.searchbar}
-      />
-      <FlatList
-        data={filteredRents}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
-        refreshing={isLoading}
-        onRefresh={fetchRents}
-        ListEmptyComponent={() =>
-          !isLoading && (
-            <View style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ fontSize: 16, color: '#666' }}>Nenhum aluguel encontrado.</Text>
-            </View>
-          )
-        }
-      />
-      <FAB
-        icon="briefcase-plus"
-        style={{ position: 'absolute', margin: 16, right: 0, bottom: 0 }}
-        onPress={() => navigation.navigate('RentsStack', { screen: 'RentsMainCreation' })}
-      />
-    </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        <Searchbar
+          placeholder="Buscar aluguel"
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+          style={styles.searchbar}
+        />
+        <FlatList
+          data={filteredRents}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.list}
+          refreshing={isLoading}
+          onRefresh={fetchRents}
+          ListEmptyComponent={() =>
+            !isLoading && (
+              <View style={{ alignItems: 'center', marginTop: 16 }}>
+                <Text style={{ fontSize: 16, color: '#666' }}>Nenhum aluguel encontrado.</Text>
+              </View>
+            )
+          }
+        />
+        <FAB
+          icon="briefcase-plus"
+          style={{ position: 'absolute', margin: 16, right: 0, bottom: 0 }}
+          onPress={() => navigation.navigate('RentsStack', { screen: 'RentsMainCreation' })}
+        />
+      </SafeAreaView>
+    </>
   );
 };
 

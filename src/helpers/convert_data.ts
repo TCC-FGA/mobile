@@ -18,6 +18,10 @@ export const parseFloatBR = (value: number): string => {
   return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
+export const parseFloatBRNumber = (value: number): number => {
+  return parseFloat(value.toFixed(2));
+};
+
 export function timeConverter(UNIX_timestamp: number) {
   const a = new Date(UNIX_timestamp * 1000);
   const months = [

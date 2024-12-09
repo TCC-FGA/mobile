@@ -3,7 +3,7 @@ import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Text, TextInput, Button, IconButton, ActivityIndicator } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 import { getProperties } from '~/api/properties';
 import { getHousesByPropertyId } from '~/api/houses';
@@ -42,6 +42,7 @@ const RentsMainCreation = () => {
   const [error, setError] = useState<string | null>(null);
   const [depositValue, setDepositValue] = useState<string>('');
   const [reajustment_rate, setReajustment_rate] = useState<string>('IGMP');
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,6 +78,24 @@ const RentsMainCreation = () => {
       fetchHouses();
     }
   }, [selectedProperty]);
+
+  useEffect(() => {
+    const newfetchData = async () => {
+      try {
+        const propertiesData = await getProperties();
+        setProperties(propertiesData);
+        const tenantsData = await getTenants();
+        setTenants(tenantsData);
+        const templatesData = await getTemplates();
+        setTemplates(templatesData);
+      } catch (error) {
+        Alert.alert('Erro', 'Não foi possível carregar os dados.');
+      }
+    };
+    if (isFocused) {
+      newfetchData();
+    }
+  }, [isFocused]);
 
   const handleStartDateChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || startDate;

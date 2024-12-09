@@ -22,6 +22,7 @@ const NotificationsModal = () => {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const { user } = useAuth();
+
   useEffect(() => {
     if (!user) {
       return;
@@ -34,7 +35,7 @@ const NotificationsModal = () => {
             kind: 1,
           },
           headers: {
-            Authorization: `Basic ${'client_id:client_secret'}`,
+            Authorization: `Basic ${'MTI1ZWE3ZDYtMTZlNi00MGZiLWE1MzQtNzVjNmZlODQ3N2Qz'}`,
           },
         });
 
@@ -74,7 +75,7 @@ const NotificationsModal = () => {
     };
 
     fetchNotifications();
-  }, []);
+  }, [user]);
 
   const handleMarkAsViewed = (id: string) => {
     setNotifications((prevNotifications) =>
@@ -103,56 +104,62 @@ const NotificationsModal = () => {
       </Appbar.Header>
       <ScrollView style={styles.scrollContainer}>
         <List.Section>
-          {notifications.map((notification, index) => (
-            <React.Fragment key={notification.id}>
-              <List.Item
-                title={() => <Text style={styles.titleText}>{notification.title}</Text>}
-                description={() => (
-                  <View>
-                    <Text style={styles.descriptionText}>{notification.body}</Text>
-                    <Text style={styles.dateText}>{notification.date}</Text>
-                  </View>
-                )}
-                style={styles.listItem}
-                left={(props) => (
-                  <List.Icon
-                    {...props}
-                    icon={notification.viewed ? 'check-circle' : 'circle-outline'}
-                    color={notification.viewed ? 'green' : 'red'}
-                  />
-                )}
-                right={(props) => (
-                  <View style={styles.iconContainer}>
-                    {notification.viewed ? (
-                      <IconButton
-                        {...props}
-                        icon={({ size, color }) => (
-                          <MaterialCommunityIcons
-                            name="eye-off"
-                            size={size}
-                            color={theme.colors.primary}
-                          />
-                        )}
-                        onPress={() => handleMarkAsUnviewed(notification.id)}
-                      />
-                    ) : (
-                      <IconButton
-                        {...props}
-                        icon={({ size, color }) => (
-                          <MaterialCommunityIcons
-                            name="eye"
-                            size={size}
-                            color={theme.colors.primary}
-                          />
-                        )}
-                        onPress={() => handleMarkAsViewed(notification.id)}
-                      />
-                    )}
-                  </View>
-                )}
-              />
-            </React.Fragment>
-          ))}
+          {notifications.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Nenhuma notificação encontrada.</Text>
+            </View>
+          ) : (
+            notifications.map((notification, index) => (
+              <React.Fragment key={notification.id}>
+                <List.Item
+                  title={() => <Text style={styles.titleText}>{notification.title}</Text>}
+                  description={() => (
+                    <View>
+                      <Text style={styles.descriptionText}>{notification.body}</Text>
+                      <Text style={styles.dateText}>{notification.date}</Text>
+                    </View>
+                  )}
+                  style={styles.listItem}
+                  left={(props) => (
+                    <List.Icon
+                      {...props}
+                      icon={notification.viewed ? 'check-circle' : 'circle-outline'}
+                      color={notification.viewed ? 'green' : 'red'}
+                    />
+                  )}
+                  right={(props) => (
+                    <View style={styles.iconContainer}>
+                      {notification.viewed ? (
+                        <IconButton
+                          {...props}
+                          icon={({ size, color }) => (
+                            <MaterialCommunityIcons
+                              name="eye-off"
+                              size={size}
+                              color={theme.colors.primary}
+                            />
+                          )}
+                          onPress={() => handleMarkAsUnviewed(notification.id)}
+                        />
+                      ) : (
+                        <IconButton
+                          {...props}
+                          icon={({ size, color }) => (
+                            <MaterialCommunityIcons
+                              name="eye"
+                              size={size}
+                              color={theme.colors.primary}
+                            />
+                          )}
+                          onPress={() => handleMarkAsViewed(notification.id)}
+                        />
+                      )}
+                    </View>
+                  )}
+                />
+              </React.Fragment>
+            ))
+          )}
         </List.Section>
       </ScrollView>
     </>
@@ -188,6 +195,14 @@ const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666666',
   },
 });
 

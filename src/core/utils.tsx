@@ -16,6 +16,8 @@ export const passwordValidator = (password: string) => {
 
 export const nameValidator = (name: string) => {
   if (!name || name.length <= 0) return 'Nome não pode estar em branco.';
+  if (/\d/.test(name)) return 'Nome não pode conter números.';
+  if (name.length < 5) return 'Nome precisa ter 5 caracteres.';
 
   return '';
 };

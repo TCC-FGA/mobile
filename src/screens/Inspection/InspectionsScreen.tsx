@@ -16,7 +16,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { InspectionDTO } from '~/dtos/InspectionDTO';
 import { createInspection } from '~/api/inspections';
 import { formatDate } from '~/helpers/convert_data';
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { AppNavigatorRoutesProps } from '~/routes/app.routes';
 
 const sections = [
   'Pintura',
@@ -36,6 +37,7 @@ type RouteParamsProps = {
 };
 
 const InspectionScreen: React.FC = () => {
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const { rentId } = route.params as RouteParamsProps;
   const [currentSection, setCurrentSection] = useState(0);
@@ -458,16 +460,17 @@ const InspectionScreen: React.FC = () => {
       formData.append('numero_chaves', inspectionData.numero_chaves?.toString() || '');
       formData.append('observacoes_chaves', inspectionData.observacoes_chaves || '');
       inspectionData.inspection_photos.forEach((photo, index) => {
-        formData.append(`inspection_photos[${index}]`, {
+        formData.append(`inspection_photos`, {
           uri: photo,
           name: `photo_${index}.jpg`,
           type: 'image/jpeg',
         } as any);
       });
-
+      console.log('formData:', formData);
       const response = await createInspection(inspectionData.contract_id, formData);
       Alert.alert('Sucesso', 'Relatório de vistoria criado com sucesso!');
       Linking.openURL(response.pdf_inspection);
+      navigation.goBack();
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível criar o relatório de vistoria.');
       console.error('Erro ao criar relatório de vistoria:', error);

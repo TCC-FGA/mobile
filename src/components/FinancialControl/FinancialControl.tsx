@@ -5,6 +5,7 @@ import { StyleSheet, View, Dimensions, Text } from 'react-native';
 import { IconButton } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DashboardPaymentStatusDTO } from '~/api/dashboard';
+import { parseFloatBR, parseFloatBRNumber } from '~/helpers/convert_data';
 
 const width = Dimensions.get('window').width;
 const height = width * 0.4;
@@ -34,18 +35,30 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
 
   const progressChartDataAmountsReceived = {
     labels: ['Total Recebido'],
-    data: totalPayments > 0 ? [paymentStatus.total_monthly_paid / totalPayments] : [0],
+    data:
+      totalPayments > 0
+        ? [parseFloatBRNumber(paymentStatus.total_monthly_paid / totalPayments)]
+        : [0],
     value: paymentStatus.total_monthly_paid,
   };
 
   const Incoming = {
-    labels: ['Pendente'],
+    labels: ['Em aberto'],
     value: paymentStatus.total_monthly_pending,
   };
 
   const TotalValue = {
     labels: ['Em atraso'],
     value: paymentStatus.total_monthly_overdue,
+  };
+
+  const getSizedValue = () => {
+    const str = parseFloatBR(progressChartDataAmountsReceived.value);
+    const baseFontSize = width * 0.05;
+    if (str.length >= 9) {
+      return baseFontSize * 0.8;
+    }
+    return baseFontSize;
   };
 
   return (
@@ -59,7 +72,7 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
             (mês atual)
           </Text>
         </View>
-        <IconButton
+        {/* <IconButton
           icon={() => {
             return (
               <MaterialCommunityIcons
@@ -69,13 +82,13 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
               />
             );
           }}
-        />
+        /> */}
       </View>
       <View style={styles.containerContentFinancialControl}>
         <View style={styles.containerIncoming}>
           <Text
             style={{
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: 'bold',
               display: 'flex',
               flexDirection: 'row',
@@ -84,14 +97,7 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
               lineHeight: 32,
             }}>
             <Text style={{ fontSize: 12, fontWeight: 'bold' }}>R$</Text>{' '}
-            {Incoming.value >= 1000
-              ? Incoming.value / 1000
-              : Incoming.value < 10
-                ? `0${Incoming.value}`
-                : Incoming.value}
-            {Incoming.value >= 1000 && (
-              <Text style={{ fontSize: 14, fontWeight: 'bold' }}>mil</Text>
-            )}
+            {parseFloatBR(Incoming.value)}
           </Text>
           <Text style={{ fontSize: 16, color: theme.colors.onSurfaceVariant, lineHeight: 24 }}>
             {Incoming.labels[0]}
@@ -118,7 +124,7 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
           <View style={{ position: 'absolute', alignItems: 'center', justifyContent: 'center' }}>
             <Text
               style={{
-                fontSize: 28,
+                fontSize: getSizedValue(),
                 fontWeight: 'bold',
                 display: 'flex',
                 flexDirection: 'row',
@@ -127,14 +133,7 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
                 lineHeight: 42,
               }}>
               <Text style={{ fontSize: 12, fontWeight: 'bold' }}>R$</Text>{' '}
-              {progressChartDataAmountsReceived.value >= 1000
-                ? progressChartDataAmountsReceived.value / 1000
-                : progressChartDataAmountsReceived.value < 10
-                  ? `0${progressChartDataAmountsReceived.value}`
-                  : progressChartDataAmountsReceived.value}
-              {progressChartDataAmountsReceived.value >= 1000 && (
-                <Text style={{ fontSize: 14, fontWeight: 'bold' }}>mil</Text>
-              )}
+              {parseFloatBR(progressChartDataAmountsReceived.value)}
             </Text>
             <Text style={{ fontSize: 16, color: theme.colors.onSurfaceVariant, lineHeight: 24 }}>
               {progressChartDataAmountsReceived.labels[0]}
@@ -145,7 +144,7 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
         <View style={styles.containerTotalAmount}>
           <Text
             style={{
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: 'bold',
               display: 'flex',
               flexDirection: 'row',
@@ -154,14 +153,7 @@ const FinancialControl: React.FC<FinancialControlProps> = ({ paymentStatus }) =>
               lineHeight: 32,
             }}>
             <Text style={{ fontSize: 12, fontWeight: 'bold' }}>R$</Text>{' '}
-            {TotalValue.value >= 1000
-              ? TotalValue.value / 1000
-              : TotalValue.value < 10
-                ? `0${TotalValue.value}`
-                : TotalValue.value}
-            {TotalValue.value >= 1000 && (
-              <Text style={{ fontSize: 14, fontWeight: 'bold' }}>mil</Text>
-            )}
+            {parseFloatBR(TotalValue.value)}
           </Text>
           <Text style={{ fontSize: 16, color: theme.colors.onSurfaceVariant, lineHeight: 24 }}>
             {TotalValue.labels[0]}
@@ -189,8 +181,10 @@ const styles = StyleSheet.create({
   containerContentFinancialControl: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
+    gap: 12,
     alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 8,
   },
   containerIncoming: {
     justifyContent: 'center',

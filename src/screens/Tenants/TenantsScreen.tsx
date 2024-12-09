@@ -14,13 +14,16 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '~/routes/app.routes';
-import { getTenants } from '~/api/tenants';
+import { getTenants, deleteTenant } from '~/api/tenants';
 import { TenantDTO } from '~/dtos/TenantDTO';
 import GuarantorComponent from '~/components/guarantor/GuarantorComponent';
 import { theme } from '~/core/theme';
 
 const getInitials = (name: string) => {
-  const names = name.split(' ');
+  const names = name.trim().split(' ');
+  if (names.length === 1) {
+    return names[0][0].toUpperCase();
+  }
   const initials = names[0][0] + names[names.length - 1][0];
   return initials.toUpperCase();
 };
@@ -106,9 +109,78 @@ const TenantScreen = () => {
     setModalVisible(false);
   };
 
+  const handleDeleteTenant = async (tenantId: number) => {
+    Alert.alert(
+      'Confirmar Exclusão',
+      'Você tem certeza que deseja excluir este inquilino? Qualquer contrato vinculado será perdido.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTenant(tenantId);
+              setTenants(tenants.filter((tenant) => tenant.id !== tenantId));
+              setFilteredTenants(filteredTenants.filter((tenant) => tenant.id !== tenantId));
+              Alert.alert('Sucesso', 'Inquilino excluído com sucesso!');
+            } catch (error) {
+              Alert.alert('Erro', 'Não foi possível excluir o inquilino.');
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const renderItem = ({ item }: { item: TenantDTO }) => (
     <>
-      <TouchableOpacity activeOpacity={0.8}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() =>
+          navigation.navigate('CustomDetailsScreen', {
+            data: item,
+            title: `Inquilino ${item.name}`,
+            fieldsToShow: [
+              'name',
+              'cpf',
+              'contact',
+              'email',
+              'profession',
+              'marital_status',
+              'birth_date',
+              'income',
+              'residents',
+              'street',
+              'neighborhood',
+              'number',
+              'zip_code',
+              'city',
+              'state',
+            ],
+            labels: {
+              name: 'Nome',
+              cpf: 'CPF',
+              contact: 'Contato',
+              email: 'Email',
+              profession: 'Profissão',
+              marital_status: 'Estado Civil',
+              emergency_contact: 'Contato de Emergência',
+              income: 'Renda',
+              residents: 'Residentes',
+              street: 'Rua',
+              neighborhood: 'Bairro',
+              number: 'Número',
+              zip_code: 'CEP',
+              city: 'Cidade',
+              state: 'Estado',
+            },
+          })
+        }>
         <Card style={styles.card}>
           <Card.Content style={styles.cardContent}>
             <View style={styles.tenantInfo}>
@@ -156,7 +228,7 @@ const TenantScreen = () => {
                 <Menu.Item
                   onPress={() => {
                     closeMenu();
-                    console.log('Excluir', item.name);
+                    handleDeleteTenant(item.id);
                   }}
                   title="Excluir"
                   leadingIcon="delete"
@@ -228,26 +300,30 @@ const TenantScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header
-        elevated
-        style={{ backgroundColor: theme.colors.surface }}
-        mode="center-aligned">
-        {isSearchVisible ? (
-          <Searchbar
-            placeholder="Pesquisar"
-            onChangeText={onChangeSearch}
-            value={searchQuery}
-            autoFocus
-            onBlur={toggleSearchBar}
-          />
-        ) : (
-          <>
-            <Appbar.BackAction onPress={() => navigation.goBack()} />
-            <Appbar.Content title="Inquilinos" titleStyle={{ fontWeight: 'bold' }} />
-          </>
-        )}
-        <Appbar.Action icon="magnify" onPress={toggleSearchBar} />
-      </Appbar.Header>
+      {!modalVisible && (
+        <>
+          <Appbar.Header
+            elevated
+            style={{ backgroundColor: theme.colors.surface }}
+            mode="center-aligned">
+            {isSearchVisible ? (
+              <Searchbar
+                placeholder="Pesquisar"
+                onChangeText={onChangeSearch}
+                value={searchQuery}
+                autoFocus
+                onBlur={toggleSearchBar}
+              />
+            ) : (
+              <>
+                <Appbar.BackAction onPress={() => navigation.goBack()} />
+                <Appbar.Content title="Inquilinos" titleStyle={{ fontWeight: 'bold' }} />
+              </>
+            )}
+            <Appbar.Action icon="magnify" onPress={toggleSearchBar} />
+          </Appbar.Header>
+        </>
+      )}
       <FlatList
         className="mt-2"
         data={filteredTenants}

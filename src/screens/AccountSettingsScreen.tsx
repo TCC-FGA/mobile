@@ -131,6 +131,7 @@ const AccountSettingsScreen: React.FC = () => {
       const response = await api.patch('/users/me', address);
       if (response.status === 200) {
         Alert.alert('Endereço atualizado', 'Seu endereço foi atualizado com sucesso.');
+        updateUserData();
       } else {
         Alert.alert('Erro', 'Não foi possível atualizar o endereço.');
       }

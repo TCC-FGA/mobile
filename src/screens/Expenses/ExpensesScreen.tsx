@@ -72,7 +72,7 @@ const ExpensesScreen: React.FC = () => {
 
   const renderExpenseItem = ({ item }: { item: ExpenseDTO }) => (
     <List.Item
-      title={`R$ ${typeof item.value === 'number' ? item.value.toFixed(2) : item.value}`}
+      title={`R$ -${typeof item.value === 'number' ? item.value.toFixed(2) : item.value}`}
       description={`${item.expense_type.toUpperCase()} - ${convertDateInDDMMYYYY(parse(item.expense_date as string, 'yyyy-MM-dd', new Date()))}`}
       left={(props) => <List.Icon {...props} icon="finance" color={theme.colors.error} />}
       right={(props) => (

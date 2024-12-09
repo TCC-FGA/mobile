@@ -80,7 +80,7 @@ const SeeMoreScreen = () => {
                     color={theme.colors.primary}
                   />
                 )}
-                onPress={() => navigation.navigate('AccountSettingsScreen')}
+                onPress={() => navigation.navigate('NotificationsScreen')}
                 style={styles.listItem}
               />
 

@@ -26,7 +26,7 @@ const ExpenseDetails: React.FC = () => {
   const [expenseData, setExpenseData] = useState<Partial<ExpenseDTO>>({
     expense_type: 'manutenção',
     value: '0' as string,
-    expense_date: '01/12/2024',
+    expense_date: '06/12/2024',
     house_id: houseId || 0,
   });
   const [loading, setLoading] = useState(false);
@@ -108,7 +108,7 @@ const ExpenseDetails: React.FC = () => {
         />
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.content}>
-        <CustomPicker
+        {/* <CustomPicker
           data={houses.map((house) => ({ label: house.nickname, value: house.id.toString() }))}
           selectedValue={selectedHouse ? selectedHouse.nickname : ''}
           onValueChange={(item) => {
@@ -119,7 +119,7 @@ const ExpenseDetails: React.FC = () => {
           title="Casa"
           placeholder="Selecione uma casa"
           leftIcon="home"
-        />
+        /> */}
         <TextInputMask
           className="mt-4"
           type="money"

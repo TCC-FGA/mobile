@@ -264,7 +264,7 @@ export function ContractsStack() {
         name="ContractsDetails"
         component={ContractsDetails}
         options={{
-          headerTitle: 'Modelos de Contratos',
+          headerTitle: 'Template de Contratos',
           headerTitleAlign: 'center',
           headerTitleStyle: {
             fontWeight: 'bold',

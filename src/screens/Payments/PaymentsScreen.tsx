@@ -78,30 +78,32 @@ const PaymentsScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <>
       <Appbar.Header
         mode="center-aligned"
         elevated
         style={{ backgroundColor: theme.colors.surface }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Pagamentos" titleStyle={{ fontWeight: 'bold' }} />
+        <Appbar.Content title="Pagamento" titleStyle={{ fontWeight: 'bold' }} />
       </Appbar.Header>
-      <FlatList
-        data={payments}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
-        refreshing={isLoading}
-        onRefresh={fetchPayments}
-        ListEmptyComponent={() =>
-          !isLoading && (
-            <Text style={{ textAlign: 'center', padding: 16 }}>
-              Nenhuma parcela encontrada para este contrato.
-            </Text>
-          )
-        }
-      />
-    </SafeAreaView>
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={payments}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.list}
+          refreshing={isLoading}
+          onRefresh={fetchPayments}
+          ListEmptyComponent={() =>
+            !isLoading && (
+              <Text style={{ textAlign: 'center', padding: 16 }}>
+                Nenhuma parcela encontrada para este contrato.
+              </Text>
+            )
+          }
+        />
+      </SafeAreaView>
+    </>
   );
 };
 

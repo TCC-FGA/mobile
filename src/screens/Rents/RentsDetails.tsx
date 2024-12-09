@@ -15,7 +15,7 @@ import {
   Appbar,
 } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import { theme } from '~/core/theme';
 import { RentDTO } from '~/dtos/RentDTO';
@@ -41,6 +41,7 @@ type RouteParamsProps = {
 };
 
 const RentsDetails = () => {
+  const isFocused = useIsFocused();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const { rentId } = route.params as RouteParamsProps;
@@ -72,12 +73,14 @@ const RentsDetails = () => {
   };
 
   useEffect(() => {
-    if (rentId) {
-      fetchRent();
-    } else {
-      navigation.setOptions({ title: 'Adicionar Aluguel' });
+    if (isFocused) {
+      if (rentId) {
+        fetchRent();
+      } else {
+        navigation.setOptions({ title: 'Adicionar Aluguel' });
+      }
     }
-  }, [rentId, navigation]);
+  }, [rentId, navigation, isFocused]);
 
   const handleUploadContract = async () => {
     try {
